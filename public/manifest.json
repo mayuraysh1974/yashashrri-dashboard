@@ -1,0 +1,16 @@
+{
+  "short_name": "Yashashrri",
+  "name": "Yashashrri Classes Management",
+  "icons": [
+    {
+      "src": "/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#002b5c",
+  "background_color": "#ffffff"
+}
