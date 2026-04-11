@@ -29,8 +29,15 @@ const FeesPayment = () => {
   });
 
   const fetchStudents = async () => {
-    const { data } = await supabase.from('students').select('*').order('name');
-    if (data) setStudents(data.map(s => ({...s, feesPaid: s.fees_paid})));
+    const { data } = await supabase.from('students').select('*, student_subjects(subject_id)').order('name');
+    if (data) {
+      const flat = data.map(s => ({
+        ...s,
+        feesPaid: s.fees_paid,
+        enrolledSubjectIds: s.student_subjects ? s.student_subjects.map(ss => Number(ss.subject_id)) : []
+      }));
+      setStudents(flat);
+    }
   };
 
   const fetchHistory = async () => {
@@ -188,7 +195,7 @@ const FeesPayment = () => {
       remarks: fee.remarks,
       studentName: fee.studentName,
       standard: fee.standard,
-      subjects: studentObj && studentObj.subjects && studentObj.subjects.length > 0 ? studentObj.subjects.map(s => s.name).join(', ') : 'All Standard Subjects',
+      subjects: studentObj && studentObj.student_subjects && studentObj.student_subjects.length > 0 ? 'Enrolled Subjects' : 'All Standard Subjects',
       newBalance: fee.currentBalance,
       totalPaid: fee.totalPaid,
       concession: fee.concession,

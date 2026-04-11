@@ -75,30 +75,44 @@ const StudentManagement = () => {
   };
 
   const fetchPerformance = async (id) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/students/${id}/performance`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setPerformanceData(await res.json());
+    const { data } = await supabase
+      .from('student_performance')
+      .select('*')
+      .eq('student_id', id)
+      .order('date', { ascending: true });
+    if (data) setPerformanceData(data);
   };
 
   const fetchDocuments = async (id) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/students/${id}/documents`, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setDocuments(await res.json());
+    const { data } = await supabase
+      .from('student_documents')
+      .select('*')
+      .eq('student_id', id);
+    if (data) setDocuments(data);
   };
 
   const fetchNextStudentId = async (standard) => {
     if (!standard) return;
-    const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`/api/students/next-id?standard=${encodeURIComponent(standard)}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const { nextId } = await res.json();
-        setFormData(prev => ({ ...prev, id: nextId }));
+      // Logic to find the highest ID for this standard and increment
+      const { data } = await supabase
+        .from('students')
+        .select('id')
+        .ilike('id', `${standard}%`)
+        .order('id', { ascending: false })
+        .limit(1);
+
+      let nextNum = 1;
+      if (data && data.length > 0) {
+        const lastId = data[0].id;
+        const matches = lastId.match(/\d+$/);
+        if (matches) nextNum = parseInt(matches[0]) + 1;
       }
+      
+      const newId = `${standard}-${String(nextNum).padStart(3, '0')}`;
+      setFormData(prev => ({ ...prev, id: newId }));
     } catch (e) {
-      console.error('Failed to fetch next student ID', e);
+      console.error('Failed to generate next student ID', e);
     }
   };
 
@@ -136,21 +150,48 @@ const StudentManagement = () => {
   };
 
   const handleFileUpload = async (id, type, file, docName = '') => {
-    const token = localStorage.getItem('token');
-    const formDataFile = new FormData();
-    formDataFile.append(type === 'photo' ? 'photo' : 'file', file);
-    if (docName) formDataFile.append('name', docName);
+    if (!file) return;
+    
+    try {
+      setLoading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${id}-${Math.random()}.${fileExt}`;
+      const bucket = type === 'photo' ? 'student-photos' : 'student-documents';
+      const filePath = `${fileName}`;
 
-    const endpoint = type === 'photo' ? `/api/students/${id}/upload-photo` : `/api/students/${id}/documents`;
-    const res = await fetch(`${endpoint}`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formDataFile
-    });
-    if (res.ok) {
-      alert(`${type} uploaded!`);
-      if (type === 'photo') fetchStudents();
-      else fetchDocuments(id);
+      let { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+      if (type === 'photo') {
+        const { error: updateError } = await supabase
+          .from('students')
+          .update({ photo: publicUrl })
+          .eq('id', id);
+        
+        if (updateError) throw updateError;
+        alert('Photo updated successfully!');
+        fetchStudents();
+        if (showProfile) setShowProfile(prev => ({...prev, photo: publicUrl}));
+      } else {
+        const { error: insertError } = await supabase
+          .from('student_documents')
+          .insert({ student_id: id, name: docName || file.name, file_url: publicUrl });
+          
+        if (insertError) throw insertError;
+        alert('Document uploaded successfully!');
+        fetchDocuments(id);
+      }
+    } catch (error) {
+      alert('Error uploading file: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -549,7 +590,7 @@ const StudentManagement = () => {
                         {documents.map(doc => (
                            <div key={doc.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: 'var(--bg-main)', borderRadius: '10px', marginBottom: '0.5rem' }}>
                               <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{doc.name}</span>
-                              <a href={`${doc.fileUrl}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-blue)' }}><FiExternalLink /></a>
+                              <a href={`${doc.file_url}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-blue)' }}><FiExternalLink /></a>
                            </div>
                         ))}
                      </div>
