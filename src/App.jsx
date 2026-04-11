@@ -24,29 +24,26 @@ import AttendanceReports from './pages/AttendanceReports';
 import AcademicCalendar from './pages/AcademicCalendar';
 import MobileMenu from './pages/MobileMenu';
 
+import { supabase } from './supabaseClient';
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      const pingInterval = setInterval(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-          fetch('/api/system/ping', { headers: { 'Authorization': `Bearer ${token}` } }).catch(() => null);
-        }
-      }, 10000); // 10s heartbeat
-      return () => clearInterval(pingInterval);
-    }
-  }, [isAuthenticated]);
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (loading) return null;
 

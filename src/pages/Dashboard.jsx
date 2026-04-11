@@ -2,30 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { FiUsers, FiClock, FiDollarSign, FiAlertCircle, FiUserCheck } from 'react-icons/fi';
 import MetricCard from '../components/MetricCard';
 import ActivityFeed from '../components/ActivityFeed';
+import { supabase } from '../supabaseClient';
 
 const Dashboard = () => {
   const [metrics, setMetrics] = useState({ totalStudents: 0, feesCollected: 0, defaulters: 0, presentTeachers: 0, totalTeachers: 0, activities: [] });
 
   useEffect(() => {
     const fetchMetrics = async () => {
-      const token = localStorage.getItem('token');
       try {
-        const res = await fetch(`/api/reports?t=${Date.now()}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        // Fetch Total Students
+        const { count: studentCount } = await supabase
+          .from('students')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch Total Fees Collected
+        const { data: feesData } = await supabase
+          .from('fees')
+          .select('amount_paid');
+        const revenue = feesData?.reduce((sum, f) => sum + (f.amount_paid || 0), 0) || 0;
+
+        // Fetch Defaulters
+        const { count: defaulterCount } = await supabase
+          .from('students')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'Defaulter');
+
+        // Fetch Teachers
+        const { count: teacherCount } = await supabase
+          .from('teachers')
+          .select('*', { count: 'exact', head: true });
+
+        setMetrics({
+          totalStudents: studentCount || 0,
+          feesCollected: revenue,
+          defaulters: defaulterCount || 0,
+          presentTeachers: teacherCount || 0, // Simplified for now
+          totalTeachers: teacherCount || 0,
+          activities: [] // Activities can be implemented later with a separate table
         });
-        if (res.ok) {
-          const data = await res.json();
-          setMetrics({
-            totalStudents: data.students?.totalStudents || 0,
-            feesCollected: data.revenue || 0,
-            defaulters: data.students?.defaulters || 0,
-            presentTeachers: data.teachers?.totalTeachers || 0,
-            totalTeachers: data.teachers?.totalTeachers || 0,
-            activities: data.activities || []
-          });
-        }
       } catch (err) {
-        console.error("Failed to fetch metrics");
+        console.error("Failed to fetch metrics", err);
       }
     };
     fetchMetrics();

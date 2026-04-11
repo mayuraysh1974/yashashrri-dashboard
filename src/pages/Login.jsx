@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
 
 const Login = ({ setAuth }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Supabase uses email/password by default
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -10,21 +11,19 @@ const Login = ({ setAuth }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem('token', data.token);
+
+      if (error) {
+        setError(error.message);
+      } else if (data.session) {
         setAuth(true);
         navigate('/');
-      } else {
-        setError(data.message);
       }
     } catch (err) {
-      setError('Could not connect to server.');
+      setError('Could not connect to authentication server.');
     }
   };
 
@@ -43,8 +42,8 @@ const Login = ({ setAuth }) => {
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div className="input-group">
-            <label>Admin Username</label>
-            <input type="text" placeholder="e.g. admin" value={username} onChange={e => setUsername(e.target.value)} required />
+            <label>Admin Email</label>
+            <input type="email" placeholder="e.g. admin@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
           <div className="input-group">
             <label>Password</label>

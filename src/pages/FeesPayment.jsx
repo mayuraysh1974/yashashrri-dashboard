@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { FiDollarSign, FiPlus, FiPrinter, FiX, FiCheckCircle, FiSearch, FiTrash2 } from 'react-icons/fi';
 
 const FeesPayment = () => {
@@ -28,19 +29,30 @@ const FeesPayment = () => {
   });
 
   const fetchStudents = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/students?t=${Date.now()}`, {
-      headers: { 'Authorization' : `Bearer ${token}` }
-    });
-    if (res.ok) setStudents(await res.json());
+    const { data } = await supabase.from('students').select('*').order('name');
+    if (data) setStudents(data.map(s => ({...s, feesPaid: s.fees_paid})));
   };
 
   const fetchHistory = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/fees/history?t=${Date.now()}`, {
-      headers: { 'Authorization' : `Bearer ${token}` }
-    });
-    if (res.ok) setHistory(await res.json());
+    const { data } = await supabase
+      .from('fees')
+      .select('*, students(name, standard, balance, fees_paid, concession)')
+      .order('payment_date', { ascending: false });
+    
+    if (data) {
+      setHistory(data.map(f => ({
+        ...f,
+        studentName: f.students?.name,
+        standard: f.students?.standard,
+        currentBalance: f.students?.balance,
+        totalPaid: f.students?.fees_paid,
+        concession: f.students?.concession,
+        studentId: f.student_id,
+        amountPaid: f.amount_paid,
+        paymentDate: f.payment_date,
+        paymentMode: f.payment_mode
+      })));
+    }
   };
 
   // eslint-disable-next-line
@@ -76,29 +88,42 @@ const FeesPayment = () => {
   }, [successReceipt, students]);
 
   const handleSavePayment = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.studentId || !formData.amountPaid) return alert('Select Student and Amount');
-    
-    // Find student name for receipt
     const studentObj = students.find(s => s.id === formData.studentId);
+    const amount = Number(formData.amountPaid);
 
-    const res = await fetch('/api/fees/receipt', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(formData)
+    // 1. Record the receipt
+    const { error: feeErr } = await supabase.from('fees').insert({
+      student_id: formData.studentId,
+      amount_paid: amount,
+      payment_date: formData.paymentDate,
+      payment_mode: formData.paymentMode,
+      remarks: formData.remarks
     });
-    
-    if (res.ok) {
-      const result = await res.json();
+
+    if (feeErr) return alert(feeErr.message);
+
+    // 2. Update Student Balance
+    const newFeesPaid = (studentObj.fees_paid || 0) + amount;
+    const newBalance = (studentObj.balance || 0) - amount;
+
+    const { error: stuErr } = await supabase
+      .from('students')
+      .update({ fees_paid: newFeesPaid, balance: newBalance })
+      .eq('id', formData.studentId);
+
+    if (stuErr) {
+      alert('Payment recorded but balance update failed: ' + stuErr.message);
+    } else {
       setSuccessReceipt({ 
         ...formData, 
         studentName: studentObj ? studentObj.name : 'Deleted Student', 
         standard: studentObj ? studentObj.standard : 'N/A',
-        subjects: studentObj && studentObj.subjects && studentObj.subjects.length > 0 ? studentObj.subjects.map(s => s.name).join(', ') : 'All Standard Subjects',
-        newBalance: result.newBalance,
-        totalPaid: result.totalPaid,
-        concession: result.concession,
-        grossFees: (result.newBalance + result.totalPaid + result.concession)
+        subjects: 'All Standard Subjects',
+        newBalance: newBalance,
+        totalPaid: newFeesPaid,
+        concession: studentObj.concession || 0,
+        grossFees: (newBalance + newFeesPaid + (studentObj.concession || 0))
       });
       setShowModal(false);
       setStudentSearch('');
@@ -108,29 +133,43 @@ const FeesPayment = () => {
   };
 
   const handleSaveRefund = async () => {
-    const token = localStorage.getItem('token');
     if (!refundData.studentId || !refundData.refundAmount) return alert('Select Student and Refund Amount');
-    
     const studentObj = students.find(s => s.id === refundData.studentId);
+    const amount = -Math.abs(Number(refundData.refundAmount));
 
-    const res = await fetch('/api/fees/refund', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(refundData)
+    // 1. Record the refund as a negative fee
+    const { error: feeErr } = await supabase.from('fees').insert({
+      student_id: refundData.studentId,
+      amount_paid: amount,
+      payment_date: refundData.paymentDate,
+      payment_mode: refundData.paymentMode,
+      remarks: refundData.remarks
     });
-    
-    if (res.ok) {
-      const result = await res.json();
+
+    if (feeErr) return alert(feeErr.message);
+
+    // 2. Update Student Balance
+    const newFeesPaid = (studentObj.fees_paid || 0) + amount;
+    const newBalance = (studentObj.balance || 0) - amount;
+
+    const { error: stuErr } = await supabase
+      .from('students')
+      .update({ fees_paid: newFeesPaid, balance: newBalance })
+      .eq('id', refundData.studentId);
+
+    if (stuErr) {
+      alert('Refund recorded but balance update failed: ' + stuErr.message);
+    } else {
       setSuccessReceipt({ 
         ...refundData, 
-        amountPaid: -Math.abs(Number(refundData.refundAmount)),
+        amountPaid: amount,
         studentName: studentObj ? studentObj.name : 'Deleted Student', 
         standard: studentObj ? studentObj.standard : 'N/A',
-        subjects: studentObj && studentObj.subjects && studentObj.subjects.length > 0 ? studentObj.subjects.map(s => s.name).join(', ') : 'All Standard Subjects',
-        newBalance: result.newBalance,
-        totalPaid: result.totalPaid,
-        concession: result.concession,
-        grossFees: (result.newBalance + result.totalPaid + result.concession)
+        subjects: 'All Standard Subjects',
+        newBalance: newBalance,
+        totalPaid: newFeesPaid,
+        concession: studentObj.concession || 0,
+        grossFees: (newBalance + newFeesPaid + (studentObj.concession || 0))
       });
       setShowRefundModal(false);
       setStudentSearch('');
@@ -159,17 +198,24 @@ const FeesPayment = () => {
 
   const handleDeleteFee = async (id) => {
     if (!window.confirm('Are you absolutely sure you want to permanently delete this record? This will reverse the amount paid and update the student balance.')) return;
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/fees/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) {
-      fetchHistory();
-      fetchStudents();
-    } else {
-      alert('Failed to delete fee record');
+    
+    const fee = history.find(f => f.id === id);
+    if (!fee) return;
+
+    // 1. Delete the fee record
+    const { error: delErr } = await supabase.from('fees').delete().eq('id', id);
+    if (delErr) return alert(delErr.message);
+
+    // 2. Reverse balance update
+    const studentObj = students.find(s => s.id === fee.studentId);
+    if (studentObj) {
+        const newFeesPaid = (studentObj.fees_paid || 0) - fee.amount_paid;
+        const newBalance = (studentObj.balance || 0) + fee.amount_paid;
+        await supabase.from('students').update({ fees_paid: newFeesPaid, balance: newBalance }).eq('id', fee.studentId);
     }
+
+    fetchHistory();
+    fetchStudents();
   };
 
   const handlePrint = () => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { FiCheckCircle, FiXCircle, FiCalendar, FiFilter, FiSave, FiSend, FiBook, FiUserCheck } from 'react-icons/fi';
 
 const AttendanceRegistry = () => {
@@ -22,38 +23,41 @@ const AttendanceRegistry = () => {
   }, [selectedDate, selectedStandard, selectedSubject, mode]);
 
   const fetchInitialData = async () => {
-    const token = localStorage.getItem('token');
     const [stdRes, stuRes, subRes] = await Promise.all([
-      fetch('/api/standards', { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch('/api/subjects', { headers: { 'Authorization': `Bearer ${token}` } })
+      supabase.from('standards').select('*'),
+      supabase.from('students').select('*, student_subjects(subject_id)'),
+      supabase.from('subjects').select('*')
     ]);
-    if (stdRes.ok) setStandards(await stdRes.json());
-    if (stuRes.ok) setStudents(await stuRes.json());
-    if (subRes.ok) setSubjects(await subRes.json());
+    
+    if (stdRes.data) setStandards(stdRes.data);
+    if (stuRes.data) setStudents(stuRes.data);
+    if (subRes.data) setSubjects(subRes.data);
     setLoading(false);
   };
 
   const fetchAttendanceRecord = async () => {
-    const token = localStorage.getItem('token');
-    
-    // Always fetch daily record
-    const dRes = await fetch(`/api/attendance?date=${selectedDate}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    // Fetch daily record
+    const { data: dData } = await supabase
+      .from('student_attendance')
+      .select('student_id, status')
+      .eq('date', selectedDate);
+
     let dMap = {};
-    if (dRes.ok) {
-      (await dRes.json()).forEach(e => dMap[e.studentId] = e.status);
+    if (dData) {
+      dData.forEach(e => dMap[e.student_id] = e.status);
       setDailyAttendance(dMap);
     }
 
     if (mode === 'Subject' && selectedSubject) {
-      const sRes = await fetch(`/api/attendance/subject?date=${selectedDate}&subjectId=${selectedSubject}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (sRes.ok) {
+      const { data: sData } = await supabase
+        .from('student_subject_attendance')
+        .select('student_id, status')
+        .eq('date', selectedDate)
+        .eq('subject_id', selectedSubject);
+      
+      if (sData) {
         const sMap = {};
-        (await sRes.json()).forEach(e => sMap[e.studentId] = e.status);
+        sData.forEach(e => sMap[e.student_id] = e.status);
         setSubjectAttendance(sMap);
       }
     }
@@ -96,29 +100,29 @@ const AttendanceRegistry = () => {
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token');
-    const url = mode === 'Daily' ? '/api/attendance' : '/api/attendance/subject';
+    const table = mode === 'Daily' ? 'student_attendance' : 'student_subject_attendance';
     
-    // IMPORTANT: In subject-wise, we must save the effective status for ALL enrolled students
-    // so they show up in the reports correctly.
-    const records = displayedStudents.map(s => ({
-      studentId: s.id,
-      status: getEffectiveStatus(s.id) || 'Absent' // Default to absent if nothing recorded
-    }));
-
-    const body = mode === 'Daily' 
-      ? { date: selectedDate, attendance: records }
-      : { date: selectedDate, subjectId: selectedSubject, attendance: records };
+    const records = displayedStudents.map(s => {
+      const record = {
+        student_id: s.id,
+        date: selectedDate,
+        status: getEffectiveStatus(s.id) || 'Absent'
+      };
+      if (mode === 'Subject') record.subject_id = selectedSubject;
+      return record;
+    });
 
     if (mode === 'Subject' && !selectedSubject) return alert('Please select a subject first.');
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(body)
-    });
+    const { error } = await supabase
+      .from(table)
+      .upsert(records, { onConflict: mode === 'Daily' ? 'student_id, date' : 'student_id, subject_id, date' });
     
-    if (res.ok) alert('Attendance saved successfully!');
+    if (error) {
+      alert('Error saving attendance: ' + error.message);
+    } else {
+      alert('Attendance saved successfully!');
+    }
   };
 
   const markAllEnrolledPresent = () => {

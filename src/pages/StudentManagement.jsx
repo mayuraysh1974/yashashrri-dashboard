@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import { 
   FiSearch, FiFilter, FiEdit2, FiTrash2, FiX, FiUser, 
   FiUpload, FiFile, FiTrendingUp, FiCheckCircle, FiExternalLink, FiPhone, FiMail, FiMapPin, FiPrinter, FiDownload, FiCreditCard
@@ -43,27 +44,33 @@ const StudentManagement = () => {
   }, [showProfile]);
 
   const fetchSubjects = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/subjects', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setSubjects(await res.json());
+    const { data } = await supabase.from('subjects').select('*');
+    if (data) setSubjects(data);
   };
 
   const fetchColleges = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/colleges', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setColleges(await res.json());
+    const { data } = await supabase.from('colleges').select('*');
+    if (data) setColleges(data);
   };
 
   const fetchStandards = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/standards', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setStandards(await res.json());
+    const { data } = await supabase.from('standards').select('*');
+    if (data) setStandards(data);
   };
 
   const fetchStudents = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setStudents(await res.json());
+    const { data } = await supabase
+      .from('students')
+      .select('*, colleges(name)') // Join with colleges
+      .order('name');
+    
+    if (data) {
+      const formatted = data.map(s => ({
+        ...s,
+        collegeName: s.colleges?.name // Map the joined data
+      }));
+      setStudents(formatted);
+    }
     setLoading(false);
   };
 
@@ -96,15 +103,33 @@ const StudentManagement = () => {
   };
 
   const handleSaveStudent = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.id || !formData.name) return alert('ID and Name are required');
-    const url = editMode ? `/api/students/${formData.id}` : '/api/students';
-    const res = await fetch(url, {
-      method: editMode ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(formData)
-    });
-    if (res.ok) {
+    
+    // In Supabase, we can upsert
+    const studentData = {
+      id: formData.id,
+      name: formData.name,
+      standard: formData.standard,
+      fees_paid: formData.feesPaid,
+      balance: formData.balance,
+      concession: formData.concession,
+      status: formData.status,
+      parent_name: formData.parentName,
+      parent_phone: formData.parentPhone,
+      student_phone: formData.studentPhone,
+      email: formData.email,
+      address: formData.address,
+      college_id: formData.collegeId ? Number(formData.collegeId) : null,
+      installments: formData.installments
+    };
+
+    const { error } = await supabase
+      .from('students')
+      .upsert(studentData);
+
+    if (error) {
+      alert('Error saving student: ' + error.message);
+    } else {
       setShowModal(false);
       fetchStudents();
     }
@@ -131,12 +156,16 @@ const StudentManagement = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this record?')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/students/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    fetchStudents();
+    const { error } = await supabase
+      .from('students')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      alert('Error deleting: ' + error.message);
+    } else {
+      fetchStudents();
+    }
   };
 
   const recalculateBalance = (subjectIds, concession, feesPaid) => {
