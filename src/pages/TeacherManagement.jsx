@@ -187,6 +187,7 @@ const TeacherManagement = () => {
             <FiPlus /> Add Faculty
           </button>
         </div>
+      </div>
 
       <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex' }}>
         <div className="search-bar" style={{ backgroundColor: 'var(--bg-main)', flex: 1, maxWidth: '400px' }}>
