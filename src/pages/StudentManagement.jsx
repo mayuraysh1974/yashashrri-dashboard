@@ -61,7 +61,7 @@ const StudentManagement = () => {
   const fetchStudents = async () => {
     const { data } = await supabase
       .from('students')
-      .select('*, colleges(name)') // Join with colleges
+      .select('*, colleges(name), student_subjects(subject_id)')
       .order('name');
     
     if (data) {
@@ -72,7 +72,8 @@ const StudentManagement = () => {
         parentName: s.parent_name || '',
         parentPhone: s.parent_phone || '',
         studentPhone: s.student_phone || '',
-        collegeId: s.college_id || null
+        collegeId: s.college_id || null,
+        subjectIds: s.student_subjects ? s.student_subjects.map(ss => ss.subject_id) : []
       }));
       setStudents(formatted);
     }
@@ -149,6 +150,18 @@ const StudentManagement = () => {
     if (error) {
       alert('Error saving student: ' + error.message);
     } else {
+      // 1. Delete existing subjects for this student
+      await supabase.from('student_subjects').delete().eq('student_id', formData.id);
+      
+      // 2. Insert new subject selections
+      if (formData.subjectIds && formData.subjectIds.length > 0) {
+        const subInserts = formData.subjectIds.map(sid => ({
+          student_id: formData.id,
+          subject_id: sid
+        }));
+        await supabase.from('student_subjects').insert(subInserts);
+      }
+
       setShowModal(false);
       fetchStudents();
     }
