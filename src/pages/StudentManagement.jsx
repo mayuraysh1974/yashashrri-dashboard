@@ -594,7 +594,20 @@ const StudentManagement = () => {
 
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}><FiFile /> Documents</h3>
                   <div style={{ border: '2px dashed var(--border-color)', borderRadius: '16px', padding: '1.25rem' }}>
-                     <input type="file" id="doc-upload" style={{ display: 'none' }} onChange={(e) => handleFileUpload(showProfile.id, 'document', e.target.files[0], prompt('Name for this document?'))} />
+                      <input 
+                        type="file" 
+                        id="doc-upload" 
+                        style={{ display: 'none' }} 
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const docName = prompt('Enter document name:', file.name);
+                            if (docName !== null) {
+                              handleFileUpload(showProfile.id, 'document', file, docName);
+                            }
+                          }
+                        }} 
+                      />
                      <button className="btn-secondary" style={{ width: '100%', marginBottom: '1rem' }} onClick={() => document.getElementById('doc-upload').click()}><FiUpload /> Upload New Attachment</button>
                      <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
                         {documents.map(doc => (
