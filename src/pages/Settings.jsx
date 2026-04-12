@@ -1,94 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FiSave, FiLock, FiBell, FiShield, FiAlertTriangle, FiTrash2, FiActivity } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const Settings = () => {
-  const [sessions, setSessions] = useState([]);
+  const [passwords, setPasswords] = useState({ current: '', new: '' });
+  const [pwLoading, setPwLoading] = useState(false);
 
-  useEffect(() => {
-    fetchSessions();
-    const intervalId = setInterval(fetchSessions, 5000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const fetchSessions = async () => {
-    const token = localStorage.getItem('token');
+  const handleUpdatePassword = async () => {
+    if (!passwords.new || passwords.new.length < 6) return alert('New password must be at least 6 characters.');
+    setPwLoading(true);
     try {
-      const res = await fetch('/api/system/sessions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) setSessions(await res.json());
-    } catch (e) {
-      console.error(e);
+      const { error } = await supabase.auth.updateUser({ password: passwords.new });
+      if (error) {
+        alert('Failed to update password: ' + error.message);
+      } else {
+        alert('Password updated successfully! You may need to log in again.');
+        setPasswords({ current: '', new: '' });
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
     }
+    setPwLoading(false);
   };
 
   const handleResetDatabase = async () => {
     const confirm1 = window.confirm('WARNING: You are about to clear ALL records (Students, Teachers, Fees) from the database. This action is PERMANENT and cannot be undone. Do you want to proceed?');
     if (!confirm1) return;
-
     const confirm2 = window.confirm('FINAL CONFIRMATION: Are you absolutely sure? All your data will be permanently erased.');
     if (!confirm2) return;
 
-    const token = localStorage.getItem('token');
     try {
-      const res = await fetch('/api/settings/reset', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Database has been successfully cleared.');
-        window.location.reload(); // Refresh to show empty state
-      } else {
-        alert('Failed to reset database: ' + data.error);
-      }
+      // Delete all records from all major tables
+      await Promise.all([
+        supabase.from('fees').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('attendance').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('test_results').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('alerts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      ]);
+      await Promise.all([
+        supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('teachers').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('tests').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      ]);
+      alert('Database has been successfully cleared.');
+      window.location.reload();
     } catch (err) {
-      alert('Error connecting to server.');
-    }
-  };
-
-  const parseDeviceDetails = (uaString) => {
-    if (!uaString) return "Unknown Device";
-    let os = 'Unknown OS';
-    let browser = 'Unknown Browser';
-    
-    if (uaString.includes('Windows NT 10.0')) os = 'Windows 10/11';
-    else if (uaString.includes('Windows NT 6.2')) os = 'Windows 8';
-    else if (uaString.includes('Windows NT 6.1')) os = 'Windows 7';
-    else if (uaString.includes('Mac OS X')) os = 'MacBook / MacOS';
-    else if (uaString.includes('Linux')) os = 'Linux';
-    else if (uaString.includes('Android')) os = 'Android Mobile';
-    else if (uaString.includes('iPhone')) os = 'iPhone';
-    else if (uaString.includes('iPad')) os = 'iPad';
-
-    if (uaString.includes('Edg/')) browser = 'Microsoft Edge';
-    else if (uaString.includes('Chrome/')) browser = 'Google Chrome';
-    else if (uaString.includes('Firefox/')) browser = 'Mozilla Firefox';
-    else if (uaString.includes('Safari/') && !uaString.includes('Chrome/')) browser = 'Apple Safari';
-
-    return `${os} — ${browser}`;
-  };
-
-  const [passwords, setPasswords] = useState({ current: '', new: '' });
-
-  const handleUpdatePassword = async () => {
-    if (!passwords.current || !passwords.new) return alert('Please fill in both fields.');
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch('/api/settings/password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ currentPassword: passwords.current, newPassword: passwords.new })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        alert('Password updated successfully!');
-        setPasswords({ current: '', new: '' });
-      } else {
-        alert(data.error || 'Failed to update password');
-      }
-    } catch (err) {
-      alert('Network error. Check connection.');
+      alert('Error resetting database: ' + err.message);
     }
   };
 
@@ -110,30 +67,24 @@ const Settings = () => {
             <FiShield /> Security
           </h3>
           <div className="input-group">
-            <label>Admin Username</label>
-            <input type="text" value="admin" disabled style={{ backgroundColor: 'var(--bg-main)' }} />
-          </div>
-          <div className="input-group">
-            <label>Current Password</label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              value={passwords.current} 
-              onChange={e => setPasswords({ ...passwords, current: e.target.value })} 
-            />
+            <label>Admin Email</label>
+            <input type="text" value="Managed via Supabase Auth" disabled style={{ backgroundColor: 'var(--bg-main)' }} />
           </div>
           <div className="input-group">
             <label>New Password</label>
             <input 
               type="password" 
-              placeholder="Enter new password" 
+              placeholder="Enter new password (min. 6 chars)" 
               value={passwords.new} 
               onChange={e => setPasswords({ ...passwords, new: e.target.value })} 
             />
           </div>
-          <button className="btn-secondary" style={{ marginTop: '0.5rem' }} onClick={handleUpdatePassword}>
-            <FiLock /> Update Password
+          <button className="btn-secondary" style={{ marginTop: '0.5rem' }} onClick={handleUpdatePassword} disabled={pwLoading}>
+            <FiLock /> {pwLoading ? 'Updating...' : 'Update Password'}
           </button>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+            Password is managed securely by Supabase Auth. No current password is needed.
+          </p>
         </div>
 
         {/* Configurations */}
@@ -163,64 +114,24 @@ const Settings = () => {
 
       </div>
 
-      {/* Active Sessions Monitoring */}
+      {/* Active Sessions — replaced with Supabase Auth info */}
       <div className="card-base" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
         <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <FiActivity /> Active Network Sessions
+          <FiActivity /> Session & Security Info
         </h3>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-          Real-time tracking of machines currently accessing the ERP data over the network.
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.7' }}>
+          Authentication is now managed by <strong>Supabase Auth</strong>. Active session monitoring is handled directly in the Supabase dashboard under <em>Authentication → Users</em>.<br /><br />
+          Your JWT session auto-refreshes and is stored securely in the browser. To terminate all sessions, update your password — this invalidates all existing tokens.
         </p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
-                <th style={{ padding: '0.75rem 1rem' }}>IP Address</th>
-                <th style={{ padding: '0.75rem 1rem' }}>User Auth</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Last Activity (UTC)</th>
-                <th style={{ padding: '0.75rem 1rem' }}>Device Details</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map(s => {
-                let displayIp = s.ip;
-                if (displayIp === '::1' || displayIp === '127.0.0.1') displayIp = 'localhost (Main PC)';
-                else if (displayIp.includes('::ffff:')) displayIp = displayIp.split('::ffff:')[1];
-                
-                // If the last seen time is within the last 30 seconds, consider it Active.
-                const diffSeconds = (new Date() - new Date(s.lastSeen)) / 1000;
-                const isCurrentlyActive = diffSeconds < 30;
-                
-                return (
-                  <tr key={s.ip} style={{ borderBottom: '1px solid var(--border-color)', opacity: isCurrentlyActive ? 1 : 0.6 }}>
-                    <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontWeight: 600, color: 'var(--primary-blue)' }}>{displayIp}</td>
-                    <td style={{ padding: '0.75rem 1rem', color: s.user === 'Guest' ? 'var(--danger-red)' : 'var(--text-primary)', fontWeight: 500 }}>{s.user}</td>
-                    <td style={{ padding: '0.75rem 1rem', color: 'var(--text-secondary)' }}>
-                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
-                          <span style={{ 
-                            display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', 
-                            backgroundColor: isCurrentlyActive ? 'var(--success-green)' : 'var(--danger-red)',
-                            boxShadow: isCurrentlyActive ? '0 0 5px var(--success-green)' : 'none'
-                          }}></span>
-                          <span style={{ color: isCurrentlyActive ? 'var(--success-green)' : 'var(--danger-red)' }}>
-                            {isCurrentlyActive ? 'Currently Active' : 'Inactive'}
-                          </span>
-                       </div>
-                       <div style={{ fontSize: '0.7rem', marginTop: '0.2rem' }}>Last ping: {new Date(s.lastSeen).toLocaleTimeString()}</div>
-                    </td>
-                    <td style={{ padding: '0.75rem 1rem', fontSize: '0.85rem' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{parseDeviceDetails(s.userAgent)}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{s.userAgent.slice(0, 50)}...</div>
-                    </td>
-                  </tr>
-                );
-              })}
-              {sessions.length === 0 && (
-                <tr><td colSpan="4" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>No active sessions logged yet.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <a 
+          href={`${import.meta.env.VITE_SUPABASE_URL?.replace('.supabase.co', '.supabase.co')}/dashboard`} 
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', fontSize: '0.85rem' }}
+        >
+          Open Supabase Dashboard
+        </a>
       </div>
 
       {/* Danger Zone */}

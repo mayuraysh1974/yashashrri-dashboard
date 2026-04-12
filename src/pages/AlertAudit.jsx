@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiMessageSquare, FiClock, FiUser, FiInfo, FiSmartphone, FiCalendar } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const AlertAudit = () => {
   const [history, setHistory] = useState([]);
@@ -10,11 +11,13 @@ const AlertAudit = () => {
   }, []);
 
   const fetchHistory = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/alerts/history', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setHistory(await res.json());
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('alerts')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200);
+    if (!error) setHistory(data || []);
     setLoading(false);
   };
 
@@ -47,11 +50,11 @@ const AlertAudit = () => {
             ) : history.map(log => (
               <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)', fontSize: '0.85rem' }}>
                 <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><FiCalendar size={12} /> {new Date(log.timestamp).toLocaleDateString()}</div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem' }}><FiClock size={12} /> {new Date(log.timestamp).toLocaleTimeString()}</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}><FiCalendar size={12} /> {new Date(log.created_at).toLocaleDateString()}</div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem' }}><FiClock size={12} /> {new Date(log.created_at).toLocaleTimeString()}</div>
                 </td>
                 <td style={{ padding: '1rem', fontWeight: 600 }}>
-                   <FiUser size={12} style={{ marginRight: '0.4rem' }} /> {log.studentName || 'General'}
+                   <FiUser size={12} style={{ marginRight: '0.4rem' }} /> {log.student_name || 'General'}
                 </td>
                 <td style={{ padding: '1rem' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -65,13 +68,13 @@ const AlertAudit = () => {
                    <span style={{ 
                       padding: '0.2rem 0.6rem', 
                       borderRadius: '20px', 
-                      backgroundColor: 'var(--success-green-light)', 
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)', 
                       color: 'var(--success-green)', 
                       fontSize: '0.7rem', 
                       fontWeight: 700,
                       textTransform: 'uppercase'
                    }}>
-                     {log.status}
+                     {log.status || 'Simulated'}
                    </span>
                 </td>
               </tr>

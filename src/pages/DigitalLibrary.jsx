@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FiUploadCloud, FiFile, FiVideo, FiFolder, FiMoreVertical, FiX, FiPlus, FiEye } from 'react-icons/fi';
+import { FiUploadCloud, FiFile, FiVideo, FiMoreVertical, FiX, FiPlus, FiEye, FiTrash2 } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const DigitalLibrary = () => {
   const [resources, setResources] = useState([]);
   const [standards, setStandards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
-  const [formData, setFormData] = useState({ name: '', standard: '', type: 'pdf', videoLink: '' });
+  const [formData, setFormData] = useState({ name: '', standard: '', videoLink: '' });
 
   useEffect(() => {
     fetchResources();
@@ -15,52 +17,67 @@ const DigitalLibrary = () => {
   }, []);
 
   const fetchStandards = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/standards', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setStandards(await res.json());
+    const { data } = await supabase.from('standards').select('id, standard').order('standard');
+    setStandards(data || []);
   };
 
   const fetchResources = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/library', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setResources(await res.json());
+    const { data } = await supabase.from('library').select('*').order('created_at', { ascending: false });
+    setResources(data || []);
     setLoading(false);
   };
 
   const handleSaveResource = async () => {
-    const token = localStorage.getItem('token');
+    if (!formData.name) return alert('Resource title is required');
     if (!uploadFile && !formData.videoLink) return alert('Provide a file or video link');
     
-    // Use FormData for real file upload
-    const data = new FormData();
-    if (uploadFile) data.append('file', uploadFile);
-    data.append('name', formData.name);
-    data.append('standard', formData.standard);
-    data.append('type', formData.type);
-    data.append('videoLink', formData.videoLink);
+    setUploading(true);
+    try {
+      let fileUrl = formData.videoLink || null;
 
-    const res = await fetch('/api/library/upload', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` }, // Form-data will set the boundary header automatically
-      body: data
-    });
-    
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem('token');
-      window.location.reload();
-      return;
-    }
+      // If a file is selected, upload to Supabase Storage
+      if (uploadFile) {
+        const ext = uploadFile.name.split('.').pop();
+        const filePath = `library/${Date.now()}_${uploadFile.name.replace(/\s+/g, '_')}`;
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from('library-files')
+          .upload(filePath, uploadFile, { cacheControl: '3600', upsert: false });
+        
+        if (storageError) {
+          alert('File upload failed: ' + storageError.message);
+          setUploading(false);
+          return;
+        }
 
-    if (res.ok) {
-      setShowModal(false);
-      setUploadFile(null);
-      setFormData({ name: '', standard: 'Std X', type: 'pdf', videoLink: '' });
-      fetchResources();
+        const { data: publicUrlData } = supabase.storage.from('library-files').getPublicUrl(filePath);
+        fileUrl = publicUrlData?.publicUrl || null;
+      }
+
+      const { error } = await supabase.from('library').insert({
+        name: formData.name,
+        standard: formData.standard,
+        video_link: fileUrl,
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      if (error) {
+        alert('Failed to save resource: ' + error.message);
+      } else {
+        setShowModal(false);
+        setUploadFile(null);
+        setFormData({ name: '', standard: '', videoLink: '' });
+        fetchResources();
+      }
+    } catch (err) {
+      alert('Error: ' + err.message);
     }
+    setUploading(false);
+  };
+
+  const handleDelete = async (resource) => {
+    if (!window.confirm('Delete this resource?')) return;
+    await supabase.from('library').delete().eq('id', resource.id);
+    fetchResources();
   };
 
   return (
@@ -68,7 +85,7 @@ const DigitalLibrary = () => {
       <div className="page-header">
         <div>
           <h1 className="page-title">Digital Library</h1>
-          <p className="page-subtitle">REAL PDF Uploads and Academic Repository</p>
+          <p className="page-subtitle">Cloud PDF Uploads and Academic Repository</p>
         </div>
         <button className="btn-primary" onClick={() => setShowModal(true)}>
           <FiPlus /> New Resource
@@ -77,19 +94,17 @@ const DigitalLibrary = () => {
 
       <div style={{ display: 'flex', gap: '1.5rem', flex: 1, minHeight: 0, flexDirection: 'row' }}>
         
-        {/* Left Side: Drag & Drop Zone */}
         <div className="card-base" style={{ flex: '1', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--border-color)', backgroundColor: 'var(--bg-main)', minWidth: '300px' }}>
           <div style={{ padding: '1.5rem', backgroundColor: 'rgba(212, 175, 55, 0.1)', borderRadius: '50%', color: 'var(--accent-gold)', marginBottom: '1.5rem' }}>
             <FiUploadCloud size={60} />
           </div>
-          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>Permanent File Storage</h3>
+          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>Cloud File Storage</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', textAlign: 'center', marginBottom: '2.5rem' }}>
-            Upload PDFs directly to your server. They will be saved in your academic repository permanently.
+            Upload PDFs to Supabase Storage. Files are stored permanently in the cloud and accessible from anywhere.
           </p>
           <button className="btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={() => setShowModal(true)}>Upload Notes (PDF)</button>
         </div>
 
-        {/* Right Side: File List */}
         <div className="card-base" style={{ flex: '2', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '1.2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-surface)' }}>
             <h3 style={{ color: 'var(--primary-blue)', fontSize: '1.1rem' }}>Resource Repository</h3>
@@ -107,8 +122,10 @@ const DigitalLibrary = () => {
               <tbody>
                 {loading ? (
                   <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
+                ) : resources.length === 0 ? (
+                  <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No resources uploaded yet.</td></tr>
                 ) : resources.map((r, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }} className="table-row-hover">
+                  <tr key={r.id || i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '1rem' }}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
                         <div style={{ padding: '0.4rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px' }}>
@@ -116,21 +133,21 @@ const DigitalLibrary = () => {
                         </div>
                         <div>
                           <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{r.name}</p>
-                          {r.videoLink && (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--primary-blue)', fontSize: '0.75rem', marginTop: '0.4rem', backgroundColor: 'var(--accent-gold-light)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                              <FiVideo /> {r.videoLink.includes('uploads') ? 'Stored Locally' : 'External Link'}
+                          {(r.video_link || r.videoLink) && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--primary-blue)', fontSize: '0.75rem', marginTop: '0.4rem', backgroundColor: 'rgba(212,175,55,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
+                              <FiVideo /> Linked
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
                     <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{r.standard}</td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{r.date}</td>
+                    <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{r.date || (r.created_at ? r.created_at.split('T')[0] : '')}</td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                        {r.videoLink && (
+                        {(r.video_link || r.videoLink) && (
                           <a 
-                            href={r.videoLink.startsWith('/') ? `${r.videoLink}` : r.videoLink} 
+                            href={r.video_link || r.videoLink} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="btn-secondary" 
@@ -139,7 +156,7 @@ const DigitalLibrary = () => {
                            <FiEye /> View
                           </a>
                         )}
-                        <button style={{ background: 'transparent', padding: '0.4rem', color: 'var(--text-secondary)', border: 'none', cursor: 'pointer' }}><FiMoreVertical size={18} /></button>
+                        <button onClick={() => handleDelete(r)} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--danger-red)', border: 'none', cursor: 'pointer' }}><FiTrash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -154,7 +171,7 @@ const DigitalLibrary = () => {
         <div className="modal-overlay">
           <div className="card-base" style={{ width: '100%', maxWidth: '450px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)', borderTop: '4px solid var(--accent-gold)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Upload Real Resource</h2>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Upload Resource</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
             </div>
             
@@ -165,10 +182,7 @@ const DigitalLibrary = () => {
 
             <div className="input-group">
               <label>Select Standard</label>
-              <select 
-                value={formData.standard} 
-                onChange={e => setFormData({...formData, standard: e.target.value})}
-              >
+              <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})}>
                 <option value="">Choose Standard...</option>
                 {standards.map(s => (
                   <option key={s.id} value={s.standard}>{s.standard}</option>
@@ -177,20 +191,22 @@ const DigitalLibrary = () => {
             </div>
 
             <div className="input-group">
-              <label>Select File (PDF, HTML, Video, etc.)</label>
-              <input type="file" onChange={e => setUploadFile(e.target.files[0])} />
+              <label>Select File (PDF, etc.)</label>
+              <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.html,.mp4" onChange={e => setUploadFile(e.target.files[0])} />
             </div>
 
             <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: '1rem 0', fontSize: '0.8rem' }}>OR</div>
 
             <div className="input-group">
-              <label>External Video / CapCut Link</label>
+              <label>External Video / YouTube Link</label>
               <input type="text" placeholder="https://youtu.be/..." value={formData.videoLink} onChange={e => setFormData({...formData, videoLink: e.target.value})} />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
               <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleSaveResource}>Upload & Save</button>
+              <button className="btn-primary" onClick={handleSaveResource} disabled={uploading}>
+                {uploading ? 'Uploading...' : 'Upload & Save'}
+              </button>
             </div>
           </div>
         </div>

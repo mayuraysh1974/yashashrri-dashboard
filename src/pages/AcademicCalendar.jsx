@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiPlus, FiTrash2, FiClock, FiCoffee, FiAlertCircle } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const AcademicCalendar = () => {
     const [holidays, setHolidays] = useState([]);
     const [workingDays, setWorkingDays] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Form states
     const [holidayForm, setHolidayForm] = useState({ date: '', description: '', type: 'Holiday' });
     const [workingDayForm, setWorkingDayForm] = useState({ month: new Date().toISOString().slice(0, 7), days: 24 });
 
@@ -15,58 +15,53 @@ const AcademicCalendar = () => {
     }, []);
 
     const fetchData = async () => {
-        const token = localStorage.getItem('token');
-        const [hRes, wRes] = await Promise.all([
-            fetch('/api/holidays', { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch('/api/working-days', { headers: { 'Authorization': `Bearer ${token}` } })
+        const [{ data: hData }, { data: wData }] = await Promise.all([
+            supabase.from('holidays').select('*').order('date', { ascending: true }),
+            supabase.from('working_days').select('*').order('month', { ascending: true })
         ]);
-        if (hRes.ok) setHolidays(await hRes.json());
-        if (wRes.ok) setWorkingDays(await wRes.json());
+        setHolidays(hData || []);
+        setWorkingDays(wData || []);
         setLoading(false);
     };
 
     const handleAddHoliday = async () => {
         if (!holidayForm.date || !holidayForm.description) return alert('Date and description are required');
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/holidays', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(holidayForm)
+        const { error } = await supabase.from('holidays').insert({
+            date: holidayForm.date,
+            description: holidayForm.description,
+            type: holidayForm.type
         });
-        if (res.ok) {
+        if (!error) {
             setHolidayForm({ date: '', description: '', type: 'Holiday' });
             fetchData();
+        } else {
+            alert('Error: ' + error.message);
         }
     };
 
     const handleDeleteHoliday = async (id) => {
         if (!window.confirm('Delete this holiday?')) return;
-        const token = localStorage.getItem('token');
-        await fetch(`/api/holidays/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        fetchData();
+        const { error } = await supabase.from('holidays').delete().eq('id', id);
+        if (!error) fetchData();
     };
 
     const handleSetWorkingDays = async () => {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/working-days', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(workingDayForm)
-        });
-        if (res.ok) {
+        const { error } = await supabase.from('working_days').upsert(
+            { month: workingDayForm.month, days: workingDayForm.days },
+            { onConflict: 'month' }
+        );
+        if (!error) {
             fetchData();
             alert('Working days updated for ' + workingDayForm.month);
+        } else {
+            alert('Error: ' + error.message);
         }
     };
 
     const handleAutoMarkSundays = async () => {
         const year = new Date().getFullYear();
         if (!window.confirm(`Auto-mark all Sundays of ${year} as Holidays?`)) return;
-        
-        const token = localStorage.getItem('token');
+
         const sundays = [];
         let d = new Date(year, 0, 1);
         while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
@@ -76,14 +71,12 @@ const AcademicCalendar = () => {
         }
 
         setLoading(true);
-        for (const sun of sundays) {
-            const dateStr = sun.toISOString().split('T')[0];
-            await fetch('/api/holidays', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ date: dateStr, description: 'Sunday (Weekly Off)', type: 'Holiday' })
-            });
-        }
+        const inserts = sundays.map(sun => ({
+            date: sun.toISOString().split('T')[0],
+            description: 'Sunday (Weekly Off)',
+            type: 'Holiday'
+        }));
+        await supabase.from('holidays').upsert(inserts, { onConflict: 'date' });
         fetchData();
         alert(`Successfully marked ${sundays.length} Sundays as holidays.`);
     };
@@ -102,7 +95,6 @@ const AcademicCalendar = () => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem' }}>
                 
-                {/* Working Days Config */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div className="card-base" style={{ padding: '1.5rem' }}>
                         <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -128,11 +120,13 @@ const AcademicCalendar = () => {
                                     <span style={{ padding: '2px 8px', background: 'var(--bg-main)', borderRadius: '4px', fontSize: '0.85rem' }}>{w.days} Days</span>
                                 </div>
                             ))}
+                            {workingDays.length === 0 && !loading && (
+                                <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No targets set yet.</p>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                {/* Holidays Management */}
                 <div className="card-base" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
                     <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <FiCalendar /> Holidays & Closures

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const CollegeMaster = () => {
   const [colleges, setColleges] = useState([]);
@@ -13,50 +14,33 @@ const CollegeMaster = () => {
   }, []);
 
   const fetchColleges = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/colleges', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setColleges(await res.json());
+    const { data, error } = await supabase.from('colleges').select('*').order('name', { ascending: true });
+    if (!error) setColleges(data || []);
     setLoading(false);
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.name) return alert('College Name is required');
-    
-    const url = editMode ? `/api/colleges/${formData.id}` : '/api/colleges';
-    const method = editMode ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(formData)
-      });
-      
-      if (res.ok) {
-        setShowModal(false);
-        setEditMode(false);
-        setFormData({ id: null, name: '' });
-        fetchColleges();
-      } else {
-        const err = await res.json();
-        alert('Failed to save college: ' + (err.error || 'Server error'));
-      }
-    } catch (err) {
-      alert('Network error. Is the server running?');
+    let error;
+    if (editMode) {
+      ({ error } = await supabase.from('colleges').update({ name: formData.name }).eq('id', formData.id));
+    } else {
+      ({ error } = await supabase.from('colleges').insert({ name: formData.name }));
+    }
+    if (error) {
+      alert('Failed to save college: ' + error.message);
+    } else {
+      setShowModal(false);
+      setEditMode(false);
+      setFormData({ id: null, name: '' });
+      fetchColleges();
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this college? It will clear the college link from all associated students.')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/colleges/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    fetchColleges();
+    const { error } = await supabase.from('colleges').delete().eq('id', id);
+    if (!error) fetchColleges();
   };
 
   return (

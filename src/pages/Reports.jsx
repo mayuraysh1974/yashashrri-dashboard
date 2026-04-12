@@ -4,6 +4,7 @@ import {
   PieChart, Pie, Cell 
 } from 'recharts';
 import { FiTrendingUp, FiUsers, FiAlertTriangle, FiCheckSquare } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const COLORS = ['#1A237E', '#D4AF37', '#10B981', '#EF4444', '#64748B'];
 
@@ -16,12 +17,69 @@ const Reports = () => {
   }, []);
 
   const fetchReports = async () => {
-    const token = localStorage.getItem('token');
     try {
-      const res = await fetch('/api/reports', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      // Total revenue
+      const { data: feesData } = await supabase.from('fees').select('amount_paid');
+      const revenue = (feesData || []).reduce((sum, f) => sum + (f.amount_paid || 0), 0);
+
+      // Students
+      const { count: totalStudents } = await supabase.from('students').select('*', { count: 'exact', head: true });
+      const { count: defaulterCount } = await supabase.from('students').select('*', { count: 'exact', head: true }).eq('status', 'Defaulter');
+
+      // Teachers payroll
+      const { data: teachersData } = await supabase.from('teachers').select('salary');
+      const totalPayroll = (teachersData || []).reduce((sum, t) => sum + (t.salary || 0), 0);
+
+      // Monthly revenue — last 6 months
+      const now = new Date();
+      const monthlyRevenue = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthStr = d.toISOString().slice(0, 7); // e.g. "2026-03"
+        const label = d.toLocaleString('default', { month: 'short' });
+        const { data: mFees } = await supabase.from('fees').select('amount_paid, payment_date').ilike('payment_date', `${monthStr}%`);
+        const collected = (mFees || []).reduce((s, f) => s + (f.amount_paid || 0), 0);
+        monthlyRevenue.push({ name: label, collected, expected: 0 });
+      }
+
+      // Subject stats (students per subject)
+      const { data: studs } = await supabase.from('students').select('subjects');
+      const subjectMap = {};
+      (studs || []).forEach(s => {
+        if (Array.isArray(s.subjects)) {
+          s.subjects.forEach(sub => {
+            subjectMap[sub] = (subjectMap[sub] || 0) + 1;
+          });
+        }
       });
-      if (res.ok) setData(await res.json());
+      const subjectStats = Object.entries(subjectMap).map(([name, value]) => ({ name, value }));
+
+      // Test performance
+      const { data: testsData } = await supabase.from('tests').select('id, name, total_marks');
+      const testPerformance = [];
+      for (const test of (testsData || []).slice(0, 6)) {
+        const { data: results } = await supabase.from('test_results').select('score').eq('test_id', test.id);
+        if (results && results.length > 0) {
+          const avg = results.reduce((s, r) => s + r.score, 0) / results.length;
+          const pct = test.total_marks > 0 ? Math.round((avg / test.total_marks) * 100) : 0;
+          testPerformance.push({ name: test.name, avgScore: pct });
+        }
+      }
+
+      // Top defaulters
+      const { data: defaulters } = await supabase.from('students').select('id, name, standard, balance').eq('status', 'Defaulter').order('balance', { ascending: true }).limit(10);
+
+      setData({
+        revenue,
+        students: { totalStudents: totalStudents || 0, defaulters: defaulterCount || 0 },
+        teachers: { totalPayroll },
+        monthlyRevenue,
+        subjectStats,
+        testPerformance,
+        defaulters: (defaulters || []).map(d => ({ ...d, balance: Math.abs(d.balance || 0) }))
+      });
+    } catch (err) {
+      console.error('Failed to fetch reports:', err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +124,6 @@ const Reports = () => {
                 <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `₹${val/1000}k`} fontSize={12} />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="expected" name="Expected" fill="#E2E8F0" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="collected" name="Collected" fill="var(--accent-gold)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -88,49 +145,55 @@ const Reports = () => {
            </div>
         </div>
 
-        <div className="card-base" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
-          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1rem', fontSize: '1rem' }}><FiUsers /> Subject Distribution</h3>
-          <div style={{ flex: 1, minHeight: '250px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie 
-                  data={data.subjectStats} dataKey="value" nameKey="name" cx="50%" cy="50%" 
-                  innerRadius={50} outerRadius={80} paddingAngle={5} label={{ fontSize: 10 }}
-                >
-                  {data.subjectStats?.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend iconSize={10} wrapperStyle={{ fontSize: '10px' }} />
-              </PieChart>
-            </ResponsiveContainer>
+        {data.subjectStats.length > 0 && (
+          <div className="card-base" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1rem', fontSize: '1rem' }}><FiUsers /> Subject Distribution</h3>
+            <div style={{ flex: 1, minHeight: '250px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie 
+                    data={data.subjectStats} dataKey="value" nameKey="name" cx="50%" cy="50%" 
+                    innerRadius={50} outerRadius={80} paddingAngle={5} label={{ fontSize: 10 }}
+                  >
+                    {data.subjectStats?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend iconSize={10} wrapperStyle={{ fontSize: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="card-base" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
         <h3 style={{ color: 'var(--primary-blue)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <FiAlertTriangle style={{color: 'var(--danger-red)'}} /> Immediate Action: Top Arrears
         </h3>
-        <table style={{width: '100%', borderCollapse: 'collapse'}}>
-          <thead>
-            <tr style={{textAlign: 'left', borderBottom: '2px solid var(--border-color)'}}>
-              <th style={{padding: '1rem 0.5rem'}}>Student Name</th>
-              <th style={{padding: '1rem 0.5rem'}}>Standard</th>
-              <th style={{padding: '1rem 0.5rem', textAlign: 'right'}}>Pending Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.defaulters?.map(d => (
-              <tr key={d.id} style={{borderBottom: '1px solid var(--border-color)'}}>
-                <td style={{padding: '0.75rem 0.5rem', fontWeight: 600}}>{d.name}</td>
-                <td style={{padding: '0.75rem 0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem'}}>{d.standard}</td>
-                <td style={{padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger-red)'}}>₹{d.balance.toLocaleString()}</td>
+        {data.defaulters?.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '1rem' }}>No defaulters currently. 🎉</p>
+        ) : (
+          <table style={{width: '100%', borderCollapse: 'collapse'}}>
+            <thead>
+              <tr style={{textAlign: 'left', borderBottom: '2px solid var(--border-color)'}}>
+                <th style={{padding: '1rem 0.5rem'}}>Student Name</th>
+                <th style={{padding: '1rem 0.5rem'}}>Standard</th>
+                <th style={{padding: '1rem 0.5rem', textAlign: 'right'}}>Pending Amount</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.defaulters?.map(d => (
+                <tr key={d.id} style={{borderBottom: '1px solid var(--border-color)'}}>
+                  <td style={{padding: '0.75rem 0.5rem', fontWeight: 600}}>{d.name}</td>
+                  <td style={{padding: '0.75rem 0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem'}}>{d.standard}</td>
+                  <td style={{padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger-red)'}}>₹{d.balance.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

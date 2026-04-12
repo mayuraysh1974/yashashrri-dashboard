@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiSend, FiBell } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const TestScheduler = () => {
   const [tests, setTests] = useState([]);
@@ -19,94 +20,84 @@ const TestScheduler = () => {
   }, []);
 
   const fetchTests = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/tests', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setTests(await res.json());
+    const { data } = await supabase.from('tests').select('*').order('date', { ascending: false });
+    setTests(data || []);
     setLoading(false);
   };
 
   const fetchStandards = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/standards', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setStandards(await res.json());
+    const { data } = await supabase.from('standards').select('*').order('standard', { ascending: true });
+    setStandards(data || []);
   };
 
   const fetchSubjects = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/subjects', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setSubjects(await res.json());
+    const { data } = await supabase.from('subjects').select('*').order('name', { ascending: true });
+    setSubjects(data || []);
   };
 
   const handleCreateTest = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/tests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(formData)
+    if (!formData.name || !formData.standard || !formData.subject) {
+      return alert('Please fill in Test Name, Subject, and Standard.');
+    }
+    const { error } = await supabase.from('tests').insert({
+      name: formData.name,
+      subject: formData.subject,
+      standard: formData.standard,
+      total_marks: formData.totalMarks,
+      date: formData.date
     });
-    if (res.ok) {
+    if (!error) {
       setShowModal(false);
+      setFormData({ name: '', subject: '', standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
       fetchTests();
+    } else {
+      alert('Failed to create test: ' + error.message);
     }
   };
 
   const sendTestAlert = async (test) => {
-    const token = localStorage.getItem('token');
-    const sRes = await fetch(`/api/students`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const allStudents = await sRes.json();
-    const targetStudents = allStudents.filter(s => s.standard === test.standard);
+    const { data: allStudents } = await supabase.from('students').select('*').eq('standard', test.standard);
+    const targetStudents = allStudents || [];
 
     if (targetStudents.length === 0) return alert('No students found in this standard to notify.');
-
-    if (!window.confirm(`Send test alerts to ${targetStudents.length} students/parents?`)) return;
+    if (!window.confirm(`Log test alerts for ${targetStudents.length} students/parents?`)) return;
 
     for (const student of targetStudents) {
-      const message = `Upcoming Test Alert: ${test.name} (${test.subject}) is scheduled for ${test.date}. Total Marks: ${test.totalMarks}. Please prepare well! - Yashashrri Classes`;
-      
-      // Target parent
-      if (student.parentPhone) {
-        await fetch('/api/alerts/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ studentId: student.id, recipient: student.parentPhone, message, type: 'SMS' })
+      const message = `Upcoming Test Alert: ${test.name} (${test.subject}) is scheduled for ${test.date}. Total Marks: ${test.total_marks || test.totalMarks}. Please prepare well! - Yashashrri Classes`;
+      if (student.parent_phone || student.parentPhone) {
+        await supabase.from('alerts').insert({
+          student_id: student.id,
+          student_name: student.name,
+          recipient: student.parent_phone || student.parentPhone,
+          message,
+          type: 'SMS',
+          status: 'Simulated'
         });
       }
-      // Target student
-      if (student.studentPhone) {
-        await fetch('/api/alerts/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ studentId: student.id, recipient: student.studentPhone, message, type: 'SMS' })
+      if (student.student_phone || student.studentPhone) {
+        await supabase.from('alerts').insert({
+          student_id: student.id,
+          student_name: student.name,
+          recipient: student.student_phone || student.studentPhone,
+          message,
+          type: 'SMS',
+          status: 'Simulated'
         });
       }
     }
-    alert('Test schedule alerts simulated and logged successfully.');
+    alert('Test schedule alerts logged successfully.');
   };
 
   const openResultEntry = async (test) => {
     setActiveTest(test);
-    const token = localStorage.getItem('token');
-    const sRes = await fetch(`/api/students`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const allStudents = await sRes.json();
-    const standardStudents = allStudents.filter(s => s.standard === test.standard);
+    const { data: allStudents } = await supabase.from('students').select('*').eq('standard', test.standard);
+    const standardStudents = allStudents || [];
 
-    const rRes = await fetch(`/api/tests/${test.id}/results`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const existingResults = await rRes.json();
+    const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
+    const existing = existingResults || [];
 
     const resultState = standardStudents.map(s => {
-      const found = existingResults.find(r => r.studentId === s.id);
+      const found = existing.find(r => r.student_id === s.id);
       return { studentId: s.id, studentName: s.name, score: found ? found.score : '' };
     });
 
@@ -115,15 +106,17 @@ const TestScheduler = () => {
   };
 
   const handleSaveResults = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/tests/${activeTest.id}/results`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ results: studentResults })
-    });
-    if (res.ok) {
+    const upserts = studentResults
+      .filter(r => r.score !== '')
+      .map(r => ({ test_id: activeTest.id, student_id: r.studentId, score: Number(r.score) }));
+
+    if (upserts.length === 0) return alert('No marks entered.');
+    const { error } = await supabase.from('test_results').upsert(upserts, { onConflict: 'test_id,student_id' });
+    if (!error) {
       alert('Marks updated successfully!');
       setShowResultModal(false);
+    } else {
+      alert('Failed to save marks: ' + error.message);
     }
   };
 
@@ -142,6 +135,8 @@ const TestScheduler = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
         {loading ? (
              <p>Loading scheduled tests...</p>
+        ) : tests.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No tests scheduled yet. Click 'New Test' to create one.</p>
         ) : tests.map(test => (
           <div key={test.id} className="card-base" style={{ padding: '2rem', position: 'relative', display: 'flex', flexDirection: 'column' }}>
             <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
@@ -162,7 +157,7 @@ const TestScheduler = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 <FiUsers /> For {test.standard}
               </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Max Score: <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{test.totalMarks}</span></div>
+              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Max Score: <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{test.total_marks || test.totalMarks}</span></div>
             </div>
 
             <button className="btn-secondary" style={{ width: '100%', marginTop: 'auto' }} onClick={() => openResultEntry(test)}>
@@ -221,14 +216,13 @@ const TestScheduler = () => {
         </div>
       )}
 
-      {/* Result Entry Modal... same as before */}
       {showResultModal && (
         <div className="modal-overlay">
           <div className="card-base" style={{ width: '100%', maxWidth: '600px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Record Marks: {activeTest?.name}</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard} | Max Score: {activeTest?.totalMarks}</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
               </div>
               <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
             </div>
@@ -248,7 +242,7 @@ const TestScheduler = () => {
                       <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                         <input 
                           type="number" 
-                          max={activeTest.totalMarks}
+                          max={activeTest?.total_marks || activeTest?.totalMarks}
                           value={res.score} 
                           onChange={(e) => {
                              const newList = [...studentResults];

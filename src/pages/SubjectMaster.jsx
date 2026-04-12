@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX, FiBook } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const SubjectMaster = () => {
   const [subjects, setSubjects] = useState([]);
@@ -13,52 +14,34 @@ const SubjectMaster = () => {
   }, []);
 
   const fetchSubjects = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/subjects', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setSubjects(await res.json());
+    const { data, error } = await supabase.from('subjects').select('*').order('name', { ascending: true });
+    if (!error) setSubjects(data || []);
     setLoading(false);
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.name || formData.fees === '') return alert('Name and Fees are required');
-    
-    const url = editMode ? `/api/subjects/${formData.id}` : '/api/subjects';
-    const method = editMode ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(formData)
-      });
-      
-      const result = await res.json();
-      
-      if (res.ok) {
-        setShowModal(false);
-        setEditMode(false);
-        setFormData({ id: null, name: '', fees: '' });
-        fetchSubjects();
-      } else {
-        alert(`Failed to save subject: ${result.error || result.message || 'Unknown Error'}`);
-      }
-    } catch (err) {
-      console.error("Save error:", err);
-      alert("Network Error: Could not connect to the server.");
+    const payload = { name: formData.name, fees: Number(formData.fees) };
+    let error;
+    if (editMode) {
+      ({ error } = await supabase.from('subjects').update(payload).eq('id', formData.id));
+    } else {
+      ({ error } = await supabase.from('subjects').insert(payload));
+    }
+    if (error) {
+      alert('Failed to save subject: ' + error.message);
+    } else {
+      setShowModal(false);
+      setEditMode(false);
+      setFormData({ id: null, name: '', fees: '' });
+      fetchSubjects();
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this subject? It will affect linked student records.')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/subjects/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    fetchSubjects();
+    const { error } = await supabase.from('subjects').delete().eq('id', id);
+    if (!error) fetchSubjects();
   };
 
   return (

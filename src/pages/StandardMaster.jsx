@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const StandardMaster = () => {
   const [standards, setStandards] = useState([]);
@@ -13,50 +14,33 @@ const StandardMaster = () => {
   }, []);
 
   const fetchStandards = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/standards', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setStandards(await res.json());
+    const { data, error } = await supabase.from('standards').select('*').order('standard', { ascending: true });
+    if (!error) setStandards(data || []);
     setLoading(false);
   };
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.standard) return alert('Standard Name is required');
-    
-    const url = editMode ? `/api/standards/${formData.id}` : '/api/standards';
-    const method = editMode ? 'PUT' : 'POST';
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(formData)
-      });
-      
-      if (res.ok) {
-        setShowModal(false);
-        setEditMode(false);
-        setFormData({ id: null, standard: '' });
-        fetchStandards();
-      } else {
-        const err = await res.json();
-        alert('Failed to save standard: ' + (err.error || 'Server error'));
-      }
-    } catch (err) {
-      alert('Network error. Is the server running?');
+    let error;
+    if (editMode) {
+      ({ error } = await supabase.from('standards').update({ standard: formData.standard }).eq('id', formData.id));
+    } else {
+      ({ error } = await supabase.from('standards').insert({ standard: formData.standard }));
+    }
+    if (error) {
+      alert('Failed to save standard: ' + error.message);
+    } else {
+      setShowModal(false);
+      setEditMode(false);
+      setFormData({ id: null, standard: '' });
+      fetchStandards();
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this standard? It will affect linked student records.')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/standards/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    fetchStandards();
+    const { error } = await supabase.from('standards').delete().eq('id', id);
+    if (!error) fetchStandards();
   };
 
   return (

@@ -135,22 +135,30 @@ const AttendanceRegistry = () => {
   };
 
   const notifyAbsentees = async () => {
-    const token = localStorage.getItem('token');
-    const absentees = displayedStudents.filter(s => getEffectiveStatus(s.id) === 'Absent' && s.parentPhone);
+    const absentees = displayedStudents.filter(s => getEffectiveStatus(s.id) === 'Absent' && (s.parent_phone || s.parentPhone));
     
-    if (absentees.length === 0) return alert('No absent students found.');
-    if (!window.confirm(`Send alerts to ${absentees.length} parents?`)) return;
+    if (absentees.length === 0) return alert('No absent students with parent contacts found.');
+    if (!window.confirm(`Log absence alerts for ${absentees.length} parents?`)) return;
 
-    for (const student of absentees) {
-      const msgHeader = mode === 'Daily' ? 'marked ABSENT for today' : `missed the ${subjects.find(s=>s.id == selectedSubject)?.name} lecture`;
-      const message = `Dear Parent, your child ${student.name} ${msgHeader} (${selectedDate}). - Yashashrri Classes`;
-      await fetch('/api/alerts/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ studentId: student.id, recipient: student.parentPhone, message })
-      });
+    const inserts = absentees.map(student => {
+      const msgHeader = mode === 'Daily' ? 'marked ABSENT for today' : `missed the ${subjects.find(s => s.id == selectedSubject)?.name} lecture`;
+      const message = `Dear Parent, your child ${student.name} was ${msgHeader} (${selectedDate}). - Yashashrri Classes`;
+      return {
+        student_id: student.id,
+        student_name: student.name,
+        recipient: student.parent_phone || student.parentPhone,
+        message,
+        type: 'SMS',
+        status: 'Simulated'
+      };
+    });
+
+    const { error } = await supabase.from('alerts').insert(inserts);
+    if (error) {
+      alert('Failed to log alerts: ' + error.message);
+    } else {
+      alert(`${absentees.length} absence alerts logged successfully.`);
     }
-    alert('Alerts sent.');
   };
 
   return (

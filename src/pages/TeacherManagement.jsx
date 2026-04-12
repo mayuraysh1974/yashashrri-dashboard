@@ -19,51 +19,55 @@ const TeacherManagement = () => {
   }, []);
 
   const fetchTeachers = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        localStorage.removeItem('token');
-        window.location.reload();
-        return;
-    }
     try {
-      const res = await fetch('/api/reports/teacher-finance-summary', {
-        headers: { 'Authorization': `Bearer ${token}` }
+      setLoading(true);
+      // Fetch teachers and their finance data
+      const { data: teacherData, error: tErr } = await supabase.from('teachers').select('*').order('name');
+      if (tErr) throw tErr;
+
+      // Fetch all shares and payments to calculate summaries on the fly
+      const { data: sharesData } = await supabase.from('teacher_shares').select('teacher_id, amount');
+      const { data: paymentsData } = await supabase.from('teacher_payments').select('teacher_id, amount');
+
+      const enriched = teacherData.map(t => {
+        const totalEarned = sharesData?.filter(s => s.teacher_id === t.id).reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
+        const totalPaid = paymentsData?.filter(p => p.teacher_id === t.id).reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+        return {
+          ...t,
+          totalEarned,
+          totalPaid,
+          balance: totalEarned - totalPaid
+        };
       });
-      if (res.status === 401 || res.status === 403) {
-          localStorage.removeItem('token');
-          window.location.reload();
-          return;
-      }
-      if (res.ok) setTeachers(await res.json());
+
+      setTeachers(enriched);
+    } catch (err) {
+      console.error('Error fetching teachers:', err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSaveTeacher = async () => {
-    const token = localStorage.getItem('token');
     if (!formData.id || !formData.name || !formData.subject) return alert('ID, Name, and Subject are required');
     
-    const url = editMode ? `/api/teachers/${formData.id}` : '/api/teachers';
-    const method = editMode ? 'PUT' : 'POST';
+    try {
+      const { error } = await supabase
+        .from('teachers')
+        .upsert({ 
+          id: formData.id, 
+          name: formData.name, 
+          subject: formData.subject 
+        });
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(formData)
-    });
+      if (error) throw error;
 
-    if (res.ok) {
       setShowModal(false);
       setEditMode(false);
       setFormData({ id: '', name: '', subject: '', totalShare: 0 });
       fetchTeachers();
-    } else {
-      const errorData = await res.json();
-      alert(`Error saving teacher: ${errorData.error || 'Unknown error'}`);
+    } catch (err) {
+      alert(`Error saving teacher: ${err.message}`);
     }
   };
 
@@ -75,22 +79,23 @@ const TeacherManagement = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this teacher record? This action cannot be undone.')) return;
-    const token = localStorage.getItem('token');
-    await fetch(`/api/teachers/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    fetchTeachers();
+    const { error } = await supabase.from('teachers').delete().eq('id', id);
+    if (error) alert('Error deleting: ' + error.message);
+    else fetchTeachers();
   };
 
   const fetchFinanceDetails = async (id) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/teachers/${id}/finance`, {
-      headers: { 'Authorization': `Bearer ${token}` }
+    const { data: shares } = await supabase.from('teacher_shares').select('*').eq('teacher_id', id).order('date', { ascending: false });
+    const { data: payments } = await supabase.from('teacher_payments').select('*').eq('teacher_id', id).order('date', { ascending: false });
+    
+    const totalEarned = shares?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
+    const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+
+    setFinanceData({
+      shares: shares || [],
+      payments: payments || [],
+      summary: { totalEarned, totalPaid, balance: totalEarned - totalPaid }
     });
-    if (res.ok) {
-      setFinanceData(await res.json());
-    }
   };
 
   const handleFinanceOpen = (teacher) => {
@@ -100,26 +105,29 @@ const TeacherManagement = () => {
   };
 
   const handleAddShare = async () => {
-    const token = localStorage.getItem('token');
     if (!shareForm.amount || !shareForm.description) return alert('Amount and description required');
-    await fetch(`/api/teachers/${selectedTeacher.id}/shares`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(shareForm)
+    const { error } = await supabase.from('teacher_shares').insert({
+      teacher_id: selectedTeacher.id,
+      description: shareForm.description,
+      amount: shareForm.amount,
+      date: shareForm.date
     });
+    if (error) return alert(error.message);
     setShareForm({ description: '', amount: 0, date: new Date().toISOString().split('T')[0] });
     fetchFinanceDetails(selectedTeacher.id);
     fetchTeachers();
   };
 
   const handleAddPayment = async () => {
-    const token = localStorage.getItem('token');
     if (!paymentForm.amount) return alert('Amount required');
-    await fetch(`/api/teachers/${selectedTeacher.id}/payments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(paymentForm)
+    const { error } = await supabase.from('teacher_payments').insert({
+      teacher_id: selectedTeacher.id,
+      amount: paymentForm.amount,
+      date: paymentForm.date,
+      payment_mode: paymentForm.paymentMode,
+      remarks: paymentForm.remarks
     });
+    if (error) return alert(error.message);
     setPaymentForm({ amount: 0, date: new Date().toISOString().split('T')[0], paymentMode: 'Cash', remarks: '' });
     fetchFinanceDetails(selectedTeacher.id);
     fetchTeachers();
@@ -154,21 +162,23 @@ const TeacherManagement = () => {
           <h1 className="page-title">Teacher Management</h1>
           <p className="page-subtitle">Faculty directory, share entitlements, and payment tracking</p>
         </div>
-        <button 
-          className="btn-primary" 
           onClick={async () => { 
             setEditMode(false);
             setShowModal(true);
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/teachers/next-id', {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-              const { nextId } = await res.json();
-              setFormData({ id: nextId, name: '', subject: '', totalShare: 0 });
-            } else {
-              setFormData({ id: '', name: '', subject: '', totalShare: 0 });
+            const { data } = await supabase
+              .from('teachers')
+              .select('id')
+              .order('id', { ascending: false })
+              .limit(1);
+
+            let nextNum = 1;
+            if (data && data.length > 0) {
+              const lastId = data[0].id;
+              const matches = lastId.match(/\d+$/);
+              if (matches) nextNum = parseInt(matches[0]) + 1;
             }
+            const nextId = `T${String(nextNum).padStart(3, '0')}`;
+            setFormData({ id: nextId, name: '', subject: '', totalShare: 0 });
           }}
         >
           <FiPlus /> Add Faculty

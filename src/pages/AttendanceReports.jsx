@@ -4,6 +4,7 @@ import {
   LineChart, Line
 } from 'recharts';
 import { FiPrinter, FiCalendar, FiUser, FiLayers, FiFileText, FiBook } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const AttendanceReports = () => {
   const [activeTab, setActiveTab] = useState('student-monthly');
@@ -21,49 +22,100 @@ const AttendanceReports = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchStandards();
-    fetchStudents();
-    fetchSubjects();
+    const fetchDropdowns = async () => {
+      const [{ data: sData }, { data: stData }, { data: subData }] = await Promise.all([
+        supabase.from('standards').select('id, standard').order('standard'),
+        supabase.from('students').select('id, name, standard').order('name'),
+        supabase.from('subjects').select('id, name').order('name')
+      ]);
+      setStandards(sData || []);
+      setStudents(stData || []);
+      setSubjects(subData || []);
+    };
+    fetchDropdowns();
   }, []);
-
-  const fetchStandards = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/standards', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setStandards(await res.json());
-  };
-
-  const fetchStudents = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setStudents(await res.json());
-  };
-
-  const fetchSubjects = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/subjects', { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setSubjects(await res.json());
-  };
 
   const fetchReportData = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    let url = '';
-    if (activeTab === 'student-monthly') {
-        if (!selectedStudent) { alert('Select student'); setLoading(false); return; }
-        url = `/api/reports/attendance/student-monthly?studentId=${selectedStudent}&month=${selectedMonth}`;
-    } else if (activeTab === 'class-daily') {
-        if (!selectedStandard) { alert('Select standard'); setLoading(false); return; }
-        url = `/api/reports/attendance/class-daily?date=${selectedDate}&standard=${selectedStandard}`;
-    } else if (activeTab === 'class-monthly') {
-        if (!selectedStandard) { alert('Select standard'); setLoading(false); return; }
-        url = `/api/reports/attendance/class-monthly?month=${selectedMonth}&standard=${selectedStandard}`;
-    } else if (activeTab === 'subject-monthly') {
-        if (!selectedSubject) { alert('Select subject'); setLoading(false); return; }
-        url = `/api/reports/attendance/subject-monthly?month=${selectedMonth}&subjectId=${selectedSubject}`;
-    }
+    setReportData(null);
+    try {
+      if (activeTab === 'student-monthly') {
+        if (!selectedStudent) { alert('Select a student'); setLoading(false); return; }
+        const student = students.find(s => s.id === selectedStudent);
+        // e.g. selectedMonth = "2026-03"
+        const from = selectedMonth + '-01';
+        const to = selectedMonth + '-31';
+        const { data: att } = await supabase
+          .from('attendance')
+          .select('date, status')
+          .eq('student_id', selectedStudent)
+          .gte('date', from)
+          .lte('date', to)
+          .order('date');
+        setReportData({ student, attendance: att || [] });
 
-    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-    if (res.ok) setReportData(await res.json());
+      } else if (activeTab === 'class-daily') {
+        if (!selectedStandard) { alert('Select a standard'); setLoading(false); return; }
+        const { data: studs } = await supabase.from('students').select('id, name').eq('standard', selectedStandard);
+        const studentIds = (studs || []).map(s => s.id);
+        if (studentIds.length === 0) { setReportData([]); setLoading(false); return; }
+        const { data: att } = await supabase
+          .from('attendance')
+          .select('student_id, status')
+          .in('student_id', studentIds)
+          .eq('date', selectedDate);
+        const result = (studs || []).map(s => {
+          const rec = (att || []).find(a => a.student_id === s.id);
+          return { ...s, status: rec ? rec.status : 'Absent' };
+        });
+        setReportData(result);
+
+      } else if (activeTab === 'class-monthly') {
+        if (!selectedStandard) { alert('Select a standard'); setLoading(false); return; }
+        const { data: studs } = await supabase.from('students').select('id').eq('standard', selectedStandard);
+        const studentIds = (studs || []).map(s => s.id);
+        if (studentIds.length === 0) { setReportData([]); setLoading(false); return; }
+        const from = selectedMonth + '-01';
+        const to = selectedMonth + '-31';
+        const { data: att } = await supabase
+          .from('attendance')
+          .select('date, status')
+          .in('student_id', studentIds)
+          .gte('date', from)
+          .lte('date', to);
+        // Group by date
+        const dateMap = {};
+        (att || []).forEach(a => {
+          if (!dateMap[a.date]) dateMap[a.date] = { date: a.date, present: 0, absent: 0, noClass: 0 };
+          if (a.status === 'Present') dateMap[a.date].present++;
+          else if (a.status === 'No Class') dateMap[a.date].noClass++;
+          else dateMap[a.date].absent++;
+        });
+        setReportData(Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date)));
+
+      } else if (activeTab === 'subject-monthly') {
+        if (!selectedSubject) { alert('Select a subject'); setLoading(false); return; }
+        const from = selectedMonth + '-01';
+        const to = selectedMonth + '-31';
+        const { data: att } = await supabase
+          .from('attendance')
+          .select('date, status')
+          .eq('subject_id', selectedSubject)
+          .gte('date', from)
+          .lte('date', to);
+        const dateMap = {};
+        (att || []).forEach(a => {
+          if (!dateMap[a.date]) dateMap[a.date] = { date: a.date, present: 0, absent: 0, noClass: 0 };
+          if (a.status === 'Present') dateMap[a.date].present++;
+          else if (a.status === 'No Class') dateMap[a.date].noClass++;
+          else dateMap[a.date].absent++;
+        });
+        setReportData(Object.values(dateMap).sort((a, b) => a.date.localeCompare(b.date)));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load report: ' + err.message);
+    }
     setLoading(false);
   };
 
@@ -165,28 +217,32 @@ const AttendanceReports = () => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
                   <div>
-                    <h3 style={{ fontSize: '1.2rem', color: '#1A237E' }}>{reportData.student.name}</h3>
-                    <p style={{ color: '#475569' }}>Standard: {reportData.student.standard}</p>
+                    <h3 style={{ fontSize: '1.2rem', color: '#1A237E' }}>{reportData.student?.name}</h3>
+                    <p style={{ color: '#475569' }}>Standard: {reportData.student?.standard}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ fontWeight: 600 }}>Period: {selectedMonth}</p>
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '5px' }}>
-                  {reportData.attendance.map(a => (
-                    <div key={a.date} style={{ 
-                      padding: '0.5rem', 
-                      textAlign: 'center', 
-                      borderRadius: '4px', 
-                      background: a.status === 'Present' ? '#10B981' : a.status === 'No Class' ? '#94A3B8' : '#EF4444', 
-                      color: 'white', 
-                      fontSize: '0.8rem' 
-                    }}>
-                      <div style={{ fontWeight: 800 }}>{a.date.split('-')[2]}</div>
-                      <div>{a.status === 'Present' ? 'P' : a.status === 'No Class' ? 'N' : 'A'}</div>
-                    </div>
-                  ))}
-                </div>
+                {reportData.attendance.length === 0 ? (
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No attendance records found for this period.</p>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '5px' }}>
+                    {reportData.attendance.map(a => (
+                      <div key={a.date} style={{ 
+                        padding: '0.5rem', 
+                        textAlign: 'center', 
+                        borderRadius: '4px', 
+                        background: a.status === 'Present' ? '#10B981' : a.status === 'No Class' ? '#94A3B8' : '#EF4444', 
+                        color: 'white', 
+                        fontSize: '0.8rem' 
+                      }}>
+                        <div style={{ fontWeight: 800 }}>{a.date.split('-')[2]}</div>
+                        <div>{a.status === 'Present' ? 'P' : a.status === 'No Class' ? 'N' : 'A'}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -200,7 +256,7 @@ const AttendanceReports = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reportData.map(s => (
+                  {Array.isArray(reportData) && reportData.map(s => (
                     <tr key={s.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                       <td style={{ padding: '1rem', fontWeight: 600 }}>{s.name}</td>
                       <td style={{ padding: '1rem', textAlign: 'center' }}>{s.id}</td>
@@ -222,7 +278,7 @@ const AttendanceReports = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {reportData.map(d => {
+                  {Array.isArray(reportData) && reportData.map(d => {
                     const total = d.present + d.absent;
                     const percentage = total > 0 ? ((d.present / total) * 100).toFixed(1) + '%' : 'N/A';
                     return (

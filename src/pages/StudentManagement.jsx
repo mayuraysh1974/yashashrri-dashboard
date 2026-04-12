@@ -735,22 +735,21 @@ const BulkPromotionModal = ({ onClose, standards, students, onSuccess }) => {
     if (!window.confirm(`WARNING: You are about to irrevocably transfer ${eligibleCount} students from ${fromStd} to ${toStd}. Are you absolutely sure?`)) return;
 
     setIsProcessing(true);
-    const token = localStorage.getItem('token');
     try {
-      const res = await fetch('/api/students/bulk-promote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ fromStandard: fromStd, toStandard: toStd })
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const { error } = await supabase
+        .from('students')
+        .update({ standard: toStd })
+        .eq('standard', fromStd)
+        .eq('status', 'Active');
+
+      if (error) {
+        alert('Promotion failed: ' + error.message);
+      } else {
         alert(`Success! ${eligibleCount} students have been successfully promoted to ${toStd}.`);
         onSuccess();
-      } else {
-        alert(data.error || 'Promotion failed.');
       }
     } catch (e) {
-      alert('Error communicating with server.');
+      alert('Error: ' + e.message);
     }
     setIsProcessing(false);
   };
