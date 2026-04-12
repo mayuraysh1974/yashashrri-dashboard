@@ -86,9 +86,12 @@ const TeacherManagement = () => {
   };
 
   const fetchFinanceDetails = async (id) => {
-    const { data: shares } = await supabase.from('teacher_shares').select('*').eq('teacher_id', id).order('date', { ascending: false });
-    const { data: payments } = await supabase.from('teacher_payments').select('*').eq('teacher_id', id).order('date', { ascending: false });
+    const { data: shares, error: e1 } = await supabase.from('teacher_shares').select('*').eq('teacher_id', id).order('date', { ascending: false });
+    const { data: payments, error: e2 } = await supabase.from('teacher_payments').select('*').eq('teacher_id', id).order('date', { ascending: false });
     
+    if (e1) console.error("Error fetching shares:", e1);
+    if (e2) console.error("Error fetching payments:", e2);
+
     const totalEarned = shares?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
     const totalPaid = payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
 

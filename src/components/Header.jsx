@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiSearch, FiBell } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const Header = () => {
   return (
@@ -13,8 +14,8 @@ const Header = () => {
         <button style={{ background: 'transparent', fontSize: '1.25rem', color: 'var(--text-secondary)', padding: '0.4rem' }}>
           <FiBell />
         </button>
-        <div className="user-profile" style={{ cursor: 'pointer' }} onClick={() => { localStorage.removeItem('token'); window.location.reload(); }}>
-          <div className="avatar" style={{ backgroundColor: 'var(--danger-red)', color: 'white' }}>L</div>
+        <div className="user-profile" style={{ cursor: 'pointer' }} onClick={async () => { await supabase.auth.signOut(); localStorage.removeItem('token'); window.location.href = '/login'; }}>
+          <div className="avatar" style={{ backgroundColor: 'var(--danger-red)', color: 'white' }}>A</div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Logout</span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Click to sign out</span>
