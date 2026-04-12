@@ -29,13 +29,24 @@ const FeesPayment = () => {
   });
 
   const fetchStudents = async () => {
-    const { data } = await supabase.from('students').select('*, student_subjects(subject_id)').order('name');
-    if (data) {
-      const flat = data.map(s => ({
-        ...s,
-        feesPaid: s.fees_paid,
-        enrolledSubjectIds: s.student_subjects ? s.student_subjects.map(ss => Number(ss.subject_id)) : []
-      }));
+    const { data: stuData } = await supabase.from('students').select('*, student_subjects(subject_id)').order('name');
+    const { data: subData } = await supabase.from('subjects').select('id, name');
+    
+    if (stuData && subData) {
+      const subMap = subData.reduce((acc, s) => { acc[s.id] = s.name; return acc; }, {});
+      
+      const flat = stuData.map(s => {
+        const subjectNames = s.student_subjects && s.student_subjects.length > 0
+          ? s.student_subjects.map(ss => subMap[ss.subject_id]).filter(Boolean).join(', ')
+          : 'All Standard Subjects';
+          
+        return {
+          ...s,
+          feesPaid: s.fees_paid,
+          subjectNames,
+          enrolledSubjectIds: s.student_subjects ? s.student_subjects.map(ss => Number(ss.subject_id)) : []
+        };
+      });
       setStudents(flat);
     }
   };
@@ -126,7 +137,7 @@ const FeesPayment = () => {
         ...formData, 
         studentName: studentObj ? studentObj.name : 'Deleted Student', 
         standard: studentObj ? studentObj.standard : 'N/A',
-        subjects: 'All Standard Subjects',
+        subjects: studentObj ? studentObj.subjectNames : 'All Standard Subjects',
         newBalance: newBalance,
         totalPaid: newFeesPaid,
         concession: studentObj.concession || 0,
@@ -172,7 +183,7 @@ const FeesPayment = () => {
         amountPaid: amount,
         studentName: studentObj ? studentObj.name : 'Deleted Student', 
         standard: studentObj ? studentObj.standard : 'N/A',
-        subjects: 'All Standard Subjects',
+        subjects: studentObj ? studentObj.subjectNames : 'All Standard Subjects',
         newBalance: newBalance,
         totalPaid: newFeesPaid,
         concession: studentObj.concession || 0,
@@ -195,7 +206,7 @@ const FeesPayment = () => {
       remarks: fee.remarks,
       studentName: fee.studentName,
       standard: fee.standard,
-      subjects: studentObj && studentObj.student_subjects && studentObj.student_subjects.length > 0 ? 'Enrolled Subjects' : 'All Standard Subjects',
+      subjects: studentObj ? studentObj.subjectNames : 'All Standard Subjects',
       newBalance: fee.currentBalance,
       totalPaid: fee.totalPaid,
       concession: fee.concession,
