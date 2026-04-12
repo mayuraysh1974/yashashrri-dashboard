@@ -162,28 +162,31 @@ const TeacherManagement = () => {
           <h1 className="page-title">Teacher Management</h1>
           <p className="page-subtitle">Faculty directory, share entitlements, and payment tracking</p>
         </div>
-          onClick={async () => { 
-            setEditMode(false);
-            setShowModal(true);
-            const { data } = await supabase
-              .from('teachers')
-              .select('id')
-              .order('id', { ascending: false })
-              .limit(1);
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            className="btn-primary"
+            onClick={async () => { 
+              setEditMode(false);
+              setShowModal(true);
+              const { data } = await supabase
+                .from('teachers')
+                .select('id')
+                .order('id', { ascending: false })
+                .limit(1);
 
-            let nextNum = 1;
-            if (data && data.length > 0) {
-              const lastId = data[0].id;
-              const matches = lastId.match(/\d+$/);
-              if (matches) nextNum = parseInt(matches[0]) + 1;
-            }
-            const nextId = `T${String(nextNum).padStart(3, '0')}`;
-            setFormData({ id: nextId, name: '', subject: '', totalShare: 0 });
-          }}
-        >
-          <FiPlus /> Add Faculty
-        </button>
-      </div>
+              let nextNum = 1;
+              if (data && data.length > 0) {
+                const lastId = data[0].id;
+                const matches = lastId.match(/\d+$/);
+                if (matches) nextNum = parseInt(matches[0]) + 1;
+              }
+              const nextId = `T${String(nextNum).padStart(3, '0')}`;
+              setFormData({ id: nextId, name: '', subject: '', totalShare: 0 });
+            }}
+          >
+            <FiPlus /> Add Faculty
+          </button>
+        </div>
 
       <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex' }}>
         <div className="search-bar" style={{ backgroundColor: 'var(--bg-main)', flex: 1, maxWidth: '400px' }}>
