@@ -67,7 +67,12 @@ const StudentManagement = () => {
     if (data) {
       const formatted = data.map(s => ({
         ...s,
-        collegeName: s.colleges?.name // Map the joined data
+        collegeName: s.colleges?.name,
+        feesPaid: s.fees_paid || 0,
+        parentName: s.parent_name || '',
+        parentPhone: s.parent_phone || '',
+        studentPhone: s.student_phone || '',
+        collegeId: s.college_id || null
       }));
       setStudents(formatted);
     }
