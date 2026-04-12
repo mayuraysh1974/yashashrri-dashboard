@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiCheckCircle, FiXCircle, FiX, FiEdit2, FiTrash2, FiPlus, FiDollarSign, FiActivity, FiArrowRight, FiPrinter } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const TeacherManagement = () => {
   const [teachers, setTeachers] = useState([]);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiPrinter, FiSearch, FiCalendar, FiDollarSign, FiFilter, FiChevronRight, FiX, FiActivity } from 'react-icons/fi';
+import { supabase } from '../supabaseClient';
 
 const FeeReports = () => {
   const [activeTab, setActiveTab] = useState('arrears');
@@ -17,11 +18,18 @@ const FeeReports = () => {
   const [financeData, setFinanceData] = useState({ teacher: {}, shares: [], payments: [], summary: { totalEarned: 0, totalPaid: 0, balance: 0 } });
 
   const fetchFinanceDetails = async (teacherId) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/teachers/${teacherId}/finance`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setFinanceData(await res.json());
+    try {
+      const { data: shares } = await supabase.from('teacher_shares').select('*').eq('teacher_id', teacherId).order('date', { ascending: false });
+      const { data: payments } = await supabase.from('teacher_payments').select('*').eq('teacher_id', teacherId).order('date', { ascending: false });
+      const totalEarned = (shares || []).reduce((sum, s) => sum + (s.amount || 0), 0);
+      const totalPaid = (payments || []).reduce((sum, p) => sum + (p.amount || 0), 0);
+      setFinanceData({
+        teacher: selectedTeacher || {},
+        shares: shares || [],
+        payments: payments || [],
+        summary: { totalEarned, totalPaid, balance: totalEarned - totalPaid }
+      });
+    } catch (e) { console.error(e); }
   };
 
   const handleFinanceOpen = (teacher) => {
@@ -33,31 +41,72 @@ const FeeReports = () => {
 
   const fetchArrears = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/reports/arrears?t=${Date.now()}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setArrears(await res.json());
+    try {
+      const { data: students } = await supabase.from('students').select('*').gt('balance', 0).order('standard', { ascending: true });
+      const arrearsData = (students || []).map(s => ({
+        id: s.id,
+        name: s.name,
+        standard: s.standard,
+        subjects: '-', 
+        feesPaid: s.fees_paid || 0,
+        balance: s.balance || 0
+      }));
+      setArrears(arrearsData);
+    } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   const fetchCollection = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/reports/collection?startDate=${dateFilter.start}&endDate=${dateFilter.end}&t=${Date.now()}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setCollection(await res.json());
+    try {
+      // In Supabase we compare dates directly via ISO string filters usually
+      const { data: feeData } = await supabase.from('fees')
+         .select('*, students(name, standard)')
+         .gte('payment_date', `${dateFilter.start}T00:00:00`)
+         .lte('payment_date', `${dateFilter.end}T23:59:59`)
+         .order('payment_date', { ascending: false });
+         
+      const collections = (feeData || []).map(f => ({
+         id: f.id,
+         paymentDate: new Date(f.payment_date).toLocaleDateString('en-IN'),
+         studentName: f.students?.name || 'Unknown',
+         standard: f.students?.standard || '',
+         paymentMode: f.payment_mode || 'Cash',
+         remarks: f.remarks || '',
+         amountPaid: f.amount_paid || 0
+      }));
+      setCollection({
+         collections,
+         summary: {
+           totalCollection: collections.reduce((s, c) => s + c.amountPaid, 0),
+           transactions: collections.length
+         }
+      });
+    } catch (e) { console.error(e); }
     setLoading(false);
   };
 
   const fetchFacultySummary = async () => {
     setLoading(true);
-    const token = localStorage.getItem('token');
-    const res = await fetch(`/api/reports/teacher-finance-summary?startDate=${dateFilter.start}&endDate=${dateFilter.end}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (res.ok) setFacultySummary(await res.json());
+    try {
+      const { data: teachersData } = await supabase.from('teachers').select('*');
+      const { data: sharesData } = await supabase.from('teacher_shares').select('teacher_id, amount');
+      const { data: paymentsData } = await supabase.from('teacher_payments').select('teacher_id, amount');
+
+      const summary = (teachersData || []).map(t => {
+        const totalEarned = (sharesData || []).filter(s => s.teacher_id === t.id).reduce((sum, s) => sum + (s.amount || 0), 0);
+        const totalPaid = (paymentsData || []).filter(p => p.teacher_id === t.id).reduce((sum, p) => sum + (p.amount || 0), 0);
+        return {
+          id: t.id,
+          name: t.name,
+          subject: t.subject,
+          totalEarned,
+          totalPaid,
+          balance: totalEarned - totalPaid
+        };
+      });
+      setFacultySummary(summary);
+    } catch (e) { console.error(e); }
     setLoading(false);
   };
 
