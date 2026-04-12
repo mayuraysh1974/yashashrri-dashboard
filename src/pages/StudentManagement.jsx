@@ -187,7 +187,12 @@ const StudentManagement = () => {
       } else {
         const { error: insertError } = await supabase
           .from('student_documents')
-          .insert({ student_id: id, name: docName || file.name, file_url: publicUrl });
+          .insert({ 
+            student_id: id, 
+            name: docName || file.name, 
+            file_url: publicUrl,
+            upload_date: new Date().toISOString()
+          });
           
         if (insertError) throw insertError;
         alert('Document uploaded successfully!');
