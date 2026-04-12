@@ -13,7 +13,7 @@ const AlertAudit = () => {
   const fetchHistory = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('alerts')
+      .from('message_log')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(200);

@@ -65,7 +65,7 @@ const TestScheduler = () => {
     for (const student of targetStudents) {
       const message = `Upcoming Test Alert: ${test.name} (${test.subject}) is scheduled for ${test.date}. Total Marks: ${test.total_marks || test.totalMarks}. Please prepare well! - Yashashrri Classes`;
       if (student.parent_phone || student.parentPhone) {
-        await supabase.from('alerts').insert({
+        await supabase.from('message_log').insert({
           student_id: student.id,
           student_name: student.name,
           recipient: student.parent_phone || student.parentPhone,
@@ -75,7 +75,7 @@ const TestScheduler = () => {
         });
       }
       if (student.student_phone || student.studentPhone) {
-        await supabase.from('alerts').insert({
+        await supabase.from('message_log').insert({
           student_id: student.id,
           student_name: student.name,
           recipient: student.student_phone || student.studentPhone,

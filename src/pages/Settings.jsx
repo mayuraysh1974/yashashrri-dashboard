@@ -35,7 +35,7 @@ const Settings = () => {
         supabase.from('fees').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
         supabase.from('attendance').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
         supabase.from('test_results').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
-        supabase.from('alerts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        supabase.from('message_log').delete().neq('id', 0),
       ]);
       await Promise.all([
         supabase.from('students').delete().neq('id', '00000000-0000-0000-0000-000000000000'),

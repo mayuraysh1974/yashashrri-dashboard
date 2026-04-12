@@ -153,7 +153,7 @@ const AttendanceRegistry = () => {
       };
     });
 
-    const { error } = await supabase.from('alerts').insert(inserts);
+    const { error } = await supabase.from('message_log').insert(inserts);
     if (error) {
       alert('Failed to log alerts: ' + error.message);
     } else {

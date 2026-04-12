@@ -46,7 +46,7 @@ const AttendanceReports = () => {
         const from = selectedMonth + '-01';
         const to = selectedMonth + '-31';
         const { data: att } = await supabase
-          .from('attendance')
+          .from('student_attendance')
           .select('date, status')
           .eq('student_id', selectedStudent)
           .gte('date', from)
@@ -60,7 +60,7 @@ const AttendanceReports = () => {
         const studentIds = (studs || []).map(s => s.id);
         if (studentIds.length === 0) { setReportData([]); setLoading(false); return; }
         const { data: att } = await supabase
-          .from('attendance')
+          .from('student_attendance')
           .select('student_id, status')
           .in('student_id', studentIds)
           .eq('date', selectedDate);
@@ -78,7 +78,7 @@ const AttendanceReports = () => {
         const from = selectedMonth + '-01';
         const to = selectedMonth + '-31';
         const { data: att } = await supabase
-          .from('attendance')
+          .from('student_attendance')
           .select('date, status')
           .in('student_id', studentIds)
           .gte('date', from)
@@ -98,7 +98,7 @@ const AttendanceReports = () => {
         const from = selectedMonth + '-01';
         const to = selectedMonth + '-31';
         const { data: att } = await supabase
-          .from('attendance')
+          .from('student_attendance')
           .select('date, status')
           .eq('subject_id', selectedSubject)
           .gte('date', from)

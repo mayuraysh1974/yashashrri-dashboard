@@ -22,7 +22,7 @@ const DigitalLibrary = () => {
   };
 
   const fetchResources = async () => {
-    const { data } = await supabase.from('library').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('library_resources').select('*').order('created_at', { ascending: false });
     setResources(data || []);
     setLoading(false);
   };
@@ -53,7 +53,7 @@ const DigitalLibrary = () => {
         fileUrl = publicUrlData?.publicUrl || null;
       }
 
-      const { error } = await supabase.from('library').insert({
+      const { error } = await supabase.from('library_resources').insert({
         name: formData.name,
         standard: formData.standard,
         video_link: fileUrl,
@@ -76,7 +76,7 @@ const DigitalLibrary = () => {
 
   const handleDelete = async (resource) => {
     if (!window.confirm('Delete this resource?')) return;
-    await supabase.from('library').delete().eq('id', resource.id);
+    await supabase.from('library_resources').delete().eq('id', resource.id);
     fetchResources();
   };
 
