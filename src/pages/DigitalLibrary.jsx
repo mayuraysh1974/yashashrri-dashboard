@@ -55,6 +55,7 @@ const DigitalLibrary = () => {
             name: recordName,
             standard: formData.standard,
             video_link: fileUrl,
+            type: 'file',
             date: new Date().toISOString().split('T')[0]
           });
           
@@ -65,6 +66,7 @@ const DigitalLibrary = () => {
           name: formData.name,
           standard: formData.standard,
           video_link: formData.videoLink,
+          type: 'video',
           date: new Date().toISOString().split('T')[0]
         });
         if (error) throw error;
