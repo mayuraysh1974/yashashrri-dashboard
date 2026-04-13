@@ -80,7 +80,7 @@ const AttendanceRegistry = () => {
   }
   if (mode === 'Subject' && selectedSubject) {
     displayedStudents = displayedStudents.filter(s => 
-      s.subjects?.some(sub => Number(sub.subjectId) === Number(selectedSubject))
+      s.student_subjects?.some(sub => Number(sub.subject_id) === Number(selectedSubject))
     );
   }
 
