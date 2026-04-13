@@ -278,7 +278,9 @@ const AttendanceReports = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(reportData) && reportData.map(d => {
+                  {Array.isArray(reportData) && reportData.length === 0 ? (
+                    <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No attendance records found for this period.</td></tr>
+                  ) : Array.isArray(reportData) && reportData.map(d => {
                     const total = d.present + d.absent;
                     const percentage = total > 0 ? ((d.present / total) * 100).toFixed(1) + '%' : 'N/A';
                     return (
