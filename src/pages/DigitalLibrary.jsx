@@ -8,7 +8,7 @@ const DigitalLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadFiles, setUploadFiles] = useState([]);
   const [formData, setFormData] = useState({ name: '', standard: '', videoLink: '' });
 
   useEffect(() => {
@@ -28,48 +28,54 @@ const DigitalLibrary = () => {
   };
 
   const handleSaveResource = async () => {
-    if (!formData.name) return alert('Resource title is required');
-    if (!uploadFile && !formData.videoLink) return alert('Provide a file or video link');
+    // If multiple files, name is optional as we use filename. If 1 file/video, name is required.
+    const isSingle = uploadFiles.length <= 1 && !formData.videoLink;
+    if (isSingle && !formData.name) return alert('Resource title is required');
+    if (uploadFiles.length === 0 && !formData.videoLink) return alert('Provide a file or video link');
     
     setUploading(true);
     try {
-      let fileUrl = formData.videoLink || null;
+      if (uploadFiles.length > 0) {
+        for (const file of uploadFiles) {
+          const filePath = `library/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+          
+          const { error: storageError } = await supabase.storage
+            .from('library-files')
+            .upload(filePath, file, { cacheControl: '3600', upsert: false });
+          
+          if (storageError) throw storageError;
 
-      // If a file is selected, upload to Supabase Storage
-      if (uploadFile) {
-        const ext = uploadFile.name.split('.').pop();
-        const filePath = `library/${Date.now()}_${uploadFile.name.replace(/\s+/g, '_')}`;
-        const { data: storageData, error: storageError } = await supabase.storage
-          .from('library-files')
-          .upload(filePath, uploadFile, { cacheControl: '3600', upsert: false });
-        
-        if (storageError) {
-          alert('File upload failed: ' + storageError.message);
-          setUploading(false);
-          return;
+          const { data: publicUrlData } = supabase.storage.from('library-files').getPublicUrl(filePath);
+          const fileUrl = publicUrlData?.publicUrl || null;
+
+          // If multiple files, use filename for individual entries, otherwise use the title provided
+          const recordName = uploadFiles.length > 1 ? file.name : (formData.name || file.name);
+
+          const { error: insError } = await supabase.from('library_resources').insert({
+            name: recordName,
+            standard: formData.standard,
+            video_link: fileUrl,
+            date: new Date().toISOString().split('T')[0]
+          });
+          
+          if (insError) throw insError;
         }
-
-        const { data: publicUrlData } = supabase.storage.from('library-files').getPublicUrl(filePath);
-        fileUrl = publicUrlData?.publicUrl || null;
+      } else if (formData.videoLink) {
+        const { error } = await supabase.from('library_resources').insert({
+          name: formData.name,
+          standard: formData.standard,
+          video_link: formData.videoLink,
+          date: new Date().toISOString().split('T')[0]
+        });
+        if (error) throw error;
       }
 
-      const { error } = await supabase.from('library_resources').insert({
-        name: formData.name,
-        standard: formData.standard,
-        video_link: fileUrl,
-        date: new Date().toISOString().split('T')[0]
-      });
-
-      if (error) {
-        alert('Failed to save resource: ' + error.message);
-      } else {
-        setShowModal(false);
-        setUploadFile(null);
-        setFormData({ name: '', standard: '', videoLink: '' });
-        fetchResources();
-      }
+      setShowModal(false);
+      setUploadFiles([]);
+      setFormData({ name: '', standard: '', videoLink: '' });
+      fetchResources();
     } catch (err) {
-      alert('Error: ' + err.message);
+      alert('Error during upload: ' + err.message);
     }
     setUploading(false);
   };
@@ -191,8 +197,13 @@ const DigitalLibrary = () => {
             </div>
 
             <div className="input-group">
-              <label>Select File (PDF, etc.)</label>
-              <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.html,.mp4" onChange={e => setUploadFile(e.target.files[0])} />
+              <label>Select Files (PDF, Images, etc.)</label>
+              <input type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.html,.mp4,.jpg,.png" onChange={e => setUploadFiles(Array.from(e.target.files))} />
+              {uploadFiles.length > 0 && (
+                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--success-green)', fontWeight: 600 }}>
+                  {uploadFiles.length} files selected
+                </div>
+              )}
             </div>
 
             <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: '1rem 0', fontSize: '0.8rem' }}>OR</div>
