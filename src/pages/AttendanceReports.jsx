@@ -98,7 +98,7 @@ const AttendanceReports = () => {
         const from = selectedMonth + '-01';
         const to = selectedMonth + '-31';
         const { data: att } = await supabase
-          .from('student_attendance')
+          .from('student_subject_attendance')
           .select('date, status')
           .eq('subject_id', selectedSubject)
           .gte('date', from)
