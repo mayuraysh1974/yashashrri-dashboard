@@ -22,8 +22,13 @@ const DigitalLibrary = () => {
   };
 
   const fetchResources = async () => {
-    const { data } = await supabase.from('library_resources').select('*').order('created_at', { ascending: false });
-    setResources(data || []);
+    const { data, error } = await supabase.from('library_resources').select('*');
+    if (error) console.error('fetchResources error:', error);
+    
+    // Fallback sort if we remove order() to test if created_at exists later
+    const sortedData = data ? data.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0)) : [];
+    
+    setResources(sortedData);
     setLoading(false);
   };
 
@@ -83,9 +88,29 @@ const DigitalLibrary = () => {
   };
 
   const handleDelete = async (resource) => {
-    if (!window.confirm('Delete this resource?')) return;
-    await supabase.from('library_resources').delete().eq('id', resource.id);
-    fetchResources();
+    if (!window.confirm('Delete this resource? This cannot be undone.')) return;
+    
+    // 1. Delete the physical file from cloud storage if it exists and is not an external video link
+    if (resource.video_link && resource.video_link.includes('supabase.co')) {
+      try {
+        // Extract the file path from the public URL
+        const urlParts = resource.video_link.split('/');
+        const filePath = urlParts.slice(urlParts.indexOf('library-files') + 1).join('/');
+        if (filePath) {
+          await supabase.storage.from('library-files').remove([filePath]);
+        }
+      } catch (err) {
+        console.error('Failed to delete file from storage:', err);
+      }
+    }
+
+    // 2. Delete the record from the database
+    const { error } = await supabase.from('library_resources').delete().eq('id', resource.id);
+    if (error) {
+       alert('Error deleting resource: ' + error.message);
+    } else {
+       fetchResources();
+    }
   };
 
   return (
