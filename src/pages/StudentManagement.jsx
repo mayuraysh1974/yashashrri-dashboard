@@ -104,18 +104,24 @@ const StudentManagement = () => {
       const { data } = await supabase
         .from('students')
         .select('id')
-        .ilike('id', `${standard}%`)
+        .eq('standard', standard)
         .order('id', { ascending: false })
         .limit(1);
 
-      let nextNum = 1;
+      let nextNum = null;
+      const currentYear = new Date().getFullYear();
+      
       if (data && data.length > 0) {
         const lastId = data[0].id;
         const matches = lastId.match(/\d+$/);
         if (matches) nextNum = parseInt(matches[0]) + 1;
       }
       
-      const newId = `${standard}${String(nextNum).padStart(3, '0')}`;
+      if (!nextNum) {
+        nextNum = parseInt(`${currentYear}001`);
+      }
+      
+      const newId = `${standard}${nextNum}`;
       setFormData(prev => ({ ...prev, id: newId }));
     } catch (e) {
       console.error('Failed to generate next student ID', e);
