@@ -115,7 +115,7 @@ const StudentManagement = () => {
         if (matches) nextNum = parseInt(matches[0]) + 1;
       }
       
-      const newId = `${standard}-${String(nextNum).padStart(3, '0')}`;
+      const newId = `${standard}${String(nextNum).padStart(3, '0')}`;
       setFormData(prev => ({ ...prev, id: newId }));
     } catch (e) {
       console.error('Failed to generate next student ID', e);
