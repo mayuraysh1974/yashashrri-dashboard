@@ -366,7 +366,7 @@ const StudentManagement = () => {
                 <td style={{ padding: '1rem', textAlign: 'center' }}>
                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                       <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => setShowProfile(s)} title="View Profile"><FiTrendingUp /></button>
-                      <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjects?.map(sub => sub.subjectId) || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
+                      <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
                       <button className="btn-secondary" style={{ padding: '0.4rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
                    </div>
                 </td>
