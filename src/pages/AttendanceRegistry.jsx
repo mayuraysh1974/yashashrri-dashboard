@@ -126,12 +126,20 @@ const AttendanceRegistry = () => {
   };
 
   const markAllEnrolledPresent = () => {
-    if (!selectedSubject) return;
-    const newAtt = { ...subjectAttendance };
-    displayedStudents.forEach(s => {
-       newAtt[s.id] = 'Present';
-    });
-    setSubjectAttendance(newAtt);
+    if (mode === 'Subject') {
+      if (!selectedSubject) return alert('Select a subject first');
+      const newAtt = { ...subjectAttendance };
+      displayedStudents.forEach(s => {
+         newAtt[s.id] = 'Present';
+      });
+      setSubjectAttendance(newAtt);
+    } else {
+      const newAtt = { ...dailyAttendance };
+      displayedStudents.forEach(s => {
+         newAtt[s.id] = 'Present';
+      });
+      setDailyAttendance(newAtt);
+    }
   };
 
   const notifyAbsentees = async () => {
@@ -214,16 +222,16 @@ const AttendanceRegistry = () => {
             onChange={e => setSearchTerm(e.target.value)} 
           />
         </div>
-        {mode === 'Subject' && (
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn-secondary" onClick={markAllEnrolledPresent} disabled={!selectedSubject} style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}><FiUserCheck /> All Present</button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}><FiUserCheck /> All Present</button>
+          {mode === 'Subject' && (
             <button className="btn-secondary" onClick={() => {
               const newAtt = { ...subjectAttendance };
               displayedStudents.forEach(s => newAtt[s.id] = 'No Class');
               setSubjectAttendance(newAtt);
             }} disabled={!selectedSubject} style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}><FiXCircle /> No Class</button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="card-base" style={{ flex: 1, overflow: 'auto' }}>
