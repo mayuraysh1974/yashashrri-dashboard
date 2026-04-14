@@ -255,7 +255,7 @@ const LandingPage = ({ isAuthenticated }) => {
       <section className="location-section" style={{ padding: '8rem 5%', background: '#F8FAFC' }}>
         <div className="section-header">
           <h2>Find <span className="text-highlight">Us</span></h2>
-          <p>Visit our main branch for a campus tour and career counseling.</p>
+          <p>Visit our main branch for career counseling.</p>
         </div>
         <div style={{ width: '100%', height: '450px', borderRadius: '12px', overflow: 'hidden', border: '3px solid #B8860B', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
           <iframe 
