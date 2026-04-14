@@ -23,6 +23,10 @@ import LandingPage from './pages/LandingPage';
 import AttendanceReports from './pages/AttendanceReports';
 import AcademicCalendar from './pages/AcademicCalendar';
 import MobileMenu from './pages/MobileMenu';
+import PublicAdmission from './pages/PublicAdmission';
+import PublicFeesPayment from './pages/PublicFeesPayment';
+import Enquiries from './pages/Enquiries';
+import GalleryManagement from './pages/GalleryManagement';
 
 import { supabase } from './supabaseClient';
 
@@ -52,6 +56,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage isAuthenticated={isAuthenticated} />} />
+        <Route path="/admission" element={<PublicAdmission />} />
+        <Route path="/pay-fees" element={<PublicFeesPayment />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login setAuth={setIsAuthenticated} />} />
 
         {/* Protected Dashboard Area */}
@@ -81,6 +87,8 @@ function App() {
                     <Route path="/alerts" element={<AlertAudit />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/menu" element={<MobileMenu />} />
+                    <Route path="/enquiries" element={<Enquiries />} />
+                    <Route path="/gallery-management" element={<GalleryManagement />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                   </Routes>
                 </div>

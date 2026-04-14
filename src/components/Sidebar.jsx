@@ -33,6 +33,8 @@ const Sidebar = () => {
     { path: '/fee-reports', name: 'Fee Reports', icon: <FiDollarSign /> },
     { path: '/reports', name: 'Reports', icon: <FiBarChart2 /> },
     { path: '/settings', name: 'Settings', icon: <FiSettings /> },
+    { path: '/enquiries', name: 'Web Enquiries', icon: <FiBarChart2 /> },
+    { path: '/gallery-management', name: 'Gallery Management', icon: <FiLayers /> },
   ];
 
   return (
