@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { 
   FiLock, FiUser, FiFileText, FiDownload, FiCheckCircle, 
-  FiClock, FiLogOut, FiBookOpen, FiCreditCard, FiGrid, FiArrowRight 
+  FiClock, FiLogOut, FiBookOpen, FiCreditCard, FiGrid, FiArrowRight,
+  FiUpload, FiCamera, FiFile, FiExternalLink
 } from 'react-icons/fi';
 import './LandingPage.css';
 
@@ -23,6 +24,8 @@ const StudentPortal = () => {
   const [results, setResults] = useState([]);
   const [library, setLibrary] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [marksheetFile, setMarksheetFile] = useState(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem('student_session');
@@ -91,17 +94,46 @@ const StudentPortal = () => {
 
       if (err || !data) throw new Error('Verification failed. Use the ID and Phone provided during admission.');
 
-      // 2. Set password
+      // 2. Upload Files if provided
+      let photoUrl = data.photo;
+      let marksheetUrl = data.marksheet_url;
+
+      if (photoFile) {
+        const fileExt = photoFile.name.split('.').pop();
+        const fileName = `${data.id}_photo.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('gallery').upload(fileName, photoFile, { upsert: true });
+        if (uploadError) throw new Error('Photo upload failed: ' + uploadError.message);
+        const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
+        photoUrl = publicUrl.publicUrl;
+      }
+
+      if (marksheetFile) {
+        const fileExt = marksheetFile.name.split('.').pop();
+        const fileName = `${data.id}_marksheet.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('gallery').upload(fileName, marksheetFile, { upsert: true });
+        if (uploadError) throw new Error('Marksheet upload failed: ' + uploadError.message);
+        const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
+        marksheetUrl = publicUrl.publicUrl;
+      }
+
+      // 3. Update student record
       const { error: upError } = await supabase
         .from('students')
-        .update({ portal_password: password.trim(), portal_enabled: true })
+        .update({ 
+          portal_password: password.trim(), 
+          portal_enabled: true,
+          photo: photoUrl,
+          marksheet_url: marksheetUrl
+        })
         .eq('id', data.id);
 
       if (upError) throw upError;
 
-      alert('Account activated successfully! Please sign in.');
+      alert('Account activated successfully with your documents! Please sign in.');
       setAuthMode('login');
       setPassword('');
+      setPhotoFile(null);
+      setMarksheetFile(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -171,8 +203,27 @@ const StudentPortal = () => {
                  required
                />
 
+               {authMode === 'signup' && (
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', textAlign: 'left' }}>
+                    <div className="file-upload-box">
+                      <label style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>PROFILE PHOTO</label>
+                      <label className="portal-file-label">
+                        <FiCamera /> {photoFile ? 'Selected' : 'Choose...'}
+                        <input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files[0])} style={{ display: 'none' }} />
+                      </label>
+                    </div>
+                    <div className="file-upload-box">
+                      <label style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>MARKSHEET PDF</label>
+                      <label className="portal-file-label">
+                        <FiFile /> {marksheetFile ? 'Selected' : 'Choose...'}
+                        <input type="file" accept=".pdf,image/*" onChange={e => setMarksheetFile(e.target.files[0])} style={{ display: 'none' }} />
+                      </label>
+                    </div>
+                 </div>
+               )}
+
                <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
-                 {loading ? 'Processing...' : (authMode === 'login' ? 'Sign In' : 'Activate Account')}
+                 {loading ? 'Processing...' : (authMode === 'login' ? 'Sign In' : 'Upload & Activate')}
                </button>
             </form>
 
@@ -214,6 +265,7 @@ const StudentPortal = () => {
            <button onClick={() => setActiveTab('results')} className={`portal-nav-btn ${activeTab === 'results' ? 'active' : ''}`}><FiFileText /> Test Results</button>
            <button onClick={() => setActiveTab('library')} className={`portal-nav-btn ${activeTab === 'library' ? 'active' : ''}`}><FiBookOpen /> Digital Library</button>
            <button onClick={() => setActiveTab('payments')} className={`portal-nav-btn ${activeTab === 'payments' ? 'active' : ''}`}><FiCreditCard /> Payments</button>
+           <button onClick={() => setActiveTab('profile')} className={`portal-nav-btn ${activeTab === 'profile' ? 'active' : ''}`}><FiUser /> My Profile</button>
         </aside>
 
         {/* Main Panel */}
@@ -320,6 +372,41 @@ const StudentPortal = () => {
              </div>
            )}
 
+           {activeTab === 'profile' && (
+             <div className="animate-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                <div className="card-base" style={{ padding: '2.5rem', textAlign: 'center' }}>
+                   <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#F1F5F9', margin: '0 auto 1.5rem', overflow: 'hidden', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                      {student.photo ? <img src={student.photo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <FiUser size={50} color="#CBD5E1" style={{ marginTop: '30px' }} />}
+                   </div>
+                   <h2 style={{ color: '#1A237E', margin: '0 0 0.5rem 0' }}>{student.name}</h2>
+                   <p style={{ color: '#64748B', fontWeight: 600 }}>ID: {student.id}</p>
+                   
+                   <div style={{ textAlign: 'left', marginTop: '2rem', display: 'grid', gap: '1rem', borderTop: '1px solid #E2E8F0', paddingTop: '2rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                         <span style={{ color: '#64748B' }}>Standard</span>
+                         <span style={{ fontWeight: 600 }}>{student.standard}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                         <span style={{ color: '#64748B' }}>Phone number</span>
+                         <span style={{ fontWeight: 600 }}>{student.student_phone || student.parent_phone}</span>
+                      </div>
+                      <div style={{ padding: '1.5rem', backgroundColor: '#F8FAFC', borderRadius: '12px', marginTop: '1rem' }}>
+                         <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '0.75rem', fontWeight: 700 }}>VERIFIED DOCUMENTS</p>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <FiCheckCircle color="#10B981" />
+                            <span style={{ flex: 1, fontSize: '0.9rem' }}>Previous Marksheet</span>
+                            {student.marksheet_url ? (
+                               <a href={student.marksheet_url} target="_blank" rel="noreferrer" style={{ color: '#B8860B', fontWeight: 700, fontSize: '0.8rem' }}>VIEW <FiExternalLink /></a>
+                            ) : (
+                               <span style={{ color: '#EF4444', fontSize: '0.8rem' }}>Missing</span>
+                            )}
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+           )}
+
         </main>
       </div>
 
@@ -359,6 +446,23 @@ const StudentPortal = () => {
         .portal-nav-btn.active {
           background-color: #1A237E;
           color: white;
+        }
+        .portal-file-label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.75rem;
+          background: #F1F5F9;
+          border: 1px dashed #CBD5E1;
+          border-radius: 8px;
+          font-size: 0.8rem;
+          color: #1A237E;
+          cursor: pointer;
+          font-weight: 600;
+          justify-content: center;
+        }
+        .portal-file-label:hover {
+          background: #E2E8F0;
         }
       `}</style>
     </div>
