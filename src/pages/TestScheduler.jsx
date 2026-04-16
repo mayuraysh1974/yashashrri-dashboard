@@ -200,47 +200,67 @@ const TestScheduler = () => {
              <p>Loading scheduled tests...</p>
         ) : tests.length === 0 ? (
           <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No tests scheduled yet. Click 'New Test' to create one.</p>
-        ) : tests.map(test => (
-          <div key={test.id} className="card-base" style={{ padding: '2rem', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
-               <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%' }} onClick={() => sendTestAlert(test)} title="Send Alert">
-                 <FiBell size={14} color="var(--primary-blue)" />
-               </button>
-               <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%' }} onClick={() => openEditModal(test)} title="Edit Test">
-                 <FiEdit2 size={14} color="var(--primary-blue)" />
-               </button>
-               <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%', color: '#EF4444' }} onClick={() => handleDeleteTest(test.id)} title="Delete Test">
-                 <FiTrash2 size={14} />
-               </button>
-            </div>
-            
-            <div style={{ marginBottom: '1.5rem' }}>
-               <h3 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)', marginBottom: '0.25rem' }}>{test.name}</h3>
-               <p style={{ color: 'var(--accent-gold)', fontWeight: 700, fontSize: '0.9rem' }}><FiCalendar /> {test.date}</p>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', backgroundColor: 'var(--bg-main)', padding: '1rem', borderRadius: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                <FiBook /> {test.subject}
+        ) : tests.map(test => {
+          const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
+          return (
+            <div key={test.id} className="card-base" style={{ padding: '2rem', position: 'relative', display: 'flex', flexDirection: 'column', borderTop: `6px solid ${isPast ? '#94A3B8' : '#B8860B'}`, transition: 'transform 0.2s', cursor: 'default' }}>
+              <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem' }}>
+                 <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'white' }} onClick={() => sendTestAlert(test)} title="Send Alert">
+                   <FiBell size={14} color="#1A237E" />
+                 </button>
+                 <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'white' }} onClick={() => openEditModal(test)} title="Edit Test">
+                   <FiEdit2 size={14} color="#1A237E" />
+                 </button>
+                 <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #FEE2E2', background: 'white', color: '#EF4444' }} onClick={() => handleDeleteTest(test.id)} title="Delete Test">
+                   <FiTrash2 size={14} />
+                 </button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                <FiUsers /> For: {(test.standards || [test.standard]).join(', ')}
-              </div>
-               <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Max Score: <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{test.total_marks || test.totalMarks}</span></div>
-               {test.solution_url && (
-                 <div style={{ marginTop: '0.5rem' }}>
-                   <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                     <FiBook /> View Solution PDF
-                   </a>
+              
+              <div style={{ marginBottom: '1.25rem' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : '#FFF9E6', color: isPast ? '#64748B' : '#B8860B' }}>
+                      {isPast ? 'COMPLETED' : 'UPCOMING'}
+                    </span>
                  </div>
-               )}
-             </div>
+                 <h3 style={{ fontSize: '1.35rem', color: '#1A237E', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>{test.name}</h3>
+                 <p style={{ color: '#64748B', fontWeight: 600, fontSize: '0.85rem', marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                   <FiCalendar color="#B8860B" /> {new Date(test.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                 </p>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                 <div style={{ backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
+                    <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', margin: '0 0 0.25rem 0' }}>Subject</p>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A237E', margin: 0 }}>{test.subject}</p>
+                 </div>
+                 <div style={{ backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
+                    <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', margin: '0 0 0.25rem 0' }}>Marks</p>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A237E', margin: 0 }}>{test.total_marks || test.totalMarks}</p>
+                 </div>
+              </div>
 
-            <button className="btn-secondary" style={{ width: '100%', marginTop: 'auto' }} onClick={() => openResultEntry(test)}>
-              <FiCheckCircle /> Record Marks
-            </button>
-          </div>
-        ))}
+              <div style={{ marginBottom: '2rem' }}>
+                 <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Assigned To</p>
+                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {(test.standards || [test.standard]).map(std => (
+                       <span key={std} style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', backgroundColor: '#EFF6FF', color: '#1E40AF', borderRadius: '6px' }}>{std}</span>
+                    ))}
+                 </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: test.solution_url ? '1fr 1fr' : '1fr', gap: '1rem' }}>
+                 {test.solution_url && (
+                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                       <FiBook /> Solution
+                    </a>
+                 )}
+                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem', background: '#1A237E' }} onClick={() => openResultEntry(test)}>
+                    <FiCheckCircle /> Record Marks
+                 </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {showModal && (
@@ -265,23 +285,41 @@ const TestScheduler = () => {
             </div>
 
             <div className="input-group">
-                <label>Target standards (Select multiple if applicable)</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  {standards.map(s => (
-                    <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={formData.standards.includes(s.standard)} 
-                        onChange={(e) => {
-                          const newStandards = e.target.checked 
-                            ? [...formData.standards, s.standard]
-                            : formData.standards.filter(item => item !== s.standard);
+                <label>Target Standards (Select all that apply)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+                  {standards.map(s => {
+                    const isSelected = formData.standards.includes(s.standard);
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          const newStandards = isSelected 
+                            ? formData.standards.filter(item => item !== s.standard)
+                            : [...formData.standards, s.standard];
                           setFormData({...formData, standards: newStandards});
-                        }} 
-                      />
-                      {s.standard}
-                    </label>
-                  ))}
+                        }}
+                        style={{
+                          padding: '0.75rem 0.5rem',
+                          borderRadius: '12px',
+                          border: isSelected ? '2px solid #B8860B' : '1px solid #CBD5E1',
+                          backgroundColor: isSelected ? '#FFF9E6' : 'white',
+                          color: isSelected ? '#B8860B' : '#64748B',
+                          fontSize: '0.85rem',
+                          fontWeight: isSelected ? 700 : 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.4rem'
+                        }}
+                      >
+                        {isSelected ? <FiCheckCircle size={14} /> : null}
+                        {s.standard}
+                      </button>
+                    );
+                  })}
                 </div>
             </div>
 
