@@ -11,7 +11,8 @@ const TestScheduler = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [activeTest, setActiveTest] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
-  const [formData, setFormData] = useState({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+  const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+  const [subjectSearch, setSubjectSearch] = useState('');
   const [solutionFile, setSolutionFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -39,8 +40,8 @@ const TestScheduler = () => {
     setSubjects(data || []);
   };
   const handleCreateTest = async () => {
-    if (!formData.name || formData.standards.length === 0 || !formData.subject) {
-      return alert('Please fill in Test Name, Subject, and select at least one Standard.');
+    if (!formData.name || !formData.standard || formData.subjects.length === 0) {
+      return alert('Please fill in Test Name, Standard, and select at least one Subject.');
     }
 
     setUploading(true);
@@ -69,8 +70,8 @@ const TestScheduler = () => {
 
     const testData = {
       name: formData.name,
-      subject: formData.subject,
-      standards: formData.standards,
+      subjects: formData.subjects,
+      standard: formData.standard,
       total_marks: formData.totalMarks,
       date: formData.date
     };
@@ -94,7 +95,7 @@ const TestScheduler = () => {
       setShowModal(false);
       setEditMode(false);
       setActiveTestId(null);
-      setFormData({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+      setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
       setSolutionFile(null);
       fetchTests();
     } else {
@@ -118,8 +119,8 @@ const TestScheduler = () => {
     setActiveTestId(test.id);
     setFormData({
       name: test.name,
-      subject: test.subject,
-      standards: test.standards || [test.standard],
+      subjects: Array.isArray(test.subjects) ? test.subjects : [test.subject],
+      standard: test.standard || (test.standards ? test.standards[0] : ''),
       totalMarks: test.total_marks || test.totalMarks,
       date: test.date
     });
@@ -152,14 +153,28 @@ const TestScheduler = () => {
 
   const openResultEntry = async (test) => {
     setActiveTest(test);
-    // Fetch students from all standards associated with this test
-    const { data: allStudents } = await supabase.from('students').select('*').in('standard', test.standards || [test.standard]);
-    const standardStudents = allStudents || [];
+    
+    // 1. Fetch all students for the standard
+    const { data: stdStudents } = await supabase
+      .from('students')
+      .select('*, student_subjects(subject_id)')
+      .eq('standard', test.standard || (test.standards ? test.standards[0] : ''));
+
+    const testSubjects = Array.isArray(test.subjects) ? test.subjects : [test.subject];
+
+    // 2. Filter students who have opted for ANY of the test subjects
+    const enrolledStudents = (stdStudents || []).filter(s => {
+      const studentSubs = s.student_subjects?.map(ss => {
+        const sub = subjects.find(sub => sub.id === ss.subject_id);
+        return sub ? sub.name : null;
+      }) || [];
+      return studentSubs.some(subName => testSubjects.includes(subName));
+    });
 
     const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
     const existing = existingResults || [];
 
-    const resultState = standardStudents.map(s => {
+    const resultState = enrolledStudents.map(s => {
       const found = existing.find(r => r.student_id === s.id);
       return { studentId: s.id, studentName: s.name, standard: s.standard, score: found ? found.score : '' };
     });
@@ -190,7 +205,7 @@ const TestScheduler = () => {
           <h1 className="page-title">Test Scheduler & Alerts</h1>
           <p className="page-subtitle">Manage upcoming exams and notify students/parents of schedules</p>
         </div>
-        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
+        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
           <FiPlus /> New Test
         </button>
       </div>
@@ -228,24 +243,24 @@ const TestScheduler = () => {
                  </p>
               </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                 <div style={{ backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
-                    <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', margin: '0 0 0.25rem 0' }}>Subject</p>
-                    <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A237E', margin: 0 }}>{test.subject}</p>
-                 </div>
-                 <div style={{ backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '10px' }}>
-                    <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', margin: '0 0 0.25rem 0' }}>Marks</p>
-                    <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A237E', margin: 0 }}>{test.total_marks || test.totalMarks}</p>
-                 </div>
-              </div>
-
-              <div style={{ marginBottom: '2rem' }}>
-                 <p style={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Assigned To</p>
-                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                    {(test.standards || [test.standard]).map(std => (
-                       <span key={std} style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0.2rem 0.6rem', backgroundColor: '#EFF6FF', color: '#1E40AF', borderRadius: '6px' }}>{std}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', backgroundColor: '#F8FAFC', padding: '1rem', borderRadius: '12px' }}>
+                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
+                    <FiBook size={12} color="#64748B" />
+                    {(Array.isArray(test.subjects) ? test.subjects : [test.subject]).map(sub => (
+                       <span key={sub} style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A237E' }}>{sub}</span>
                     ))}
                  </div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748B' }}>
+                    <FiUsers size={12} /> {test.standard || (Array.isArray(test.standards) ? test.standards[0] : 'N/A')}
+                 </div>
+                 <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Max Score: <span style={{ color: '#1A237E', fontWeight: 800 }}>{test.total_marks || test.totalMarks}</span></div>
+                 {test.solution_url && (
+                    <div style={{ marginTop: '0.4rem' }}>
+                       <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#B8860B', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <FiBook /> View Solution PDF
+                       </a>
+                    </div>
+                 )}
               </div>
 
               <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: test.solution_url ? '1fr 1fr' : '1fr', gap: '1rem' }}>
@@ -276,62 +291,68 @@ const TestScheduler = () => {
               <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Unit Test 1" />
             </div>
 
-            <div className="input-group">
-                <label>Subject</label>
-                <select value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})}>
-                  <option value="">Select subject</option>
-                  {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
-                </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div className="input-group">
+                  <label>Target Class (Standard)</label>
+                  <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})}>
+                    <option value="">Select standard...</option>
+                    {standards.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                  </select>
+              </div>
+              <div className="input-group">
+                <label>Total Marks</label>
+                <input type="number" value={formData.totalMarks} onChange={e => setFormData({...formData, totalMarks: Number(e.target.value)})} />
+              </div>
             </div>
 
             <div className="input-group">
-                <label>Target Standards (Select all that apply)</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
-                  {standards.map(s => {
-                    const isSelected = formData.standards.includes(s.standard);
+                <label>Subject(s) Selection</label>
+                <div style={{ marginBottom: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Search subjects..." 
+                    style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid #E2E8F0', width: '100%', fontSize: '0.8rem' }}
+                    value={subjectSearch}
+                    onChange={e => setSubjectSearch(e.target.value)}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.5rem', backgroundColor: '#F8FAFC', borderRadius: '12px' }}>
+                  {subjects.filter(s => s.name.toLowerCase().includes(subjectSearch.toLowerCase())).map(s => {
+                    const isSelected = formData.subjects.includes(s.name);
                     return (
                       <button
                         key={s.id}
                         type="button"
                         onClick={() => {
-                          const newStandards = isSelected 
-                            ? formData.standards.filter(item => item !== s.standard)
-                            : [...formData.standards, s.standard];
-                          setFormData({...formData, standards: newStandards});
+                          const newSubjects = isSelected 
+                            ? formData.subjects.filter(item => item !== s.name)
+                            : [...formData.subjects, s.name];
+                          setFormData({...formData, subjects: newSubjects});
                         }}
                         style={{
-                          padding: '0.75rem 0.5rem',
-                          borderRadius: '12px',
+                          padding: '0.5rem',
+                          borderRadius: '8px',
                           border: isSelected ? '2px solid #B8860B' : '1px solid #CBD5E1',
                           backgroundColor: isSelected ? '#FFF9E6' : 'white',
                           color: isSelected ? '#B8860B' : '#64748B',
-                          fontSize: '0.85rem',
-                          fontWeight: isSelected ? 700 : 500,
+                          fontSize: '0.75rem',
+                          fontWeight: 700,
                           cursor: 'pointer',
-                          transition: 'all 0.2s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.4rem'
+                          transition: 'all 0.2s'
                         }}
                       >
-                        {isSelected ? <FiCheckCircle size={14} /> : null}
-                        {s.standard}
+                        {s.name}
                       </button>
                     );
                   })}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
-               <div className="input-group">
-                 <label>Total Marks</label>
-                 <input type="number" value={formData.totalMarks} onChange={e => setFormData({...formData, totalMarks: Number(e.target.value)})} />
-               </div>
-               <div className="input-group">
-                 <label>Test Date</label>
-                 <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
-               </div>
+             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
+                <div className="input-group">
+                  <label>Test Date</label>
+                  <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+                </div>
              </div>
 
              <div className="input-group" style={{ marginBottom: '2rem' }}>
