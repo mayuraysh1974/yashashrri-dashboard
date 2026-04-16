@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 
 const TestScheduler = () => {
@@ -14,6 +14,8 @@ const TestScheduler = () => {
   const [formData, setFormData] = useState({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
   const [solutionFile, setSolutionFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [activeTestId, setActiveTestId] = useState(null);
 
   useEffect(() => {
     fetchTests();
@@ -36,7 +38,6 @@ const TestScheduler = () => {
     const { data } = await supabase.from('subjects').select('*').order('name', { ascending: true });
     setSubjects(data || []);
   };
-
   const handleCreateTest = async () => {
     if (!formData.name || formData.standards.length === 0 || !formData.subject) {
       return alert('Please fill in Test Name, Subject, and select at least one Standard.');
@@ -50,7 +51,7 @@ const TestScheduler = () => {
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `test_solutions/${fileName}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('solutions')
         .upload(filePath, solutionFile);
 
@@ -66,24 +67,64 @@ const TestScheduler = () => {
       solutionUrl = publicUrl;
     }
 
-    const { error } = await supabase.from('tests').insert({
+    const testData = {
       name: formData.name,
       subject: formData.subject,
       standards: formData.standards,
       total_marks: formData.totalMarks,
-      date: formData.date,
-      solution_url: solutionUrl
-    });
+      date: formData.date
+    };
+
+    if (solutionUrl) {
+      testData.solution_url = solutionUrl;
+    }
+
+    let error;
+    if (editMode && activeTestId) {
+      const { error: err } = await supabase.from('tests').update(testData).eq('id', activeTestId);
+      error = err;
+    } else {
+      const { error: err } = await supabase.from('tests').insert(testData);
+      error = err;
+    }
 
     setUploading(false);
+    
     if (!error) {
       setShowModal(false);
+      setEditMode(false);
+      setActiveTestId(null);
       setFormData({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
       setSolutionFile(null);
       fetchTests();
     } else {
-      alert('Failed to create test: ' + error.message);
+      alert('Action failed: ' + error.message);
     }
+  };
+
+  const handleDeleteTest = async (testId) => {
+    if (!window.confirm('Are you sure you want to delete this test? This will also remove all recorded marks for this test.')) return;
+    
+    const { error } = await supabase.from('tests').delete().eq('id', testId);
+    if (!error) {
+      fetchTests();
+    } else {
+      alert('Delete failed: ' + error.message);
+    }
+  };
+
+  const openEditModal = (test) => {
+    setActiveTest(test);
+    setActiveTestId(test.id);
+    setFormData({
+      name: test.name,
+      subject: test.subject,
+      standards: test.standards || [test.standard],
+      totalMarks: test.total_marks || test.totalMarks,
+      date: test.date
+    });
+    setEditMode(true);
+    setShowModal(true);
   };
 
   const sendTestAlert = async (test) => {
@@ -149,7 +190,7 @@ const TestScheduler = () => {
           <h1 className="page-title">Test Scheduler & Alerts</h1>
           <p className="page-subtitle">Manage upcoming exams and notify students/parents of schedules</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
           <FiPlus /> New Test
         </button>
       </div>
@@ -161,9 +202,15 @@ const TestScheduler = () => {
           <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No tests scheduled yet. Click 'New Test' to create one.</p>
         ) : tests.map(test => (
           <div key={test.id} className="card-base" style={{ padding: '2rem', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+            <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
                <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%' }} onClick={() => sendTestAlert(test)} title="Send Alert">
                  <FiBell size={14} color="var(--primary-blue)" />
+               </button>
+               <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%' }} onClick={() => openEditModal(test)} title="Edit Test">
+                 <FiEdit2 size={14} color="var(--primary-blue)" />
+               </button>
+               <button className="btn-secondary" style={{ padding: '0.4rem', border: '1px solid var(--border-color)', borderRadius: '50%', color: '#EF4444' }} onClick={() => handleDeleteTest(test.id)} title="Delete Test">
+                 <FiTrash2 size={14} />
                </button>
             </div>
             
@@ -199,9 +246,9 @@ const TestScheduler = () => {
       {showModal && (
         <div className="modal-overlay">
           <div className="card-base" style={{ width: '100%', maxWidth: '500px', padding: '2rem', borderTop: '4px solid var(--accent-gold)', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-blue)' }}>Schedule New Test</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+              <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-blue)' }}>{editMode ? 'Edit Scheduled Test' : 'Schedule New Test'}</h2>
+              <button onClick={() => { setShowModal(false); setEditMode(false); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><FiX size={24} /></button>
             </div>
             
             <div className="input-group">
@@ -258,9 +305,9 @@ const TestScheduler = () => {
              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                <button className="btn-secondary" onClick={() => setShowModal(false)} disabled={uploading}>Cancel</button>
                <button className="btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={handleCreateTest} disabled={uploading}>
-                 {uploading ? 'Creating Test...' : 'Create Test'}
-               </button>
-             </div>
+                 {uploading ? 'Processing...' : (editMode ? 'Update Test Schedule' : 'Schedule Test')}
+              </button>
+            </div>
           </div>
         </div>
       )}
