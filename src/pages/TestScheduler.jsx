@@ -391,7 +391,7 @@ const TestScheduler = () => {
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Record Marks: {activeTest?.name}</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{(activeTest?.standards || [activeTest?.standard]).join(', ')} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
+                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard || (activeTest?.standards ? activeTest.standards[0] : 'N/A')} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
               </div>
               <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
             </div>
@@ -401,15 +401,13 @@ const TestScheduler = () => {
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
                     <th style={{ padding: '0.75rem', fontSize: '0.85rem' }}>Student Name</th>
-                    <th style={{ padding: '0.75rem', fontSize: '0.85rem' }}>Class</th>
                     <th style={{ padding: '0.75rem', fontSize: '0.85rem', textAlign: 'right' }}>Score Obtained</th>
                   </tr>
                 </thead>
                 <tbody>
                   {studentResults.map((res, index) => (
                     <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                      <td style={{ padding: '0.75rem', fontSize: '0.9rem' }}>{res.studentName}</td>
-                      <td style={{ padding: '0.75rem', fontSize: '0.9rem', color: '#64748B' }}>{res.standard}</td>
+                      <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>{res.studentName}</td>
                       <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                         <input 
                           type="text" 
