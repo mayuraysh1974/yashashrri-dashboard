@@ -51,6 +51,7 @@ const LandingPage = ({ isAuthenticated }) => {
           <a href="#contact">Contact</a>
           <Link to="/admission" style={{ fontWeight: 'bold', color: '#B8860B' }}>Online Admission</Link>
           <Link to="/pay-fees" style={{ fontWeight: 'bold', color: '#B8860B' }}>Pay Fees</Link>
+          <Link to="/results" style={{ fontWeight: 'bold', color: '#B8860B' }}>Test Results</Link>
         </div>
         <div className="nav-actions">
           {isAuthenticated && (
@@ -285,6 +286,7 @@ const LandingPage = ({ isAuthenticated }) => {
             <a href="#gallery">Gallery</a>
             <Link to="/admission">Online Admission</Link>
             <Link to="/pay-fees">Pay Fees Online</Link>
+            <Link to="/results">Check Test Results</Link>
             <Link to="/login" style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.9rem' }}>Staff Portal (Admin)</Link>
           </div>
           <div className="footer-contact">

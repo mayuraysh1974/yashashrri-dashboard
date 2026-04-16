@@ -11,7 +11,9 @@ const TestScheduler = () => {
   const [showResultModal, setShowResultModal] = useState(false);
   const [activeTest, setActiveTest] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
-  const [formData, setFormData] = useState({ name: '', subject: '', standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+  const [formData, setFormData] = useState({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+  const [solutionFile, setSolutionFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchTests();
@@ -36,19 +38,48 @@ const TestScheduler = () => {
   };
 
   const handleCreateTest = async () => {
-    if (!formData.name || !formData.standard || !formData.subject) {
-      return alert('Please fill in Test Name, Subject, and Standard.');
+    if (!formData.name || formData.standards.length === 0 || !formData.subject) {
+      return alert('Please fill in Test Name, Subject, and select at least one Standard.');
     }
+
+    setUploading(true);
+    let solutionUrl = '';
+
+    if (solutionFile) {
+      const fileExt = solutionFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `test_solutions/${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('solutions')
+        .upload(filePath, solutionFile);
+
+      if (uploadError) {
+        setUploading(false);
+        return alert('Error uploading solution: ' + uploadError.message);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('solutions')
+        .getPublicUrl(filePath);
+      
+      solutionUrl = publicUrl;
+    }
+
     const { error } = await supabase.from('tests').insert({
       name: formData.name,
       subject: formData.subject,
-      standard: formData.standard,
+      standards: formData.standards,
       total_marks: formData.totalMarks,
-      date: formData.date
+      date: formData.date,
+      solution_url: solutionUrl
     });
+
+    setUploading(false);
     if (!error) {
       setShowModal(false);
-      setFormData({ name: '', subject: '', standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+      setFormData({ name: '', subject: '', standards: [], totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+      setSolutionFile(null);
       fetchTests();
     } else {
       alert('Failed to create test: ' + error.message);
@@ -56,10 +87,10 @@ const TestScheduler = () => {
   };
 
   const sendTestAlert = async (test) => {
-    const { data: allStudents } = await supabase.from('students').select('*').eq('standard', test.standard);
+    const { data: allStudents } = await supabase.from('students').select('*').in('standard', test.standards || [test.standard]);
     const targetStudents = allStudents || [];
 
-    if (targetStudents.length === 0) return alert('No students found in this standard to notify.');
+    if (targetStudents.length === 0) return alert('No students found in selected standards to notify.');
     if (!window.confirm(`Log test alerts for ${targetStudents.length} students/parents?`)) return;
 
     for (const student of targetStudents) {
@@ -74,23 +105,14 @@ const TestScheduler = () => {
           status: 'Simulated'
         });
       }
-      if (student.student_phone || student.studentPhone) {
-        await supabase.from('message_log').insert({
-          student_id: student.id,
-          student_name: student.name,
-          recipient: student.student_phone || student.studentPhone,
-          message,
-          type: 'SMS',
-          status: 'Simulated'
-        });
-      }
     }
     alert('Test schedule alerts logged successfully.');
   };
 
   const openResultEntry = async (test) => {
     setActiveTest(test);
-    const { data: allStudents } = await supabase.from('students').select('*').eq('standard', test.standard);
+    // Fetch students from all standards associated with this test
+    const { data: allStudents } = await supabase.from('students').select('*').in('standard', test.standards || [test.standard]);
     const standardStudents = allStudents || [];
 
     const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
@@ -98,7 +120,7 @@ const TestScheduler = () => {
 
     const resultState = standardStudents.map(s => {
       const found = existing.find(r => r.student_id === s.id);
-      return { studentId: s.id, studentName: s.name, score: found ? found.score : '' };
+      return { studentId: s.id, studentName: s.name, standard: s.standard, score: found ? found.score : '' };
     });
 
     setStudentResults(resultState);
@@ -155,10 +177,17 @@ const TestScheduler = () => {
                 <FiBook /> {test.subject}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                <FiUsers /> For {test.standard}
+                <FiUsers /> For: {(test.standards || [test.standard]).join(', ')}
               </div>
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Max Score: <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{test.total_marks || test.totalMarks}</span></div>
-            </div>
+               <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Max Score: <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{test.total_marks || test.totalMarks}</span></div>
+               {test.solution_url && (
+                 <div style={{ marginTop: '0.5rem' }}>
+                   <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', textDecoration: 'none', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                     <FiBook /> View Solution PDF
+                   </a>
+                 </div>
+               )}
+             </div>
 
             <button className="btn-secondary" style={{ width: '100%', marginTop: 'auto' }} onClick={() => openResultEntry(test)}>
               <FiCheckCircle /> Record Marks
@@ -169,7 +198,7 @@ const TestScheduler = () => {
 
       {showModal && (
         <div className="modal-overlay">
-          <div className="card-base" style={{ width: '100%', maxWidth: '450px', padding: '2rem', borderTop: '4px solid var(--accent-gold)' }}>
+          <div className="card-base" style={{ width: '100%', maxWidth: '500px', padding: '2rem', borderTop: '4px solid var(--accent-gold)', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <h2 style={{ fontSize: '1.5rem', color: 'var(--primary-blue)' }}>Schedule New Test</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
@@ -180,38 +209,58 @@ const TestScheduler = () => {
               <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Unit Test 1" />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-              <div className="input-group">
+            <div className="input-group">
                 <label>Subject</label>
                 <select value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})}>
                   <option value="">Select subject</option>
                   {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
                 </select>
-              </div>
-              <div className="input-group">
-                <label>Standard</label>
-                <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})}>
-                  <option value="">Select standard</option>
-                  {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
-                </select>
-              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-              <div className="input-group">
-                <label>Total Marks</label>
-                <input type="number" value={formData.totalMarks} onChange={e => setFormData({...formData, totalMarks: Number(e.target.value)})} />
-              </div>
-              <div className="input-group">
-                <label>Test Date</label>
-                <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
-              </div>
+            <div className="input-group">
+                <label>Target standards (Select multiple if applicable)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  {standards.map(s => (
+                    <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={formData.standards.includes(s.standard)} 
+                        onChange={(e) => {
+                          const newStandards = e.target.checked 
+                            ? [...formData.standards, s.standard]
+                            : formData.standards.filter(item => item !== s.standard);
+                          setFormData({...formData, standards: newStandards});
+                        }} 
+                      />
+                      {s.standard}
+                    </label>
+                  ))}
+                </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={handleCreateTest}>Create Test</button>
-            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
+               <div className="input-group">
+                 <label>Total Marks</label>
+                 <input type="number" value={formData.totalMarks} onChange={e => setFormData({...formData, totalMarks: Number(e.target.value)})} />
+               </div>
+               <div className="input-group">
+                 <label>Test Date</label>
+                 <input type="date" value={formData.date} onChange={e => setFormData({...formData, date: e.target.value})} />
+               </div>
+             </div>
+
+             <div className="input-group" style={{ marginBottom: '2rem' }}>
+               <label>Solution PDF (Optional)</label>
+               <input type="file" accept="application/pdf" onChange={e => setSolutionFile(e.target.files[0])} style={{ padding: '0.5rem' }} />
+               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Upload solution for students to access online.</p>
+             </div>
+
+             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+               <button className="btn-secondary" onClick={() => setShowModal(false)} disabled={uploading}>Cancel</button>
+               <button className="btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={handleCreateTest} disabled={uploading}>
+                 {uploading ? 'Creating Test...' : 'Create Test'}
+               </button>
+             </div>
           </div>
         </div>
       )}
@@ -222,7 +271,7 @@ const TestScheduler = () => {
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Record Marks: {activeTest?.name}</h2>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{(activeTest?.standards || [activeTest?.standard]).join(', ')} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
               </div>
               <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
             </div>
@@ -232,6 +281,7 @@ const TestScheduler = () => {
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
                     <th style={{ padding: '0.75rem', fontSize: '0.85rem' }}>Student Name</th>
+                    <th style={{ padding: '0.75rem', fontSize: '0.85rem' }}>Class</th>
                     <th style={{ padding: '0.75rem', fontSize: '0.85rem', textAlign: 'right' }}>Score Obtained</th>
                   </tr>
                 </thead>
@@ -239,6 +289,7 @@ const TestScheduler = () => {
                   {studentResults.map((res, index) => (
                     <tr key={res.studentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>{res.studentName}</td>
+                      <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{res.standard}</td>
                       <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                         <input 
                           type="number" 
@@ -249,7 +300,7 @@ const TestScheduler = () => {
                              newList[index].score = Number(e.target.value);
                              setStudentResults(newList);
                           }}
-                          style={{ width: '100px', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', textAlign: 'center' }}
+                          style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', textAlign: 'center' }}
                         />
                       </td>
                     </tr>
