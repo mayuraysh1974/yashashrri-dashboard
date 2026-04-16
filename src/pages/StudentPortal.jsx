@@ -123,7 +123,6 @@ const StudentPortal = () => {
     setPayments([]);
   };
 
-  if (isAuthLoading) return null;
 
   if (!student) {
     return (
