@@ -70,6 +70,7 @@ const TestScheduler = () => {
 
     const testData = {
       name: formData.name,
+      subject: formData.subjects[0], // Keep for backward compatibility
       subjects: formData.subjects,
       standard: formData.standard,
       total_marks: formData.totalMarks,
