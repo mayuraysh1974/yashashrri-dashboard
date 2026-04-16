@@ -10,7 +10,6 @@ import './LandingPage.css';
 const StudentPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [student, setStudent] = useState(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [authMode, setAuthMode] = useState('login'); // 'login', 'signup'
   
   // Login States
@@ -32,7 +31,6 @@ const StudentPortal = () => {
       setStudent(data);
       fetchAllData(data);
     }
-    setIsAuthLoading(false);
   }, []);
 
   const fetchAllData = async (studentData) => {
@@ -131,7 +129,7 @@ const StudentPortal = () => {
     return (
       <div className="landing-container" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1A237E 0%, #0D47A1 100%)', display: 'flex', flexDirection: 'column' }}>
         <nav className="landing-nav" style={{ background: 'transparent', border: 'none' }}>
-           <img src="/logo.png" style={{ height: '60px', filter: 'brightness(0) invert(1)' }} alt="Logo" />
+           <img src="/logo.png" style={{ height: '60px' }} alt="Logo" />
            <Link to="/" style={{ color: 'white', fontWeight: 600 }}>Back Home</Link>
         </nav>
         
