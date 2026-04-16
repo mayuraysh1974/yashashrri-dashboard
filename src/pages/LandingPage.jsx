@@ -51,7 +51,7 @@ const LandingPage = ({ isAuthenticated }) => {
           <a href="#contact">Contact</a>
           <Link to="/admission" style={{ fontWeight: 'bold', color: '#B8860B' }}>Online Admission</Link>
           <Link to="/pay-fees" style={{ fontWeight: 'bold', color: '#B8860B' }}>Pay Fees</Link>
-          <Link to="/results" style={{ fontWeight: 'bold', color: '#B8860B' }}>Test Results</Link>
+          <Link to="/portal" style={{ fontWeight: 'bold', color: '#B8860B' }}>Student Portal</Link>
         </div>
         <div className="nav-actions">
           {isAuthenticated && (
@@ -67,6 +67,7 @@ const LandingPage = ({ isAuthenticated }) => {
           <p>Join Yashashrri Classes for a transformative educational experience that combines traditional excellence with modern innovation since 1999.</p>
           <div className="hero-cta" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <button className="cta-primary" onClick={() => document.getElementById('enquiry').scrollIntoView({ behavior: 'smooth' })}>Enquire Now</button>
+            <Link to="/portal" className="cta-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1A237E', color: 'white', border: 'none' }}>Student Portal</Link>
             <Link to="/admission" className="cta-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Apply Online</Link>
           </div>
         </div>
@@ -286,7 +287,7 @@ const LandingPage = ({ isAuthenticated }) => {
             <a href="#gallery">Gallery</a>
             <Link to="/admission">Online Admission</Link>
             <Link to="/pay-fees">Pay Fees Online</Link>
-            <Link to="/results">Check Test Results</Link>
+            <Link to="/portal">Student Portal</Link>
             <Link to="/login" style={{ marginTop: '1rem', color: '#64748b', fontSize: '0.9rem' }}>Staff Portal (Admin)</Link>
           </div>
           <div className="footer-contact">

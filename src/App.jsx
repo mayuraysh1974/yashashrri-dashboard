@@ -27,7 +27,7 @@ import PublicAdmission from './pages/PublicAdmission';
 import PublicFeesPayment from './pages/PublicFeesPayment';
 import Enquiries from './pages/Enquiries';
 import GalleryManagement from './pages/GalleryManagement';
-import PublicResults from './pages/PublicResults';
+import StudentPortal from './pages/StudentPortal';
 
 import { supabase } from './supabaseClient';
 
@@ -59,7 +59,8 @@ function App() {
         <Route path="/" element={<LandingPage isAuthenticated={isAuthenticated} />} />
         <Route path="/admission" element={<PublicAdmission />} />
         <Route path="/pay-fees" element={<PublicFeesPayment />} />
-        <Route path="/results" element={<PublicResults />} />
+        <Route path="/portal" element={<StudentPortal />} />
+        <Route path="/results" element={<Navigate to="/portal" />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login setAuth={setIsAuthenticated} />} />
 
         {/* Protected Dashboard Area */}
