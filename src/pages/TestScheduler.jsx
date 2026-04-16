@@ -296,7 +296,7 @@ const TestScheduler = () => {
                   <label>Target Class (Standard)</label>
                   <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})}>
                     <option value="">Select standard...</option>
-                    {standards.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                    {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
                   </select>
               </div>
               <div className="input-group">
