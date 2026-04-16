@@ -177,7 +177,12 @@ const TestScheduler = () => {
 
     const resultState = enrolledStudents.map(s => {
       const found = existing.find(r => r.student_id === s.id);
-      return { studentId: s.id, studentName: s.name, standard: s.standard, score: found ? found.score : '' };
+      return { 
+        studentId: s.id, 
+        studentName: s.name, 
+        standard: s.standard, 
+        score: found ? (found.score === -1 ? 'Ab' : found.score) : '' 
+      };
     });
 
     setStudentResults(resultState);
@@ -187,7 +192,15 @@ const TestScheduler = () => {
   const handleSaveResults = async () => {
     const upserts = studentResults
       .filter(r => r.score !== '')
-      .map(r => ({ test_id: activeTest.id, student_id: r.studentId, score: Number(r.score) }));
+      .map(r => {
+        let numericScore;
+        if (typeof r.score === 'string' && (r.score.toLowerCase() === 'ab' || r.score.toLowerCase() === 'a')) {
+          numericScore = -1; // -1 represents Absent
+        } else {
+          numericScore = Number(r.score);
+        }
+        return { test_id: activeTest.id, student_id: r.studentId, score: numericScore };
+      });
 
     if (upserts.length === 0) return alert('No marks entered.');
     const { error } = await supabase.from('test_results').upsert(upserts, { onConflict: 'test_id,student_id' });
@@ -270,7 +283,7 @@ const TestScheduler = () => {
                        <FiBook /> Solution
                     </a>
                  )}
-                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem', background: '#1A237E' }} onClick={() => openResultEntry(test)}>
+                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem', background: '#1A237E', color: 'white', border: 'none' }} onClick={() => openResultEntry(test)}>
                     <FiCheckCircle /> Record Marks
                  </button>
               </div>
@@ -394,20 +407,20 @@ const TestScheduler = () => {
                 </thead>
                 <tbody>
                   {studentResults.map((res, index) => (
-                    <tr key={res.studentId} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>{res.studentName}</td>
-                      <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{res.standard}</td>
+                    <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                      <td style={{ padding: '0.75rem', fontSize: '0.9rem' }}>{res.studentName}</td>
+                      <td style={{ padding: '0.75rem', fontSize: '0.9rem', color: '#64748B' }}>{res.standard}</td>
                       <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                         <input 
-                          type="number" 
-                          max={activeTest?.total_marks || activeTest?.totalMarks}
-                          value={res.score} 
+                          type="text" 
+                          placeholder="Score or Ab" 
+                          value={res.score === -1 ? 'Ab' : res.score} 
                           onChange={(e) => {
-                             const newList = [...studentResults];
-                             newList[index].score = Number(e.target.value);
-                             setStudentResults(newList);
+                             const newResults = [...studentResults];
+                             newResults[index].score = e.target.value;
+                             setStudentResults(newResults);
                           }}
-                          style={{ width: '80px', padding: '0.5rem', borderRadius: '4px', border: '1px solid var(--border-color)', textAlign: 'center' }}
+                          style={{ width: '80px', padding: '0.4rem', borderRadius: '6px', border: '1px solid #CBD5E1', textAlign: 'center' }}
                         />
                       </td>
                     </tr>
