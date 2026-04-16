@@ -24,7 +24,8 @@ const StudentManagement = () => {
   const [formData, setFormData] = useState({ 
     id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, 
     status: 'Active', subjectIds: [], photo: null,
-    parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1
+    parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1,
+    portal_enabled: true, portal_password: 'yash123'
   });
   const [performanceData, setPerformanceData] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -73,6 +74,8 @@ const StudentManagement = () => {
         parentPhone: s.parent_phone || '',
         studentPhone: s.student_phone || '',
         collegeId: s.college_id || null,
+        portal_enabled: s.portal_enabled ?? true,
+        portal_password: s.portal_password || 'yash123',
         subjectIds: s.student_subjects ? s.student_subjects.map(ss => ss.subject_id) : []
       }));
       setStudents(formatted);
@@ -146,7 +149,9 @@ const StudentManagement = () => {
       email: formData.email,
       address: formData.address,
       college_id: formData.collegeId ? Number(formData.collegeId) : null,
-      installments: formData.installments
+      installments: formData.installments,
+      portal_enabled: formData.portal_enabled,
+      portal_password: formData.portal_password
     };
 
     const { error } = await supabase
@@ -301,7 +306,7 @@ const StudentManagement = () => {
           <button className="btn-secondary" onClick={exportToCSV}><FiDownload /> Export CSV</button>
           <button className="btn-secondary" onClick={() => { setPrintMode('idcards'); setTimeout(() => window.print(), 50); }}><FiCreditCard /> Print ID Cards</button>
           <button className="btn-secondary" onClick={() => { setPrintMode('directory'); setTimeout(() => window.print(), 50); }}><FiPrinter /> Print Directory</button>
-          <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, status: 'Active', subjectIds: [], photo: null, parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1 }); setShowModal(true); }}>Add Student</button>
+          <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, status: 'Active', subjectIds: [], photo: null, parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1, portal_enabled: true, portal_password: 'yash123' }); setShowModal(true); }}>Add Student</button>
         </div>
       </div>
 
@@ -436,6 +441,21 @@ const StudentManagement = () => {
                     <div className="input-group">
                       <label>Student Phone</label>
                       <input type="text" value={formData.studentPhone} onChange={e => setFormData({...formData, studentPhone: e.target.value})} />
+                    </div>
+                  </div>
+
+                  <div style={{ borderBottom: '1px solid var(--border-color)', margin: '1.5rem 0 1rem 0', paddingBottom: '0.5rem', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>STUDENT PORTAL AUTHENTICATION</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="input-group">
+                      <label>Portal Access</label>
+                      <select value={formData.portal_enabled ? 'true' : 'false'} onChange={e => setFormData({...formData, portal_enabled: e.target.value === 'true'})}>
+                        <option value="true">Enabled</option>
+                        <option value="false">Disabled / Revoked</option>
+                      </select>
+                    </div>
+                    <div className="input-group">
+                      <label>Portal Password</label>
+                      <input type="text" value={formData.portal_password || 'yash123'} onChange={e => setFormData({...formData, portal_password: e.target.value})} placeholder="Set portal password" />
                     </div>
                   </div>
 
