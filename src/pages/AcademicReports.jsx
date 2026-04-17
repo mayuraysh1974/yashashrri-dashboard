@@ -192,17 +192,17 @@ const AcademicReports = () => {
   );
 
   const PrintFooter = () => (
-    <div className="print-only" style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-      <div className="AcademicNote" style={{ fontSize: '11px', color: '#94A3B8', maxWidth: '450px', textAlign: 'left' }}>
+    <div className="print-only" style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #1A237E', paddingTop: '20px' }}>
+      <div className="AcademicNote">
         <strong>Academic Note:</strong><br />
         1. This report is based on internal tests conducted for continuous assessment.<br />
         2. Graphical analysis represents performance relative to class averages and passing thresholds.<br />
         3. For detailed career guidance, please contact the faculty coordinator.
       </div>
-      <div style={{ textAlign: 'center', minWidth: '180px' }}>
+      <div className="signatory-box">
         <div style={{ width: '100%', borderBottom: '1px solid #000', marginBottom: '10px' }}></div>
-        <div style={{ fontSize: '12px', fontWeight: 800, color: '#1A237E' }}>Authorized Signatory</div>
-        <div style={{ fontSize: '10px', color: '#64748B' }}>Yashashrri Classes Academic Dept.</div>
+        <div style={{ fontSize: '13px', fontWeight: 800, color: '#1A237E' }}>Authorized Signatory</div>
+        <div style={{ fontSize: '11px', color: '#64748B' }}>Yashashrri Classes Academic Dept.</div>
       </div>
     </div>
   );
@@ -445,6 +445,7 @@ const AcademicReports = () => {
                       <Line type="step" dataKey="minMarks" name="Passing Threshold %" stroke="var(--danger-red)" strokeDasharray="5 5" strokeWidth={2} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
+                  <div className="no-print" style={{ height: '20px' }}></div> {/* Spacer for screen */}
                 </div>
 
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -518,10 +519,12 @@ const AcademicReports = () => {
           table { width: 100% !important; border: 1px solid #ddd !important; font-size: 10px !important; border-collapse: collapse !important; table-layout: fixed !important; }
           th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px !important; }
           td { padding: 6px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; word-wrap: break-word; }
-          .recharts-responsive-container { width: 100% !important; height: 280px !important; }
+          .recharts-responsive-container { width: 100% !important; height: 280px !important; margin-bottom: 30px !important; }
+          .recharts-legend-wrapper { position: relative !important; top: auto !important; margin-top: 10px !important; }
           h2, h3 { color: #1A237E !important; margin-top: 10px !important; margin-bottom: 5px !important; }
           .print-header { margin-bottom: 20px !important; }
-          .AcademicNote { font-size: 9px !important; line-height: 1.4 !important; flex: 1; }
+          .AcademicNote { font-size: 9px !important; line-height: 1.4 !important; flex: 1; padding-right: 20px; }
+          .signatory-box { min-width: 200px; text-align: center; }
         }
       `}</style>
     </div>
