@@ -22,7 +22,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 5%;
-  height: 140px; /* Taller header for 75% logo visibility */
+  height: 100px; /* Adjusted from 140px for better balance */
   position: sticky;
   top: 0;
   background: rgba(26, 35, 126, 0.98); 
@@ -78,6 +78,11 @@
   padding: 0.7rem 2rem;
   border-radius: 4px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .login-btn:hover {
@@ -467,9 +472,8 @@
     padding: 0 1rem;
   }
   .logo-img {
-    height: 48px !important;
+    height: 60px !important;
     width: auto !important;
-    max-width: 160px !important;
   }
   .hero-section {
     grid-template-columns: 1fr;

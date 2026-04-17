@@ -159,8 +159,8 @@ const StudentPortal = () => {
   if (!student) {
     return (
       <div className="landing-container" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1A237E 0%, #0D47A1 100%)', display: 'flex', flexDirection: 'column' }}>
-        <nav className="landing-nav" style={{ background: 'transparent', border: 'none', height: '140px' }}>
-           <img src="/logo.png" style={{ height: '100%', objectFit: 'contain' }} alt="Logo" />
+        <nav className="landing-nav" style={{ background: 'transparent', border: 'none', height: '100px' }}>
+           <img src="/logo.png" style={{ height: '80%', objectFit: 'contain' }} alt="Logo" />
            <Link to="/" style={{ color: 'white', fontWeight: 600 }}>Back Home</Link>
         </nav>
         
