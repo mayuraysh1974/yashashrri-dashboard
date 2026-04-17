@@ -22,6 +22,7 @@ import CollegeMaster from './pages/CollegeMaster';
 import LandingPage from './pages/LandingPage';
 import AttendanceReports from './pages/AttendanceReports';
 import AcademicCalendar from './pages/AcademicCalendar';
+import AcademicReports from './pages/AcademicReports';
 import MobileMenu from './pages/MobileMenu';
 import PublicAdmission from './pages/PublicAdmission';
 import PublicFeesPayment from './pages/PublicFeesPayment';
@@ -81,6 +82,7 @@ function App() {
                     <Route path="/library" element={<DigitalLibrary />} />
                     <Route path="/subjects" element={<SubjectMaster />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/academic-reports" element={<AcademicReports />} />
                     <Route path="/colleges" element={<CollegeMaster />} />
                     <Route path="/standards" element={<StandardMaster />} />
                     <Route path="/fee-reports" element={<FeeReports />} />

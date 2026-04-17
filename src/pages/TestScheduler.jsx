@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell, FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell, FiEdit2, FiTrash2, FiBarChart2 } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 
 const TestScheduler = () => {
+  const navigate = useNavigate();
   const [tests, setTests] = useState([]);
   const [standards, setStandards] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -10,9 +12,8 @@ const TestScheduler = () => {
   const [showModal, setShowModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [activeTest, setActiveTest] = useState(null);
-  const [studentResults, setStudentResults] = useState([]);
-  const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
-  const [subjectSearch, setSubjectSearch] = useState('');
+  const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] });
+  const [resultSearch, setResultSearch] = useState('');
   const [solutionFile, setSolutionFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -74,6 +75,7 @@ const TestScheduler = () => {
       subjects: formData.subjects,
       standard: formData.standard,
       total_marks: formData.totalMarks,
+      min_marks: formData.minMarks,
       date: formData.date
     };
 
@@ -96,7 +98,7 @@ const TestScheduler = () => {
       setShowModal(false);
       setEditMode(false);
       setActiveTestId(null);
-      setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] });
+      setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] });
       setSolutionFile(null);
       fetchTests();
     } else {
@@ -123,6 +125,7 @@ const TestScheduler = () => {
       subjects: Array.isArray(test.subjects) ? test.subjects : [test.subject],
       standard: test.standard || (test.standards ? test.standards[0] : ''),
       totalMarks: test.total_marks || test.totalMarks,
+      minMarks: test.min_marks || 0,
       date: test.date
     });
     setEditMode(true);
@@ -219,7 +222,7 @@ const TestScheduler = () => {
           <h1 className="page-title">Test Scheduler & Alerts</h1>
           <p className="page-subtitle">Manage upcoming exams and notify students/parents of schedules</p>
         </div>
-        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
+        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
           <FiPlus /> New Test
         </button>
       </div>
@@ -277,13 +280,16 @@ const TestScheduler = () => {
                  )}
               </div>
 
-              <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: test.solution_url ? '1fr 1fr' : '1fr', gap: '1rem' }}>
+              <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.5rem' }}>
                  {test.solution_url && (
-                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }}>
                        <FiBook /> Solution
                     </a>
                  )}
-                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontSize: '0.85rem', background: '#1A237E', color: 'white', border: 'none' }} onClick={() => openResultEntry(test)}>
+                 <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }} onClick={() => navigate('/academic-reports')}>
+                    <FiBarChart2 /> Report
+                 </button>
+                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#1A237E', color: 'white', border: 'none', padding: '0.5rem' }} onClick={() => openResultEntry(test)}>
                     <FiCheckCircle /> Record Marks
                  </button>
               </div>
@@ -316,6 +322,10 @@ const TestScheduler = () => {
               <div className="input-group">
                 <label>Total Marks</label>
                 <input type="number" value={formData.totalMarks} onChange={e => setFormData({...formData, totalMarks: Number(e.target.value)})} />
+              </div>
+              <div className="input-group">
+                <label>Passing Marks (Min)</label>
+                <input type="number" value={formData.minMarks} onChange={e => setFormData({...formData, minMarks: Number(e.target.value)})} />
               </div>
             </div>
 
@@ -393,7 +403,17 @@ const TestScheduler = () => {
                 <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Record Marks: {activeTest?.name}</h2>
                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard || (activeTest?.standards ? activeTest.standards[0] : 'N/A')} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
               </div>
-              <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
+              <div style={{ position: 'relative', flex: 1, marginRight: '1rem' }}>
+                <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <input 
+                  type="text" 
+                  placeholder="Search student name..." 
+                  value={resultSearch}
+                  onChange={(e) => setResultSearch(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem 0.5rem 0.5rem 2.5rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.9rem' }}
+                />
+              </div>
+              <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><FiX size={24} /></button>
             </div>
 
             <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', backgroundColor: 'var(--bg-main)' }}>
@@ -405,7 +425,9 @@ const TestScheduler = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {studentResults.map((res, index) => (
+                  {studentResults.filter(r => r.studentName.toLowerCase().includes(resultSearch.toLowerCase())).map((res) => {
+                    const originalIndex = studentResults.findIndex(sr => sr.studentId === res.studentId);
+                    return (
                     <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
                       <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>{res.studentName}</td>
                       <td style={{ padding: '0.75rem', textAlign: 'right' }}>
@@ -415,14 +437,21 @@ const TestScheduler = () => {
                           value={res.score === -1 ? 'Ab' : res.score} 
                           onChange={(e) => {
                              const newResults = [...studentResults];
-                             newResults[index].score = e.target.value;
+                             newResults[originalIndex].score = e.target.value;
                              setStudentResults(newResults);
                           }}
-                          style={{ width: '80px', padding: '0.4rem', borderRadius: '6px', border: '1px solid #CBD5E1', textAlign: 'center' }}
+                          style={{ 
+                            width: '80px', 
+                            padding: '0.4rem', 
+                            borderRadius: '6px', 
+                            border: '1px solid #CBD5E1', 
+                            textAlign: 'center',
+                            backgroundColor: res.score !== '' && res.score !== 'Ab' && Number(res.score) < (activeTest?.min_marks || 0) ? '#FEE2E2' : 'white'
+                          }}
                         />
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </table>
             </div>

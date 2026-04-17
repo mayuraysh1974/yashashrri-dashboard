@@ -159,8 +159,8 @@ const StudentPortal = () => {
   if (!student) {
     return (
       <div className="landing-container" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #1A237E 0%, #0D47A1 100%)', display: 'flex', flexDirection: 'column' }}>
-        <nav className="landing-nav" style={{ background: 'transparent', border: 'none' }}>
-           <img src="/logo.png" style={{ height: '60px' }} alt="Logo" />
+        <nav className="landing-nav" style={{ background: 'transparent', border: 'none', height: '140px' }}>
+           <img src="/logo.png" style={{ height: '100%', objectFit: 'contain' }} alt="Logo" />
            <Link to="/" style={{ color: 'white', fontWeight: 600 }}>Back Home</Link>
         </nav>
         
@@ -245,9 +245,9 @@ const StudentPortal = () => {
   return (
     <div className="landing-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F8FAFC' }}>
       {/* Portal Header */}
-      <nav className="landing-nav" style={{ position: 'sticky', top: 0, zIndex: 100, backgroundColor: 'white', padding: '1rem 5%', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <img src="/logo.png" style={{ height: '40px' }} alt="Logo" />
+      <nav className="landing-nav" style={{ position: 'sticky', top: 0, zIndex: 100, backgroundColor: 'white', padding: '0 5%', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', height: '100px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', height: '100%' }}>
+          <img src="/logo.png" style={{ height: '80%', objectFit: 'contain' }} alt="Logo" />
           <div style={{ borderLeft: '2px solid #E2E8F0', paddingLeft: '1rem' }}>
             <h4 style={{ margin: 0, color: '#1A237E' }}>{student.name}</h4>
             <span style={{ fontSize: '0.75rem', color: '#64748B' }}>{student.standard} • ID: {student.id}</span>

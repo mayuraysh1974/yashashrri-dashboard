@@ -12,7 +12,8 @@ import {
   FiFileText,
   FiLayers,
   FiCheckCircle,
-  FiBell
+  FiBell,
+  FiTrendingUp
 } from 'react-icons/fi';
 
 const Sidebar = () => {
@@ -31,7 +32,8 @@ const Sidebar = () => {
     {"path": "/subjects", "name": "Subject Master", "icon": <FiFileText />},
     { path: '/standards', name: 'Standard Master', icon: <FiLayers /> },
     { path: '/fee-reports', name: 'Fee Reports', icon: <FiDollarSign /> },
-    { path: '/reports', name: 'Reports', icon: <FiBarChart2 /> },
+    { path: '/academic-reports', name: 'Academic Reports', icon: <FiTrendingUp /> },
+    { path: '/reports', name: 'Dashboard Analytics', icon: <FiBarChart2 /> },
     { path: '/settings', name: 'Settings', icon: <FiSettings /> },
     { path: '/enquiries', name: 'Web Enquiries', icon: <FiBarChart2 /> },
     { path: '/gallery-management', name: 'Gallery Management', icon: <FiLayers /> },
@@ -40,7 +42,7 @@ const Sidebar = () => {
   return (
     <div className="sidebar no-print">
       <div className="brand">
-        <img src="/logo.png" alt="Yashashrri Logo" style={{ width: '100%', maxWidth: '200px', margin: '0 auto', display: 'block' }} onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }} />
+        <img src="/logo.png" alt="Yashashrri Logo" style={{ width: '100%', maxWidth: '260px', margin: '0 auto', display: 'block' }} onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }} />
         <div style={{ display: 'none', textAlign: 'center' }}>
           <div className="brand-title">YASHASHRRI CLASSES</div>
           <div className="brand-tagline">BUILDING BRIDGES TO SUCCESS</div>

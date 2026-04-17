@@ -138,8 +138,8 @@ const Reports = () => {
                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                  <XAxis dataKey="name" axisLine={false} tickLine={false} fontSize={12} />
                  <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val}%`} fontSize={10} />
-                 <Tooltip />
-                 <Bar dataKey="avgScore" name="Avg Score" fill="var(--primary-blue)" radius={[4, 4, 0, 0]} />
+                 <Tooltip formatter={(value) => [`${value}%`, 'Avg. Performance']} />
+                 <Bar dataKey="avgScore" name="Avg. Performance" fill="var(--primary-blue)" radius={[4, 4, 0, 0]} />
                </BarChart>
              </ResponsiveContainer>
            </div>
