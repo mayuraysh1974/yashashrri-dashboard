@@ -14,6 +14,7 @@ const TestScheduler = () => {
   const [activeTest, setActiveTest] = useState(null);
   const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] });
   const [resultSearch, setResultSearch] = useState('');
+  const [subjectSearch, setSubjectSearch] = useState('');
   const [solutionFile, setSolutionFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
