@@ -14,6 +14,7 @@ const AcademicReports = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [selectedTestId, setSelectedTestId] = useState('all');
   const [selectedStandard, setSelectedStandard] = useState('');
   const [standards, setStandards] = useState([]);
   
@@ -261,9 +262,22 @@ const AcademicReports = () => {
               <input 
                 type="month" 
                 value={selectedMonth} 
-                onChange={e => setSelectedMonth(e.target.value)}
+                onChange={e => { setSelectedMonth(e.target.value); setSelectedTestId('all'); }}
                 style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
               />
+            </div>
+            <div style={{ flex: 1 }}>
+              <select 
+                value={selectedTestId} 
+                onChange={e => setSelectedTestId(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                disabled={reportData.tests.length === 0}
+              >
+                <option value="all">All Tests in Month</option>
+                {reportData.tests.map(t => (
+                  <option key={t.id} value={t.id}>{t.name} ({new Date(t.date).toLocaleDateString()})</option>
+                ))}
+              </select>
             </div>
           </div>
         ) : (
@@ -310,8 +324,8 @@ const AcademicReports = () => {
         {activeTab === 'monthly' ? (
           <>
             <PrintHeader 
-              title="Monthly Academic Performance Report" 
-              subTitle={`Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`} 
+              title={selectedTestId === 'all' ? "Monthly Academic Performance Report" : "Specific Test Performance Report"} 
+              subTitle={`${selectedTestId === 'all' ? `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : `Test: ${reportData.tests.find(t => t.id === selectedTestId)?.name} | Date: ${new Date(reportData.tests.find(t => t.id === selectedTestId)?.date).toLocaleDateString()}`}`} 
             />
             
             {!loading && reportData.tests.length === 0 ? <div style={{ textAlign: 'center', padding: '4rem' }}><FiBook size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} /><p>No tests found for selected subject and month.</p></div> : (
@@ -320,7 +334,7 @@ const AcademicReports = () => {
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
                     <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiTrendingUp /> Avg. Performance Trend (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={reportData.performance}>
+                      <BarChart data={selectedTestId === 'all' ? reportData.performance : reportData.performance.filter((_, idx) => reportData.tests[idx].id === selectedTestId)}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" fontSize={10} />
                         <YAxis tickFormatter={t => `${t}%`} fontSize={10} />
@@ -332,7 +346,7 @@ const AcademicReports = () => {
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
                     <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiCheckCircle /> Student Passing Ratio (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={reportData.performance}>
+                      <LineChart data={selectedTestId === 'all' ? reportData.performance : reportData.performance.filter((_, idx) => reportData.tests[idx].id === selectedTestId)}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" fontSize={10} />
                         <YAxis tickFormatter={t => `${t}%`} fontSize={10} />
@@ -355,10 +369,13 @@ const AcademicReports = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {reportData.tests.map((test, idx) => {
-                      const perf = reportData.performance[idx];
-                      const testResults = reportData.results.filter(r => r.test_id === test.id);
-                      const maxScore = Math.max(...testResults.map(r => r.score));
+                    {reportData.tests
+                      .filter(t => selectedTestId === 'all' || t.id === selectedTestId)
+                      .map((test) => {
+                        const originalIdx = reportData.tests.findIndex(t => t.id === test.id);
+                        const perf = reportData.performance[originalIdx];
+                        const testResults = reportData.results.filter(r => r.test_id === test.id);
+                        const maxScore = testResults.length > 0 ? Math.max(...testResults.map(r => r.score)) : 0;
                       
                       return (
                         <React.Fragment key={test.id}>
