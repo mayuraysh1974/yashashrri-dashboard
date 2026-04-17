@@ -18,7 +18,10 @@ const AcademicReports = () => {
   const [standards, setStandards] = useState([]);
   
   const [reportData, setReportData] = useState({ tests: [], performance: [], results: [] });
-  const [studentStats, setStudentStats] = useState({ progress: [], summary: {} });
+  const [studentStats, setStudentStats] = useState({ 
+    progress: [], 
+    summary: { totalTests: 0, passCount: 0, failCount: 0, avgPercentage: 0 } 
+  });
 
   useEffect(() => {
     fetchInitialData();
@@ -101,18 +104,19 @@ const AcademicReports = () => {
         .eq('student_id', selectedStudent.id)
         .order('created_at', { ascending: true });
 
-      const progress = (results || []).map(r => ({
-        name: r.tests.name,
+      const dataResults = results || [];
+      const progress = dataResults.map(r => ({
+        name: r.tests?.name || 'Unknown Test',
         score: r.score === -1 ? 0 : r.score,
-        percentage: Math.round(((r.score === -1 ? 0 : r.score) / r.tests.total_marks) * 100),
-        minMarks: Math.round(((r.tests.min_marks || 0) / r.tests.total_marks) * 100),
-        date: r.tests.date,
-        subject: r.tests.subjects?.[0] || r.tests.subject,
-        totalMarks: r.tests.total_marks
+        percentage: r.tests ? Math.round(((r.score === -1 ? 0 : r.score) / r.tests.total_marks) * 100) : 0,
+        minMarks: r.tests ? Math.round(((r.tests.min_marks || 0) / r.tests.total_marks) * 100) : 0,
+        date: r.tests?.date || '',
+        subject: r.tests?.subjects?.[0] || r.tests?.subject || 'N/A',
+        totalMarks: r.tests?.total_marks || 0
       }));
 
-      const totalTests = results.length;
-      const passCount = results.filter(r => r.score >= (r.tests.min_marks || 0)).length;
+      const totalTests = dataResults.length;
+      const passCount = dataResults.filter(r => r.score >= (r.tests?.min_marks || 0)).length;
       const avgPercentage = progress.length > 0 
         ? progress.reduce((sum, p) => sum + p.percentage, 0) / progress.length 
         : 0;
