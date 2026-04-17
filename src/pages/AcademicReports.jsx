@@ -14,6 +14,8 @@ const AcademicReports = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [selectedStandard, setSelectedStandard] = useState('');
+  const [standards, setStandards] = useState([]);
   
   const [reportData, setReportData] = useState({ tests: [], performance: [], results: [] });
   const [studentStats, setStudentStats] = useState({ progress: [], summary: {} });
@@ -25,8 +27,11 @@ const AcademicReports = () => {
   const fetchInitialData = async () => {
     const { data: subData } = await supabase.from('subjects').select('*').order('name');
     const { data: studData } = await supabase.from('students').select('id, name, standard').order('name');
+    const { data: stdData } = await supabase.from('standards').select('*').order('standard');
+    
     setSubjects(subData || []);
     setStudents(studData || []);
+    setStandards(stdData || []);
     if (subData?.length > 0) setSelectedSubject(subData[0].name);
   };
 
@@ -219,15 +224,28 @@ const AcademicReports = () => {
             </div>
           </div>
         ) : (
-          <div style={{ flex: 1 }}>
-             <select 
-                value={selectedStudent?.id || ''} 
-                onChange={e => setSelectedStudent(students.find(s => s.id === e.target.value))}
+          <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
+            <div style={{ flex: 1 }}>
+              <select 
+                value={selectedStandard} 
+                onChange={e => { setSelectedStandard(e.target.value); setSelectedStudent(null); }}
                 style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
               >
-                <option value="">Search Student...</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.standard})</option>)}
+                <option value="">Filter by Class...</option>
+                {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
               </select>
+            </div>
+            <div style={{ flex: 2 }}>
+               <select 
+                  value={selectedStudent?.id || ''} 
+                  onChange={e => setSelectedStudent(students.find(s => s.id === e.target.value))}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                  disabled={!selectedStandard}
+                >
+                  <option value="">{selectedStandard ? `Select Student from ${selectedStandard}...` : 'Select Class First'}</option>
+                  {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+            </div>
           </div>
         )}
       </div>
@@ -310,11 +328,11 @@ const AcademicReports = () => {
                                       else if (isFail) { bgColor = '#FEE2E2'; borderColor = '#FECACA'; }
 
                                       return (
-                                        <div key={res.id} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: `1px solid ${borderColor}`, backgroundColor: bgColor, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem' }}>
+                                        <div key={res.id} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: `1px solid ${borderColor}`, backgroundColor: bgColor, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                                           <span style={{ fontWeight: 600, color: isTop ? '#B8860B' : 'inherit' }}>{res.students?.name}</span>
                                           <span style={{ fontWeight: 800 }}>
                                             {isAbsent ? 'AB' : res.score}
-                                            {isTop && <span style={{ marginLeft: '4px', fontSize: '0.6rem', backgroundColor: '#D4AF37', color: 'white', padding: '1px 3px', borderRadius: '3px' }}>TOP</span>}
+                                            {isTop && <span style={{ marginLeft: '4px', fontSize: '0.6rem', backgroundColor: '#D4AF37', color: 'white', padding: '1px 3px', borderRadius: '3px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TOP</span>}
                                           </span>
                                         </div>
                                       );
@@ -390,7 +408,9 @@ const AcademicReports = () => {
                       return (
                         <tr key={idx} style={{ 
                           borderBottom: '1px solid var(--border-color)',
-                          backgroundColor: isAbsent ? '#F1F5F9' : (isFail ? '#FEE2E2' : 'transparent')
+                          backgroundColor: isAbsent ? '#F1F5F9' : (isFail ? '#FEE2E2' : 'transparent'),
+                          WebkitPrintColorAdjust: 'exact',
+                          printColorAdjust: 'exact'
                         }}>
                           <td style={{ padding: '1rem', fontWeight: 600 }}>{p.name}</td>
                           <td style={{ padding: '1rem' }}>{p.subject}</td>
@@ -432,8 +452,8 @@ const AcademicReports = () => {
           .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
           body { background: white !important; padding: 20px !important; }
           table { width: 100% !important; border: 1px solid #ddd !important; font-size: 11px !important; border-collapse: collapse !important; }
-          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; padding: 8px !important; }
-          td { padding: 8px !important; border-bottom: 1px solid #eee !important; }
+          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 8px !important; }
+          td { padding: 8px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .chart-container { display: none !important; } /* Recharts don't always print well, rely on the detailed tables */
           h3 { color: #1A237E !important; }
         }
