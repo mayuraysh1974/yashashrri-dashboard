@@ -510,17 +510,18 @@ const AcademicReports = () => {
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
+          @page { size: A4; margin: 10mm; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
           .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
-          body { background: white !important; padding: 10mm !important; margin: 0 !important; width: auto !important; height: auto !important; font-family: 'Inter', sans-serif !important; }
+          body { background: white !important; width: 100% !important; margin: 0 !important; padding: 0 !important; font-family: 'Inter', sans-serif !important; }
           table { width: 100% !important; border: 1px solid #ddd !important; font-size: 10px !important; border-collapse: collapse !important; table-layout: fixed !important; }
           th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px !important; }
-          td { padding: 6px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden; text-overflow: ellipsis; word-wrap: break-word; }
-          .recharts-responsive-container { width: 100% !important; height: 250px !important; }
+          td { padding: 6px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; word-wrap: break-word; }
+          .recharts-responsive-container { width: 100% !important; height: 280px !important; }
           h2, h3 { color: #1A237E !important; margin-top: 10px !important; margin-bottom: 5px !important; }
           .print-header { margin-bottom: 20px !important; }
-          .AcademicNote { font-size: 9px !important; line-height: 1.4 !important; }
+          .AcademicNote { font-size: 9px !important; line-height: 1.4 !important; flex: 1; }
         }
       `}</style>
     </div>
