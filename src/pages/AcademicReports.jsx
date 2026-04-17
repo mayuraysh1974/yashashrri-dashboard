@@ -128,17 +128,34 @@ const AcademicReports = () => {
   };
 
   const PrintHeader = ({ title, subTitle }) => (
-    <div className="print-header" style={{ display: 'none', textAlign: 'center', marginBottom: '30px' }}>
-      <div style={{ marginBottom: '10px' }}>
-        <h1 style={{ color: '#1A237E', margin: 0, fontSize: '28px', letterSpacing: '2px' }}>YASHASHRRI CLASSES</h1>
-        <div style={{ color: '#D4AF37', fontWeight: 700, fontSize: '13px', marginBottom: '10px' }}>BUILDING BRIDGES TO SUCCESS</div>
+    <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px' }}>
+      <div style={{ marginBottom: '15px' }}>
+        <img src="/logo.png" alt="Yashashrri Logo" style={{ maxWidth: '400px', height: 'auto' }} />
       </div>
       <div style={{ fontSize: '11px', color: '#64748B', lineHeight: '1.6' }}>
-        Talegaon Dabhade, PUNE | Contact: +91 73874 20737 | Email: mayuraysh1974@gmail.com
+        Main Br: "Shree Ekveera Prasad", Vaidya Colony, Nr. Axis bank ATM, Talegaon Dabhade, PUNE - 410506<br />
+        Branch 2: Silverwinds, C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Talegaon Dabhade, PUNE - 410506<br />
+        Contact: +91 73874 20737 | Email: mayuraysh1974@gmail.com
       </div>
       <hr style={{ border: 'none', borderTop: '2px solid #1A237E', margin: '20px 0' }} />
-      <h2 style={{ fontSize: '16px', color: '#1A237E', margin: '10px 0', textTransform: 'uppercase' }}>{title}</h2>
-      {subTitle && <p style={{ fontSize: '13px', color: '#64748B', fontWeight: 600 }}>{subTitle}</p>}
+      <h2 style={{ fontSize: '18px', color: '#1A237E', margin: '10px 0', textTransform: 'uppercase', fontWeight: 800 }}>{title}</h2>
+      {subTitle && <div style={{ fontSize: '14px', color: '#475569', fontWeight: 700, backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'inline-block' }}>{subTitle}</div>}
+    </div>
+  );
+
+  const PrintFooter = () => (
+    <div className="print-only" style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ fontSize: '11px', color: '#94A3B8', maxWidth: '400px', textAlign: 'left' }}>
+        <strong>Academic Note:</strong><br />
+        1. This report is based on internal tests conducted for continuous assessment.<br />
+        2. Graphical analysis represents performance relative to class averages and passing thresholds.<br />
+        3. For detailed career guidance, please contact the faculty coordinator.
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: '180px', borderBottom: '1px solid #000', marginBottom: '10px' }}></div>
+        <div style={{ fontSize: '12px', fontWeight: 800, color: '#1A237E' }}>Authorized Signatory</div>
+        <div style={{ fontSize: '10px', color: '#64748B' }}>Yashashrri Classes Academic Dept.</div>
+      </div>
     </div>
   );
 
@@ -311,6 +328,7 @@ const AcademicReports = () => {
                     })}
                   </tbody>
                 </table>
+                <PrintFooter />
               </div>
             )}
           </>
@@ -394,6 +412,7 @@ const AcademicReports = () => {
                     })}
                   </tbody>
                 </table>
+                <PrintFooter />
               </>
             ) : (
               <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -406,13 +425,17 @@ const AcademicReports = () => {
       </div>
 
       <style>{`
+        .print-only { display: none; }
         @media print {
           .no-print { display: none !important; }
-          .print-header { display: block !important; }
+          .print-only { display: block !important; }
           .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-          body { background: white !important; }
-          table { width: 100% !important; border: 1px solid #ddd !important; font-size: 12px; }
-          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; }
+          body { background: white !important; padding: 20px !important; }
+          table { width: 100% !important; border: 1px solid #ddd !important; font-size: 11px !important; border-collapse: collapse !important; }
+          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; padding: 8px !important; }
+          td { padding: 8px !important; border-bottom: 1px solid #eee !important; }
+          .chart-container { display: none !important; } /* Recharts don't always print well, rely on the detailed tables */
+          h3 { color: #1A237E !important; }
         }
       `}</style>
     </div>
