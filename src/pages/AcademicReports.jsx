@@ -251,7 +251,7 @@ const AcademicReports = () => {
             <div style={{ flex: 1 }}>
               <select 
                 value={selectedSubject} 
-                onChange={e => setSelectedSubject(e.target.value)}
+                onChange={e => { setSelectedSubject(e.target.value); setSelectedTestId('all'); }}
                 style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
               >
                 <option value="">Select Subject...</option>
@@ -334,24 +334,24 @@ const AcademicReports = () => {
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
                     <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiTrendingUp /> Avg. Performance Trend (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={selectedTestId === 'all' ? reportData.performance : reportData.performance.filter((_, idx) => reportData.tests[idx].id === selectedTestId)}>
+                      <BarChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" fontSize={10} />
-                        <YAxis tickFormatter={t => `${t}%`} fontSize={10} />
+                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} />
                         <Tooltip formatter={(value) => [`${value}%`, 'Avg. Performance']} />
-                        <Bar dataKey="avg" name="Avg. Performance" fill="var(--primary-blue)" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="avg" name="Avg. Performance" fill="var(--primary-blue)" radius={[4, 4, 0, 0]} barSize={selectedTestId === 'all' ? undefined : 60} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
                     <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiCheckCircle /> Student Passing Ratio (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
-                      <LineChart data={selectedTestId === 'all' ? reportData.performance : reportData.performance.filter((_, idx) => reportData.tests[idx].id === selectedTestId)}>
+                      <LineChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                         <XAxis dataKey="name" fontSize={10} />
-                        <YAxis tickFormatter={t => `${t}%`} fontSize={10} />
+                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} />
                         <Tooltip formatter={(value) => [`${value}%`, 'Passing Ratio']} />
-                        <Line type="monotone" dataKey="passing" name="Passing Ratio" stroke="var(--success-green)" strokeWidth={3} />
+                        <Line type="monotone" dataKey="passing" name="Passing Ratio" stroke="var(--success-green)" strokeWidth={3} dot={{ r: 6 }} activeDot={{ r: 8 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -370,11 +370,11 @@ const AcademicReports = () => {
                   </thead>
                   <tbody>
                     {reportData.tests
-                      .filter(t => selectedTestId === 'all' || t.id === selectedTestId)
+                      .filter(t => selectedTestId === 'all' || String(t.id) === String(selectedTestId))
                       .map((test) => {
-                        const originalIdx = reportData.tests.findIndex(t => t.id === test.id);
+                        const originalIdx = reportData.tests.findIndex(t => String(t.id) === String(test.id));
                         const perf = reportData.performance[originalIdx];
-                        const testResults = reportData.results.filter(r => r.test_id === test.id);
+                        const testResults = reportData.results.filter(r => String(r.test_id) === String(test.id));
                         const maxScore = testResults.length > 0 ? Math.max(...testResults.map(r => r.score)) : 0;
                       
                       return (
