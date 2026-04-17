@@ -257,7 +257,10 @@ const AcademicReports = () => {
       <div className="card-base" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         {activeTab === 'monthly' ? (
           <>
-            <PrintHeader title="Monthly Academic Performance Report" subTitle={`Subject: ${selectedSubject} | Period: ${selectedMonth}`} />
+            <PrintHeader 
+              title="Monthly Academic Performance Report" 
+              subTitle={`Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`} 
+            />
             
             {loading ? <p>Loading report data...</p> : reportData.tests.length === 0 ? <p>No tests found for selected subject and month.</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
