@@ -399,16 +399,39 @@ const AcademicReports = () => {
                                       
                                       let bgColor = 'white';
                                       let borderColor = '#E2E8F0';
-                                      if (isAbsent) { bgColor = '#F1F5F9'; borderColor = '#CBD5E1'; }
-                                      else if (isTop) { bgColor = '#FFF9E6'; borderColor = '#D4AF37'; }
-                                      else if (isFail) { bgColor = '#FEE2E2'; borderColor = '#FECACA'; }
+                                      let textColor = 'inherit';
+                                      let borderStyle = 'solid';
+                                      let opacity = 1;
+
+                                      if (isAbsent) { 
+                                        bgColor = '#F8FAFC'; 
+                                        borderColor = '#CBD5E1'; 
+                                        borderStyle = 'dashed'; 
+                                        textColor = '#64748B';
+                                        opacity = 0.8;
+                                      }
+                                      else if (isTop) { bgColor = '#FFFBEB'; borderColor = '#F59E0B'; textColor = '#B45309'; }
+                                      else if (isFail) { bgColor = '#FEF2F2'; borderColor = '#FECACA'; textColor = '#EF4444'; }
 
                                       return (
-                                        <div key={res.id} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: `1px solid ${borderColor}`, backgroundColor: bgColor, display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                          <span style={{ fontWeight: 600, color: isTop ? '#B8860B' : 'inherit' }}>{res.students?.name}</span>
+                                        <div key={res.id} style={{ 
+                                          padding: '0.4rem 0.8rem', 
+                                          borderRadius: '6px', 
+                                          border: `1px ${borderStyle} ${borderColor}`, 
+                                          backgroundColor: bgColor, 
+                                          color: textColor,
+                                          display: 'flex', 
+                                          justifyContent: 'space-between', 
+                                          alignItems: 'center', 
+                                          fontSize: '0.8rem', 
+                                          opacity,
+                                          WebkitPrintColorAdjust: 'exact', 
+                                          printColorAdjust: 'exact' 
+                                        }}>
+                                          <span style={{ fontWeight: 600 }}>{res.students?.name}</span>
                                           <span style={{ fontWeight: 800 }}>
                                             {isAbsent ? 'AB' : res.score}
-                                            {isTop && <span style={{ marginLeft: '4px', fontSize: '0.6rem', backgroundColor: '#D4AF37', color: 'white', padding: '1px 3px', borderRadius: '3px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TOP</span>}
+                                            {isTop && <span style={{ marginLeft: '4px', fontSize: '0.6rem', backgroundColor: '#F59E0B', color: 'white', padding: '1px 3px', borderRadius: '3px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>TOP</span>}
                                           </span>
                                         </div>
                                       );
@@ -485,7 +508,10 @@ const AcademicReports = () => {
                       return (
                         <tr key={idx} style={{ 
                           borderBottom: '1px solid var(--border-color)',
-                          backgroundColor: isAbsent ? '#F1F5F9' : (isFail ? '#FEE2E2' : 'transparent'),
+                          backgroundColor: isAbsent ? '#F8FAFC' : (isFail ? '#FEF2F2' : 'transparent'),
+                          color: isAbsent ? '#64748B' : 'inherit',
+                          fontStyle: isAbsent ? 'italic' : 'normal',
+                          opacity: isAbsent ? 0.8 : 1,
                           WebkitPrintColorAdjust: 'exact',
                           printColorAdjust: 'exact'
                         }}>
