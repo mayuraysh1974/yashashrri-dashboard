@@ -18,6 +18,7 @@ const AcademicReports = () => {
   const [standards, setStandards] = useState([]);
   
   const [reportData, setReportData] = useState({ tests: [], performance: [], results: [] });
+  const [debugStatus, setDebugStatus] = useState('');
   const [studentStats, setStudentStats] = useState({ 
     progress: [], 
     summary: { totalTests: 0, passCount: 0, failCount: 0, avgPercentage: 0 } 
@@ -97,37 +98,58 @@ const AcademicReports = () => {
   const fetchStudentProgress = async () => {
     if (!selectedStudent) return;
     setLoading(true);
+    setDebugStatus(`Searching for results for: ${selectedStudent.name} (ID: ${selectedStudent.id})...`);
+    
     try {
+      const cleanId = String(selectedStudent.id).trim();
+      
+      // Fetch results with an explicit query
       const { data: results, error: fetchError } = await supabase
         .from('test_results')
-        .select('*, tests(*)')
-        .eq('student_id', selectedStudent.id);
+        .select(`
+          id,
+          score,
+          test_id,
+          student_id,
+          tests:test_id (
+            id,
+            name,
+            total_marks,
+            min_marks,
+            date,
+            subjects,
+            subject
+          )
+        `)
+        .eq('student_id', cleanId);
         
       if (fetchError) throw fetchError;
 
       const dataResults = results || [];
+      setDebugStatus(`Found ${dataResults.length} raw records for this student.`);
+
       const progress = dataResults
-        .filter(r => r.tests) // Ensure test data exists
+        .filter(r => r.tests)
         .map(r => {
           const test = Array.isArray(r.tests) ? r.tests[0] : r.tests;
-          const score = r.score === -1 ? 0 : r.score;
+          const score = Number(r.score);
+          const actualScore = score === -1 ? 0 : score;
+          
           return {
             name: test?.name || 'Unknown Test',
-            score: score,
-            percentage: test ? Math.round((score / test.total_marks) * 100) : 0,
+            score: actualScore,
+            isAbsent: score === -1,
+            percentage: test ? Math.round((actualScore / test.total_marks) * 100) : 0,
             minMarks: test ? Math.round(((test.min_marks || 0) / test.total_marks) * 100) : 0,
             date: test?.date || '',
-            subject: test?.subjects?.[0] || test?.subject || 'N/A',
+            subject: Array.isArray(test?.subjects) ? test.subjects[0] : (test?.subject || 'N/A'),
             totalMarks: test?.total_marks || 0
           };
         })
         .sort((a, b) => new Date(a.date) - new Date(b.date));
 
       const totalTests = progress.length;
-      const passCount = dataResults.filter(r => {
-        const test = Array.isArray(r.tests) ? r.tests[0] : r.tests;
-        return test && r.score >= (test.min_marks || 0);
-      }).length;
+      const passCount = progress.filter(p => !p.isAbsent && p.score >= (p.totalMarks * (p.minMarks / 100))).length;
       
       const avgPercentage = progress.length > 0 
         ? progress.reduce((sum, p) => sum + p.percentage, 0) / progress.length 
@@ -137,8 +159,13 @@ const AcademicReports = () => {
         progress, 
         summary: { totalTests, passCount, failCount: totalTests - passCount, avgPercentage: Math.round(avgPercentage) } 
       });
+      
+      if (progress.length === 0 && dataResults.length > 0) {
+        setDebugStatus(`Warning: Found ${dataResults.length} results but could not link them to Test details.`);
+      }
     } catch (err) {
       console.error(err);
+      setDebugStatus(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -464,6 +491,9 @@ const AcademicReports = () => {
                     })}
                   </tbody>
                 </table>
+                <div className="no-print" style={{ marginTop: '1.5rem', padding: '0.75rem', backgroundColor: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '0.8rem', color: '#64748B' }}>
+                   <strong>Diagnostic Info:</strong> {debugStatus || 'Ready'}
+                </div>
                 <PrintFooter />
               </>
             ) : (
