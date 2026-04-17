@@ -192,15 +192,15 @@ const AcademicReports = () => {
   );
 
   const PrintFooter = () => (
-    <div className="print-only" style={{ marginTop: '60px', display: 'flex', justifyContent: 'space-between' }}>
-      <div style={{ fontSize: '11px', color: '#94A3B8', maxWidth: '400px', textAlign: 'left' }}>
+    <div className="print-only" style={{ marginTop: '40px', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+      <div className="AcademicNote" style={{ fontSize: '11px', color: '#94A3B8', maxWidth: '450px', textAlign: 'left' }}>
         <strong>Academic Note:</strong><br />
         1. This report is based on internal tests conducted for continuous assessment.<br />
         2. Graphical analysis represents performance relative to class averages and passing thresholds.<br />
         3. For detailed career guidance, please contact the faculty coordinator.
       </div>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: '180px', borderBottom: '1px solid #000', marginBottom: '10px' }}></div>
+      <div style={{ textAlign: 'center', minWidth: '180px' }}>
+        <div style={{ width: '100%', borderBottom: '1px solid #000', marginBottom: '10px' }}></div>
         <div style={{ fontSize: '12px', fontWeight: 800, color: '#1A237E' }}>Authorized Signatory</div>
         <div style={{ fontSize: '10px', color: '#64748B' }}>Yashashrri Classes Academic Dept.</div>
       </div>
@@ -512,13 +512,15 @@ const AcademicReports = () => {
         @media print {
           .no-print { display: none !important; }
           .print-only { display: block !important; }
-          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-          body { background: white !important; padding: 20px !important; }
-          table { width: 100% !important; border: 1px solid #ddd !important; font-size: 11px !important; border-collapse: collapse !important; }
-          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 8px !important; }
-          td { padding: 8px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .chart-container { display: none !important; } 
-          h3 { color: #1A237E !important; }
+          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+          body { background: white !important; padding: 10mm !important; margin: 0 !important; width: auto !important; height: auto !important; font-family: 'Inter', sans-serif !important; }
+          table { width: 100% !important; border: 1px solid #ddd !important; font-size: 10px !important; border-collapse: collapse !important; table-layout: fixed !important; }
+          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px !important; }
+          td { padding: 6px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden; text-overflow: ellipsis; word-wrap: break-word; }
+          .recharts-responsive-container { width: 100% !important; height: 250px !important; }
+          h2, h3 { color: #1A237E !important; margin-top: 10px !important; margin-bottom: 5px !important; }
+          .print-header { margin-bottom: 20px !important; }
+          .AcademicNote { font-size: 9px !important; line-height: 1.4 !important; }
         }
       `}</style>
     </div>
