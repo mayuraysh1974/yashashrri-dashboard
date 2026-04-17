@@ -98,25 +98,37 @@ const AcademicReports = () => {
     if (!selectedStudent) return;
     setLoading(true);
     try {
-      const { data: results } = await supabase
+      const { data: results, error: fetchError } = await supabase
         .from('test_results')
         .select('*, tests(*)')
-        .eq('student_id', selectedStudent.id)
-        .order('created_at', { ascending: true });
+        .eq('student_id', selectedStudent.id);
+        
+      if (fetchError) throw fetchError;
 
       const dataResults = results || [];
-      const progress = dataResults.map(r => ({
-        name: r.tests?.name || 'Unknown Test',
-        score: r.score === -1 ? 0 : r.score,
-        percentage: r.tests ? Math.round(((r.score === -1 ? 0 : r.score) / r.tests.total_marks) * 100) : 0,
-        minMarks: r.tests ? Math.round(((r.tests.min_marks || 0) / r.tests.total_marks) * 100) : 0,
-        date: r.tests?.date || '',
-        subject: r.tests?.subjects?.[0] || r.tests?.subject || 'N/A',
-        totalMarks: r.tests?.total_marks || 0
-      }));
+      const progress = dataResults
+        .filter(r => r.tests) // Ensure test data exists
+        .map(r => {
+          const test = Array.isArray(r.tests) ? r.tests[0] : r.tests;
+          const score = r.score === -1 ? 0 : r.score;
+          return {
+            name: test?.name || 'Unknown Test',
+            score: score,
+            percentage: test ? Math.round((score / test.total_marks) * 100) : 0,
+            minMarks: test ? Math.round(((test.min_marks || 0) / test.total_marks) * 100) : 0,
+            date: test?.date || '',
+            subject: test?.subjects?.[0] || test?.subject || 'N/A',
+            totalMarks: test?.total_marks || 0
+          };
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      const totalTests = dataResults.length;
-      const passCount = dataResults.filter(r => r.score >= (r.tests?.min_marks || 0)).length;
+      const totalTests = progress.length;
+      const passCount = dataResults.filter(r => {
+        const test = Array.isArray(r.tests) ? r.tests[0] : r.tests;
+        return test && r.score >= (test.min_marks || 0);
+      }).length;
+      
       const avgPercentage = progress.length > 0 
         ? progress.reduce((sum, p) => sum + p.percentage, 0) / progress.length 
         : 0;
@@ -242,7 +254,10 @@ const AcademicReports = () => {
             <div style={{ flex: 2 }}>
                <select 
                   value={selectedStudent?.id || ''} 
-                  onChange={e => setSelectedStudent(students.find(s => s.id === e.target.value))}
+                  onChange={e => {
+                    const student = students.find(s => s.id === e.target.value);
+                    setSelectedStudent(student);
+                  }}
                   style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
                   disabled={!selectedStandard}
                 >
@@ -250,11 +265,21 @@ const AcademicReports = () => {
                   {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
             </div>
+            <button className="btn-secondary" onClick={() => fetchInitialData()} title="Refresh List" style={{ padding: '0.6rem' }}>
+              <FiCalendar />
+            </button>
           </div>
         )}
       </div>
 
-      <div className="card-base" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      <div className="card-base" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
+        {loading && (
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
+             <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+             <p style={{ fontWeight: 600, color: 'var(--primary-blue)' }}>Fetching Performance Data...</p>
+          </div>
+        )}
+
         {activeTab === 'monthly' ? (
           <>
             <PrintHeader 
@@ -262,7 +287,7 @@ const AcademicReports = () => {
               subTitle={`Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`} 
             />
             
-            {loading ? <p>Loading report data...</p> : reportData.tests.length === 0 ? <p>No tests found for selected subject and month.</p> : (
+            {!loading && reportData.tests.length === 0 ? <div style={{ textAlign: 'center', padding: '4rem' }}><FiBook size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} /><p>No tests found for selected subject and month.</p></div> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
@@ -453,6 +478,7 @@ const AcademicReports = () => {
 
       <style>{`
         .print-only { display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
           .no-print { display: none !important; }
           .print-only { display: block !important; }
@@ -461,7 +487,7 @@ const AcademicReports = () => {
           table { width: 100% !important; border: 1px solid #ddd !important; font-size: 11px !important; border-collapse: collapse !important; }
           th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 8px !important; }
           td { padding: 8px !important; border-bottom: 1px solid #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .chart-container { display: none !important; } /* Recharts don't always print well, rely on the detailed tables */
+          .chart-container { display: none !important; } 
           h3 { color: #1A237E !important; }
         }
       `}</style>
