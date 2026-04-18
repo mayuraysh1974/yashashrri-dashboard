@@ -319,6 +319,55 @@ const StudentPortal = () => {
                   </div>
                </div>
 
+               {/* Upload Documents */}
+               <div className="card-base" style={{ padding: '2rem' }}>
+                  <h3 style={{ color: '#1A237E', marginTop: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiUpload /> Upload Documents</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', textAlign: 'left', marginBottom: '1.5rem' }}>
+                     <div className="file-upload-box">
+                       <label style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>UPDATE PROFILE PHOTO</label>
+                       <label className="portal-file-label">
+                         <FiCamera size={18} /> Choose Photo
+                         <input type="file" accept="image/*" onChange={async e => {
+                           const file = e.target.files[0];
+                           if (!file) return;
+                           setProfileLoading(true); setProfileMsg(null);
+                           const fileExt = file.name.split('.').pop();
+                           const fileName = `${student.id}_photo.${fileExt}`;
+                           const { error } = await supabase.storage.from('gallery').upload(fileName, file, { upsert: true });
+                           if (error) { setProfileMsg({ type: 'error', text: 'Photo upload failed: ' + error.message }); setProfileLoading(false); return; }
+                           const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
+                           await supabase.from('students').update({ photo: publicUrl.publicUrl }).eq('id', student.id);
+                           setStudent(prev => ({ ...prev, photo: publicUrl.publicUrl }));
+                           sessionStorage.setItem('student_session', JSON.stringify({ ...student, photo: publicUrl.publicUrl }));
+                           setProfileMsg({ type: 'success', text: '✅ Profile photo updated!' });
+                           setProfileLoading(false);
+                         }} style={{ display: 'none' }} disabled={profileLoading} />
+                       </label>
+                     </div>
+                     <div className="file-upload-box">
+                       <label style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 700, display: 'block', marginBottom: '0.5rem' }}>UPDATE MARKSHEET</label>
+                       <label className="portal-file-label">
+                         <FiFile size={18} /> Choose Marksheet
+                         <input type="file" accept=".pdf,image/*" onChange={async e => {
+                           const file = e.target.files[0];
+                           if (!file) return;
+                           setProfileLoading(true); setProfileMsg(null);
+                           const fileExt = file.name.split('.').pop();
+                           const fileName = `${student.id}_marksheet.${fileExt}`;
+                           const { error } = await supabase.storage.from('gallery').upload(fileName, file, { upsert: true });
+                           if (error) { setProfileMsg({ type: 'error', text: 'Marksheet upload failed: ' + error.message }); setProfileLoading(false); return; }
+                           const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
+                           await supabase.from('students').update({ marksheet_url: publicUrl.publicUrl }).eq('id', student.id);
+                           setStudent(prev => ({ ...prev, marksheet_url: publicUrl.publicUrl }));
+                           sessionStorage.setItem('student_session', JSON.stringify({ ...student, marksheet_url: publicUrl.publicUrl }));
+                           setProfileMsg({ type: 'success', text: '✅ Marksheet updated!' });
+                           setProfileLoading(false);
+                         }} style={{ display: 'none' }} disabled={profileLoading} />
+                       </label>
+                     </div>
+                  </div>
+               </div>
+
              </div>
            )}
 
