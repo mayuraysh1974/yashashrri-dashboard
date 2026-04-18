@@ -28,6 +28,7 @@ const StudentPortal = () => {
   const [marksheetFile, setMarksheetFile] = useState(null);
 
   const resetForm = () => {
+    setStudentId('');
     setPassword('');
     setPhone('');
     setPhotoFile(null);
