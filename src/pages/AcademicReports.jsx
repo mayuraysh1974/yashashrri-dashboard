@@ -220,97 +220,113 @@ const AcademicReports = () => {
         </button>
       </div>
 
-      <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '1rem', display: 'flex', alignItems: 'center', gap: '1.5rem', backgroundColor: 'var(--bg-main)', flexWrap: 'wrap', borderRadius: '12px' }}>
-        <div style={{ display: 'inline-flex', gap: '0.25rem', background: '#F1F5F9', padding: '0.3rem', borderRadius: '10px' }}>
+      <div className="card-base no-print" style={{ 
+        marginBottom: '1.5rem', 
+        padding: '1rem', 
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: '1rem', 
+        backgroundColor: 'var(--bg-main)', 
+        borderRadius: '12px' 
+      }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          background: '#F1F5F9', 
+          padding: '0.3rem', 
+          borderRadius: '10px',
+          width: '100%'
+        }}>
           <button 
             onClick={() => setActiveTab('monthly')}
             style={{ 
+              flex: 1,
               backgroundColor: activeTab === 'monthly' ? 'white' : 'transparent',
               color: activeTab === 'monthly' ? 'var(--primary-blue)' : 'var(--text-secondary)',
               boxShadow: activeTab === 'monthly' ? 'var(--shadow-sm)' : 'none',
-              padding: '0.6rem 1.2rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem'
+              padding: '0.6rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem'
             }}
           >
-            Subject Monthly Report
+            Monthly Report
           </button>
           <button 
             onClick={() => setActiveTab('student')}
             style={{ 
+              flex: 1,
               backgroundColor: activeTab === 'student' ? 'white' : 'transparent',
               color: activeTab === 'student' ? 'var(--primary-blue)' : 'var(--text-secondary)',
               boxShadow: activeTab === 'student' ? 'white' : 'none',
-              padding: '0.6rem 1.2rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem'
+              padding: '0.6rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem'
             }}
           >
-            Student Progress Analysis
+            Progress Analysis
           </button>
         </div>
 
-        {activeTab === 'monthly' ? (
-          <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
-            <div style={{ flex: 1 }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+          gap: '1rem',
+          width: '100%'
+        }}>
+          {activeTab === 'monthly' ? (
+            <>
               <select 
                 value={selectedSubject} 
                 onChange={e => { setSelectedSubject(e.target.value); setSelectedTestId('all'); }}
-                style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                className="input-base"
+                style={{ width: '100%' }}
               >
                 <option value="">Select Subject...</option>
-                {subjects.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                {subjects.map(sub => <option key={sub.id} value={sub.name}>{sub.name}</option>)}
               </select>
-            </div>
-            <div style={{ flex: 1 }}>
               <input 
                 type="month" 
                 value={selectedMonth} 
                 onChange={e => { setSelectedMonth(e.target.value); setSelectedTestId('all'); }}
-                style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                className="input-base"
+                style={{ width: '100%' }}
               />
-            </div>
-            <div style={{ flex: 1 }}>
               <select 
                 value={selectedTestId} 
                 onChange={e => setSelectedTestId(e.target.value)}
-                style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                className="input-base"
+                style={{ width: '100%' }}
                 disabled={reportData.tests.length === 0}
               >
-                <option value="all">All Tests in Month</option>
+                <option value="all">All Tests</option>
                 {reportData.tests.map(t => (
-                  <option key={t.id} value={t.id}>{t.name} ({new Date(t.date).toLocaleDateString()})</option>
+                  <option key={t.id} value={t.id}>{t.name}</option>
                 ))}
               </select>
-            </div>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: '1rem', flex: 1 }}>
-            <div style={{ flex: 1 }}>
+            </>
+          ) : (
+            <>
               <select 
                 value={selectedStandard} 
                 onChange={e => { setSelectedStandard(e.target.value); setSelectedStudent(null); }}
-                style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
+                className="input-base"
+                style={{ width: '100%' }}
               >
-                <option value="">Filter by Class...</option>
+                <option value="">Select Class...</option>
                 {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
               </select>
-            </div>
-            <div style={{ flex: 2 }}>
-               <select 
-                  value={selectedStudent?.id || ''} 
-                  onChange={e => {
-                    const student = students.find(s => s.id === e.target.value);
-                    setSelectedStudent(student);
-                  }}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}
-                  disabled={!selectedStandard}
-                >
-                  <option value="">{selectedStandard ? `Select Student from ${selectedStandard}...` : 'Select Class First'}</option>
-                  {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-            </div>
-            <button className="btn-secondary" onClick={() => fetchInitialData()} title="Refresh List" style={{ padding: '0.6rem' }}>
-              <FiCalendar />
-            </button>
-          </div>
-        )}
+              <select 
+                value={selectedStudent?.id || ''} 
+                onChange={e => {
+                  const student = students.find(s => s.id === e.target.value);
+                  setSelectedStudent(student);
+                }}
+                className="input-base"
+                style={{ width: '100%' }}
+                disabled={!selectedStandard}
+              >
+                <option value="">Select Student...</option>
+                {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="card-base" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
@@ -330,9 +346,9 @@ const AcademicReports = () => {
             
             {!loading && reportData.tests.length === 0 ? <div style={{ textAlign: 'center', padding: '4rem' }}><FiBook size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} /><p>No tests found for selected subject and month.</p></div> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: '1.5rem' }}>
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
-                    <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiTrendingUp /> Avg. Performance Trend (%)</h3>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiTrendingUp /> Avg. Performance Trend (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -344,7 +360,7 @@ const AcademicReports = () => {
                     </ResponsiveContainer>
                   </div>
                   <div className="card-base no-print" style={{ padding: '1.5rem', minHeight: '300px' }}>
-                    <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem' }}><FiCheckCircle /> Student Passing Ratio (%)</h3>
+                    <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiCheckCircle /> Student Passing Ratio (%)</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -357,7 +373,8 @@ const AcademicReports = () => {
                   </div>
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '650px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#1A237E', color: 'white', textAlign: 'left' }}>
                       <th style={{ padding: '1rem' }}>Test Name</th>
@@ -488,53 +505,55 @@ const AcademicReports = () => {
                   <div className="no-print" style={{ height: '20px' }}></div> {/* Spacer for screen */}
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: '#1A237E', color: 'white', textAlign: 'left' }}>
-                      <th style={{ padding: '1rem' }}>Test Name</th>
-                      <th style={{ padding: '1rem' }}>Subject</th>
-                      <th style={{ padding: '1rem' }}>Date</th>
-                      <th style={{ padding: '1rem', textAlign: 'right' }}>Score</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>Result</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {studentStats.progress.map((p, idx) => {
-                      const isAbsent = p.score === 0 && p.percentage === 0; // In this view, -1 was converted to 0 percentage
-                      // Note: Progress analysis is student-centric, so "Top" doesn't apply here (Top is relative to class).
-                      // But we will highlight Pass/Fail and Absent.
-                      const isFail = p.percentage < p.minMarks;
+                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '650px' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#1A237E', color: 'white', textAlign: 'left' }}>
+                        <th style={{ padding: '1rem' }}>Test Name</th>
+                        <th style={{ padding: '1rem' }}>Subject</th>
+                        <th style={{ padding: '1rem' }}>Date</th>
+                        <th style={{ padding: '1rem', textAlign: 'right' }}>Score</th>
+                        <th style={{ padding: '1rem', textAlign: 'center' }}>Result</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {studentStats.progress.map((p, idx) => {
+                        const isAbsent = p.score === 0 && p.percentage === 0; // In this view, -1 was converted to 0 percentage
+                        // Note: Progress analysis is student-centric, so "Top" doesn't apply here (Top is relative to class).
+                        // But we will highlight Pass/Fail and Absent.
+                        const isFail = p.percentage < p.minMarks;
 
-                      return (
-                        <tr key={idx} style={{ 
-                          borderBottom: '1px solid var(--border-color)',
-                          backgroundColor: isAbsent ? '#F8FAFC' : (isFail ? '#FEF2F2' : 'transparent'),
-                          color: isAbsent ? '#64748B' : 'inherit',
-                          fontStyle: isAbsent ? 'italic' : 'normal',
-                          opacity: isAbsent ? 0.8 : 1,
-                          WebkitPrintColorAdjust: 'exact',
-                          printColorAdjust: 'exact'
-                        }}>
-                          <td style={{ padding: '1rem', fontWeight: 600 }}>{p.name}</td>
-                          <td style={{ padding: '1rem' }}>{p.subject}</td>
-                          <td style={{ padding: '1rem' }}>{new Date(p.date).toLocaleDateString()}</td>
-                          <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700 }}>
-                            {isAbsent ? 'ABSENT' : `${p.score} / ${p.totalMarks}`} ({p.percentage}%)
-                          </td>
-                          <td style={{ padding: '1rem', textAlign: 'center' }}>
-                            {isAbsent ? (
-                              <span style={{ color: '#64748B', fontWeight: 800 }}>-</span>
-                            ) : !isFail ? (
-                              <span style={{ color: 'var(--success-green)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiCheckCircle /> PASSED</span>
-                            ) : (
-                              <span style={{ color: 'var(--danger-red)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiXCircle /> FAILED</span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        return (
+                          <tr key={idx} style={{ 
+                            borderBottom: '1px solid var(--border-color)',
+                            backgroundColor: isAbsent ? '#F8FAFC' : (isFail ? '#FEF2F2' : 'transparent'),
+                            color: isAbsent ? '#64748B' : 'inherit',
+                            fontStyle: isAbsent ? 'italic' : 'normal',
+                            opacity: isAbsent ? 0.8 : 1,
+                            WebkitPrintColorAdjust: 'exact',
+                            printColorAdjust: 'exact'
+                          }}>
+                            <td style={{ padding: '1rem', fontWeight: 600 }}>{p.name}</td>
+                            <td style={{ padding: '1rem' }}>{p.subject}</td>
+                            <td style={{ padding: '1rem' }}>{new Date(p.date).toLocaleDateString()}</td>
+                            <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700 }}>
+                              {isAbsent ? 'ABSENT' : `${p.score} / ${p.totalMarks}`} ({p.percentage}%)
+                            </td>
+                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                              {isAbsent ? (
+                                <span style={{ color: '#64748B', fontWeight: 800 }}>-</span>
+                              ) : !isFail ? (
+                                <span style={{ color: 'var(--success-green)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiCheckCircle /> PASSED</span>
+                              ) : (
+                                <span style={{ color: 'var(--danger-red)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiXCircle /> FAILED</span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
                 <div className="no-print" style={{ marginTop: '1.5rem', padding: '0.75rem', backgroundColor: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '0.8rem', color: '#64748B' }}>
                    <strong>Diagnostic Info:</strong> {debugStatus || 'Ready'}
                 </div>
