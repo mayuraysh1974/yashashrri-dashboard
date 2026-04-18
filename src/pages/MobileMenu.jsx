@@ -25,6 +25,9 @@ const MobileMenu = () => {
     { path: '/subjects', name: 'Subject Master', icon: <FiFileText /> },
     { path: '/standards', name: 'Standard Master', icon: <FiLayers /> },
     { path: '/fee-reports', name: 'Fee Reports', icon: <FiBarChart2 /> },
+    { path: '/academic-reports', name: 'Academic Reports', icon: <FiBarChart2 /> },
+    { path: '/enquiries', name: 'Web Enquiries', icon: <FiBarChart2 /> },
+    { path: '/gallery-management', name: 'Gallery Management', icon: <FiLayers /> },
     { path: '/settings', name: 'Settings', icon: <FiSettings /> },
   ];
 
