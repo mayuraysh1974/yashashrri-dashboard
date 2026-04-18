@@ -463,6 +463,7 @@ const AcademicReports = () => {
                   </tbody>
                 </table>
                 <PrintFooter />
+                </div>
               </div>
             )}
           </>
