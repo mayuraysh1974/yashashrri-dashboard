@@ -458,7 +458,7 @@ const AcademicReports = () => {
                             </td>
                           </tr>
                         </React.Fragment>
-                      );
+                      )
                     })}
                   </tbody>
                 </table>
