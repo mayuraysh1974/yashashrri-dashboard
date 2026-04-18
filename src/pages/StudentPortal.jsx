@@ -86,6 +86,32 @@ const StudentPortal = () => {
     }
   };
 
+  const handleStudentIdBlur = async () => {
+    if (!studentId.trim() || authMode !== 'activate') return;
+    try {
+      const { data, error: err } = await supabase
+        .from('students')
+        .select('portal_password')
+        .eq('id', studentId.trim())
+        .single();
+
+      if (err || !data) {
+        setError('Student ID not found in our records. Please check and try again.');
+        return;
+      }
+
+      if (data.portal_password && data.portal_password !== 'yash123') {
+        alert('This Student ID is already activated. Please Sign In.');
+        setAuthMode('login');
+        setError(null);
+      } else {
+        setError(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -224,7 +250,7 @@ const StudentPortal = () => {
                   Enter your Student ID and registered phone to set your password.
                 </p>
                 <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} className="portal-input" required />
+                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} onBlur={handleStudentIdBlur} className="portal-input" required />
                   <input type="tel" placeholder="Registered Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className="portal-input" required />
                   <input type="password" placeholder="Set New Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', textAlign: 'left' }}>
