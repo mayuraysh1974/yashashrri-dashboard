@@ -150,48 +150,57 @@ const Enquiries = () => {
               ) : (
                 enquiries.map((enq) => (
                   <tr key={enq.id}>
-                    <td>{new Date(enq.created_at).toLocaleDateString()}</td>
-                    <td>
-                      <div className="fw-bold">{enq.student_name}</div>
-                      <div className="text-sm text-gray">{enq.standard}</div>
+                    <td style={{ padding: '1.25rem' }}>{new Date(enq.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '1.25rem' }}>
+                      <div className="fw-bold" style={{ fontSize: '1rem', color: 'var(--primary-blue)' }}>{enq.student_name}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.2rem' }}>{enq.standard}</div>
                     </td>
-                    <td>{enq.phone}</td>
-                    <td>
-                      <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : (enq.status === 'Admitted' ? 'bg-success' : 'bg-primary')}`}>
+                    <td style={{ padding: '1.25rem', fontWeight: 600 }}>{enq.phone}</td>
+                    <td style={{ padding: '1.25rem' }}>
+                      <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : (enq.status === 'Admitted' ? 'bg-success' : 'bg-primary')}`} style={{ padding: '0.4rem 0.8rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700 }}>
                         {enq.status}
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column' }}>
-                        {enq.status === 'New' ? (
+                      <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column', width: '100%', minWidth: '200px' }}>
+                        {enq.status !== 'Admitted' ? (
                           <>
-                            <textarea 
-                              placeholder="Add reply notes..." 
-                              value={replyText[enq.id] || ''} 
-                              onChange={(e) => handleReplyChange(enq.id, e.target.value)}
-                              rows="2"
-                              style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                            ></textarea>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button className="btn btn-sm btn-primary" onClick={() => updateStatus(enq.id, 'Replied', replyText[enq.id])}>
-                                <FiCheck /> Mark Replied
-                              </button>
+                            {enq.status === 'New' && (
+                              <textarea 
+                                placeholder="Add reply notes..." 
+                                value={replyText[enq.id] || ''} 
+                                onChange={(e) => handleReplyChange(enq.id, e.target.value)}
+                                rows="2"
+                                style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
+                              ></textarea>
+                            )}
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                              {enq.status === 'New' && (
+                                <button className="btn btn-sm btn-primary" onClick={() => updateStatus(enq.id, 'Replied', replyText[enq.id])} style={{ flex: 1 }}>
+                                  <FiCheck /> Mark Replied
+                                </button>
+                              )}
                               <button 
                                 className="btn btn-sm" 
-                                style={{ backgroundColor: 'var(--success-green)', color: 'white', border: 'none' }}
+                                style={{ backgroundColor: 'var(--success-green)', color: 'white', border: 'none', flex: 1, padding: '0.5rem' }}
                                 onClick={() => confirmAdmission(enq)}
                               >
                                 <FiCheck /> Confirm Admission
                               </button>
                             </div>
+                            {enq.status === 'Replied' && enq.reply_notes && (
+                              <div style={{ fontSize: '0.8rem', color: '#64748B', fontStyle: 'italic', backgroundColor: '#F1F5F9', padding: '0.5rem', borderRadius: '6px' }}>
+                                <FiMessageCircle /> Note: {enq.reply_notes}
+                              </div>
+                            )}
                           </>
                         ) : (
-                          <div style={{ fontSize: '0.9rem', color: '#666' }}>
-                            <FiMessageCircle /> Note: {enq.reply_notes}
+                          <div style={{ fontSize: '0.9rem', color: 'var(--success-green)', fontWeight: 700, backgroundColor: '#ECFDF5', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
+                            <FiCheckCircle /> {enq.reply_notes || 'Admission Confirmed'}
                           </div>
                          )}
-                        <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626' }} onClick={() => deleteEnquiry(enq.id)}>
-                          <FiTrash2 /> Delete
+                        <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none', marginTop: '0.5rem' }} onClick={() => deleteEnquiry(enq.id)}>
+                          <FiTrash2 /> Delete enquiry
                         </button>
                       </div>
                     </td>
