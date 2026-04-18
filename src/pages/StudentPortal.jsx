@@ -84,12 +84,15 @@ const StudentPortal = () => {
     setLoading(true);
     setError(null);
     try {
+      // Normalize phone: strip +91 or leading 0
+      const rawPhone = phone.trim().replace(/^\+91/, '').replace(/^0/, '').replace(/\s+/g, '');
+
       // 1. Verify student exists by ID and Phone
       const { data, error: err } = await supabase
         .from('students')
         .select('*')
         .eq('id', studentId.trim())
-        .or(`parent_phone.eq.${phone},student_phone.eq.${phone}`)
+        .or(`parent_phone.ilike.%${rawPhone},student_phone.ilike.%${rawPhone}`)
         .single();
 
       if (err || !data) throw new Error('Verification failed. Use the ID and Phone provided during admission.');
