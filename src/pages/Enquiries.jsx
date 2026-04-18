@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { FiCheck, FiTrash2, FiMessageCircle } from 'react-icons/fi';
+import { FiCheck, FiTrash2, FiMessageCircle, FiCheckCircle } from 'react-icons/fi';
 
 const Enquiries = () => {
   const [enquiries, setEnquiries] = useState([]);

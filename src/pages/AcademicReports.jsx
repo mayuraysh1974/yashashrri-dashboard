@@ -3,7 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
   BarChart, Bar, Cell
 } from 'recharts';
-import { FiPrinter, FiSearch, FiCalendar, FiBook, FiUser, FiTrendingUp, FiCheckCircle, FiXCircle, FiBarChart2 } from 'react-icons/fi';
+import { FiPrinter, FiSearch, FiCalendar, FiBook, FiUser, FiTrendingUp, FiCheckCircle, FiXCircle, FiBarChart2, FiArrowRight, FiDownload } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 
 const AcademicReports = () => {
