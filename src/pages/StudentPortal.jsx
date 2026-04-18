@@ -186,45 +186,48 @@ const StudentPortal = () => {
         
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
           <div className="card-base" style={{ width: '100%', maxWidth: '450px', padding: '3rem', textAlign: 'center' }}>
-            <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>{authMode === 'login' ? 'Student Portal Login' : 'Activate Portal Account'}</h2>
-            <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>
-              {authMode === 'login' 
-                ? 'Sign in to access results, notes, and payments.' 
-                : 'Enter your Student ID and registered phone to set your password.'}
-            </p>
 
-            <form onSubmit={authMode === 'login' ? handleLogin : handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-               <input 
-                 type="text" 
-                 placeholder="Student ID (e.g. 10S2026001)" 
-                 value={studentId} 
-                 onChange={e => setStudentId(e.target.value)} 
-                 className="portal-input"
-                 required
-               />
-               
-               {authMode === 'signup' && (
-                 <input 
-                   type="tel" 
-                   placeholder="Registered Phone Number" 
-                   value={phone} 
-                   onChange={e => setPhone(e.target.value)} 
-                   className="portal-input"
-                   required
-                 />
-               )}
-
-               <input 
-                 type="password" 
-                 placeholder={authMode === 'login' ? 'Portal Password' : 'Set New Password'} 
-                 value={password} 
-                 onChange={e => setPassword(e.target.value)} 
-                 className="portal-input"
-                 required
-               />
-
-               {authMode === 'signup' && (
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', textAlign: 'left' }}>
+            {authMode === 'signup' ? (
+              /* ---- Already Activated Warning Screen ---- */
+              <>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Account Activation</h2>
+                <div style={{ backgroundColor: '#FFF7ED', border: '2px solid #FED7AA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'left' }}>
+                  <p style={{ margin: 0, fontWeight: 700, color: '#92400E', marginBottom: '0.5rem' }}>⚠️ Already activated your account?</p>
+                  <p style={{ margin: 0, color: '#78350F', fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    Do <strong>NOT</strong> activate again. Use <strong>Sign In</strong> with your existing password instead.<br /><br />
+                    To change your password or phone number, log in and go to <strong>My Profile</strong>.
+                  </p>
+                </div>
+                <button
+                  className="cta-primary"
+                  style={{ border: 'none', cursor: 'pointer', width: '100%', padding: '1rem', marginBottom: '1rem' }}
+                  onClick={() => { setAuthMode('login'); setError(null); }}
+                >
+                  Go to Sign In
+                </button>
+                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1rem' }}>Activating for the <strong>very first time?</strong></p>
+                  <button
+                    onClick={() => setAuthMode('activate')}
+                    style={{ color: '#1A237E', background: 'none', border: '1px solid #1A237E', borderRadius: '8px', padding: '0.6rem 1.5rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
+                  >
+                    Yes, I am new — Activate Now
+                  </button>
+                </div>
+              </>
+            ) : authMode === 'activate' ? (
+              /* ---- First-time Activation Form ---- */
+              <>
+                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Activate Portal Account</h2>
+                <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                  Enter your Student ID and registered phone to set your password.
+                </p>
+                <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} className="portal-input" required />
+                  <input type="tel" placeholder="Registered Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className="portal-input" required />
+                  <input type="password" placeholder="Set New Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', textAlign: 'left' }}>
                     <div className="file-upload-box">
                       <label style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>PROFILE PHOTO</label>
                       <label className="portal-file-label">
@@ -239,28 +242,35 @@ const StudentPortal = () => {
                         <input type="file" accept=".pdf,image/*" onChange={e => setMarksheetFile(e.target.files[0])} style={{ display: 'none' }} />
                       </label>
                     </div>
-                 </div>
-               )}
+                  </div>
+                  <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
+                    {loading ? 'Processing...' : 'Upload & Activate'}
+                  </button>
+                </form>
+                {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
+                <div style={{ marginTop: '1.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
+                  <p style={{ fontSize: '0.9rem' }}>Already activated? <button onClick={() => { setAuthMode('login'); setError(null); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
+                </div>
+              </>
+            ) : (
+              /* ---- Login Form ---- */
+              <>
+                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Student Portal Login</h2>
+                <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>Sign in to access results, notes, and payments.</p>
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} className="portal-input" required />
+                  <input type="password" placeholder="Portal Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
+                  <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </button>
+                </form>
+                {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
+                <div style={{ marginTop: '2rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
+                  <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => { setAuthMode('signup'); setError(null); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
+                </div>
+              </>
+            )}
 
-               <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
-                 {loading ? 'Processing...' : (authMode === 'login' ? 'Sign In' : 'Upload & Activate')}
-               </button>
-            </form>
-
-            {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
-
-            <div style={{ marginTop: '2rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-               {authMode === 'login' ? (
-                 <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => setAuthMode('signup')} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
-               ) : (
-                 <>
-                   <p style={{ fontSize: '0.85rem', color: '#64748B', backgroundColor: '#FFF7ED', padding: '0.75rem', borderRadius: '8px', border: '1px solid #FED7AA' }}>
-                     ⚠️ Already activated? Do not activate again — use <strong>Sign In</strong> instead. Activating again will reset your password.
-                   </p>
-                   <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>Already activated? <button onClick={() => setAuthMode('login')} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
-                 </>
-               )}
-            </div>
           </div>
         </main>
       </div>
