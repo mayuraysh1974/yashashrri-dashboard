@@ -41,6 +41,67 @@ const Enquiries = () => {
     }
   };
 
+  const confirmAdmission = async (enq) => {
+    if (!window.confirm(`Confirm admission for ${enq.student_name}? This will create an official student record.`)) return;
+    
+    try {
+      setLoading(true);
+      
+      // 1. Generate a Student ID (Standard + Year + Next Number)
+      const currentYear = new Date().getFullYear();
+      const { data: existingStudents } = await supabase
+        .from('students')
+        .select('id')
+        .eq('standard', enq.standard)
+        .order('id', { ascending: false })
+        .limit(1);
+
+      let nextNum = 1;
+      if (existingStudents && existingStudents.length > 0) {
+        const matches = existingStudents[0].id.match(/\d+$/);
+        if (matches) nextNum = parseInt(matches[0].slice(-3)) + 1;
+      }
+      
+      const sequence = String(nextNum).padStart(3, '0');
+      const newId = `${enq.standard}${currentYear}${sequence}`;
+
+      // 2. Create the Student Record
+      const { error: studentError } = await supabase
+        .from('students')
+        .insert({
+          id: newId,
+          name: enq.student_name,
+          standard: enq.standard,
+          student_phone: enq.phone,
+          status: 'Active',
+          portal_enabled: true,
+          portal_password: 'yash123',
+          fees_paid: 0,
+          balance: 0,
+          concession: 0
+        });
+
+      if (studentError) throw studentError;
+
+      // 3. Update Enquiry Status
+      const { error: updateError } = await supabase
+        .from('enquiries')
+        .update({ status: 'Admitted', reply_notes: `Admitted on ${new Date().toLocaleDateString()} with ID: ${newId}` })
+        .eq('id', enq.id);
+
+      if (updateError) throw updateError;
+
+      alert(`Success! ${enq.student_name} is now admitted.\n\nStudent ID: ${newId}\nPortal Password: yash123\n\nPlease ask the student to visit the Student Portal and upload documents using their phone number (${enq.phone}).`);
+      
+      fetchEnquiries();
+    } catch (error) {
+      alert('Error during admission: ' + error.message);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deleteEnquiry = async (id) => {
     if (!window.confirm('Are you sure you want to delete this enquiry?')) return;
     
@@ -96,7 +157,7 @@ const Enquiries = () => {
                     </td>
                     <td>{enq.phone}</td>
                     <td>
-                      <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : 'bg-success'}`}>
+                      <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : (enq.status === 'Admitted' ? 'bg-success' : 'bg-primary')}`}>
                         {enq.status}
                       </span>
                     </td>
@@ -114,6 +175,13 @@ const Enquiries = () => {
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                               <button className="btn btn-sm btn-primary" onClick={() => updateStatus(enq.id, 'Replied', replyText[enq.id])}>
                                 <FiCheck /> Mark Replied
+                              </button>
+                              <button 
+                                className="btn btn-sm" 
+                                style={{ backgroundColor: 'var(--success-green)', color: 'white', border: 'none' }}
+                                onClick={() => confirmAdmission(enq)}
+                              >
+                                <FiCheck /> Confirm Admission
                               </button>
                             </div>
                           </>
