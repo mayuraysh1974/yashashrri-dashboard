@@ -27,6 +27,14 @@ const StudentPortal = () => {
   const [photoFile, setPhotoFile] = useState(null);
   const [marksheetFile, setMarksheetFile] = useState(null);
 
+  const resetForm = () => {
+    setPassword('');
+    setPhone('');
+    setPhotoFile(null);
+    setMarksheetFile(null);
+    setError(null);
+  };
+
   // Profile Edit States
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -103,7 +111,7 @@ const StudentPortal = () => {
       if (data.portal_password && data.portal_password !== 'yash123') {
         alert('This Student ID is already activated. Please Sign In.');
         setAuthMode('login');
-        setError(null);
+        resetForm();
       } else {
         setError(null);
       }
@@ -228,14 +236,14 @@ const StudentPortal = () => {
                 <button
                   className="cta-primary"
                   style={{ border: 'none', cursor: 'pointer', width: '100%', padding: '1rem', marginBottom: '1rem' }}
-                  onClick={() => { setAuthMode('login'); setError(null); }}
+                  onClick={() => { setAuthMode('login'); resetForm(); }}
                 >
                   Go to Sign In
                 </button>
                 <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
                   <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1rem' }}>Activating for the <strong>very first time?</strong></p>
                   <button
-                    onClick={() => setAuthMode('activate')}
+                    onClick={() => { setAuthMode('activate'); resetForm(); }}
                     style={{ color: '#1A237E', background: 'none', border: '1px solid #1A237E', borderRadius: '8px', padding: '0.6rem 1.5rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
                   >
                     Yes, I am new — Activate Now
@@ -275,7 +283,7 @@ const StudentPortal = () => {
                 </form>
                 {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
                 <div style={{ marginTop: '1.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-                  <p style={{ fontSize: '0.9rem' }}>Already activated? <button onClick={() => { setAuthMode('login'); setError(null); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
+                  <p style={{ fontSize: '0.9rem' }}>Already activated? <button onClick={() => { setAuthMode('login'); resetForm(); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
                 </div>
               </>
             ) : (
@@ -292,7 +300,7 @@ const StudentPortal = () => {
                 </form>
                 {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
                 <div style={{ marginTop: '2rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-                  <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => { setAuthMode('signup'); setError(null); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
+                  <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => { setAuthMode('signup'); resetForm(); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
                 </div>
               </>
             )}
