@@ -352,8 +352,8 @@ const AcademicReports = () => {
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="name" fontSize={10} />
-                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} />
+                        <XAxis dataKey="name" fontSize={10} padding={{ left: 10, right: 10 }} />
+                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} width={40} />
                         <Tooltip formatter={(value) => [`${value}%`, 'Avg. Performance']} />
                         <Bar dataKey="avg" name="Avg. Performance" fill="var(--primary-blue)" radius={[4, 4, 0, 0]} barSize={selectedTestId === 'all' ? undefined : 60} />
                       </BarChart>
@@ -364,8 +364,8 @@ const AcademicReports = () => {
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={reportData.performance.filter((_, idx) => selectedTestId === 'all' || String(reportData.tests[idx]?.id) === String(selectedTestId))}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="name" fontSize={10} />
-                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} />
+                        <XAxis dataKey="name" fontSize={10} padding={{ left: 10, right: 10 }} />
+                        <YAxis tickFormatter={t => `${t}%`} domain={[0, 100]} fontSize={10} width={40} />
                         <Tooltip formatter={(value) => [`${value}%`, 'Passing Ratio']} />
                         <Line type="monotone" dataKey="passing" name="Passing Ratio" stroke="var(--success-green)" strokeWidth={3} dot={{ r: 6 }} activeDot={{ r: 8 }} />
                       </LineChart>
@@ -494,10 +494,10 @@ const AcademicReports = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={studentStats.progress}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" fontSize={10} />
-                      <YAxis tickFormatter={t => `${t}%`} fontSize={10} domain={[0, 100]} />
+                      <XAxis dataKey="name" fontSize={10} padding={{ left: 10, right: 10 }} />
+                      <YAxis tickFormatter={t => `${t}%`} fontSize={10} domain={[0, 100]} width={40} />
                       <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
-                      <Legend />
+                      <Legend verticalAlign="bottom" height={36} />
                       <Line type="monotone" dataKey="percentage" name="Student Score %" stroke="var(--primary-blue)" strokeWidth={4} dot={{ r: 6, fill: 'var(--primary-blue)' }} activeDot={{ r: 8 }} />
                       <Line type="step" dataKey="minMarks" name="Passing Threshold %" stroke="var(--danger-red)" strokeDasharray="5 5" strokeWidth={2} dot={false} />
                     </LineChart>
@@ -615,12 +615,12 @@ const AcademicReports = () => {
           .recharts-responsive-container { 
             width: 100% !important; 
             max-width: 180mm !important;
-            height: 200px !important; 
-            margin: 5px auto !important;
+            height: 220px !important; 
+            margin: 15px auto 25px auto !important;
           }
-          .print-header { margin-bottom: 10px !important; }
-          .AcademicNote { font-size: 7px !important; line-height: 1.2 !important; }
-          .signatory-box { min-width: 150px; text-align: center; }
+          .print-header { margin-bottom: 15px !important; }
+          .AcademicNote { font-size: 7px !important; line-height: 1.2 !important; margin-top: 15px !important; }
+          .signatory-box { min-width: 150px; text-align: center; margin-top: 20px !important; }
         }
       `}</style>
     </div>
