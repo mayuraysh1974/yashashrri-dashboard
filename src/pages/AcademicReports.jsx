@@ -325,7 +325,7 @@ const AcademicReports = () => {
           <>
             <PrintHeader 
               title={selectedTestId === 'all' ? "Monthly Academic Performance Report" : "Specific Test Performance Report"} 
-              subTitle={`${selectedTestId === 'all' ? `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : `Test: ${reportData.tests.find(t => t.id === selectedTestId)?.name} | Date: ${new Date(reportData.tests.find(t => t.id === selectedTestId)?.date).toLocaleDateString()}`}`} 
+              subTitle={`${selectedTestId === 'all' ? `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : `Test: ${reportData.tests.find(t => String(t.id) === String(selectedTestId))?.name} | Date: ${new Date(reportData.tests.find(t => String(t.id) === String(selectedTestId))?.date).toLocaleDateString()}`}`} 
             />
             
             {!loading && reportData.tests.length === 0 ? <div style={{ textAlign: 'center', padding: '4rem' }}><FiBook size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} /><p>No tests found for selected subject and month.</p></div> : (
