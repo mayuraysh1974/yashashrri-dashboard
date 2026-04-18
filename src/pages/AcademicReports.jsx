@@ -554,7 +554,7 @@ const AcademicReports = () => {
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
-          @page { size: A4; margin: 10mm; }
+          @page { size: auto; margin: 10mm; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
           .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
