@@ -211,12 +211,6 @@ const AcademicReports = () => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <style>{`
-        @media print {
-          @page { size: ${printOrientation}; }
-          .print-content { width: 100%; max-width: 100%; }
-        }
-      `}</style>
       <div className="no-print" style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -228,22 +222,26 @@ const AcademicReports = () => {
         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
       }}>
         <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <FiBarChart2 /> Academic Performance Reports
-          </h1>
-          <div style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '4px', borderRadius: '8px', gap: '4px' }}>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+              <FiBarChart2 /> Academic Performance Reports
+            </h1>
+            <p style={{ fontSize: '0.85rem', color: '#64748B', margin: 0 }}>Detailed test analytics and student progress tracking</p>
+          </div>
+          <div style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '4px', borderRadius: '8px', gap: '4px', marginLeft: '1rem' }}>
             <button 
               onClick={() => setPrintOrientation('portrait')}
               style={{ 
                 padding: '6px 12px', 
                 borderRadius: '6px', 
                 border: 'none', 
-                fontSize: '0.8rem', 
+                fontSize: '0.75rem', 
                 fontWeight: 600,
                 cursor: 'pointer',
                 backgroundColor: printOrientation === 'portrait' ? 'white' : 'transparent',
                 boxShadow: printOrientation === 'portrait' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                color: printOrientation === 'portrait' ? 'var(--primary-blue)' : '#64748B'
+                color: printOrientation === 'portrait' ? 'var(--primary-blue)' : '#64748B',
+                transition: 'all 0.2s'
               }}
             >
               Portrait
@@ -254,12 +252,13 @@ const AcademicReports = () => {
                 padding: '6px 12px', 
                 borderRadius: '6px', 
                 border: 'none', 
-                fontSize: '0.8rem', 
+                fontSize: '0.75rem', 
                 fontWeight: 600,
                 cursor: 'pointer',
                 backgroundColor: printOrientation === 'landscape' ? 'white' : 'transparent',
                 boxShadow: printOrientation === 'landscape' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                color: printOrientation === 'landscape' ? 'var(--primary-blue)' : '#64748B'
+                color: printOrientation === 'landscape' ? 'var(--primary-blue)' : '#64748B',
+                transition: 'all 0.2s'
               }}
             >
               Landscape
