@@ -11,12 +11,8 @@ import './LandingPage.css';
 const StudentPortal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [student, setStudent] = useState(null);
-  const [authMode, setAuthMode] = useState('login'); // 'login', 'signup'
-  
-  // Login States
   const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState(''); // for signup
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -24,17 +20,6 @@ const StudentPortal = () => {
   const [results, setResults] = useState([]);
   const [library, setLibrary] = useState([]);
   const [payments, setPayments] = useState([]);
-  const [photoFile, setPhotoFile] = useState(null);
-  const [marksheetFile, setMarksheetFile] = useState(null);
-
-  const resetForm = () => {
-    setStudentId('');
-    setPassword('');
-    setPhone('');
-    setPhotoFile(null);
-    setMarksheetFile(null);
-    setError(null);
-  };
 
   // Profile Edit States
   const [newPassword, setNewPassword] = useState('');
@@ -85,110 +70,13 @@ const StudentPortal = () => {
         .single();
 
       if (err || !data) throw new Error('Invalid ID or Password.');
-      if (!data.portal_enabled) throw new Error('Portal access disabled.');
+      if (!data.portal_enabled) {
+        // Automatically enable portal if it's their first login
+        const { error: upError } = await supabase.from('students').update({ portal_enabled: true }).eq('id', data.id);
+        if (upError) console.error('Failed to enable portal access:', upError);
+      }
 
       loginStudent(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleStudentIdBlur = async () => {
-    if (!studentId.trim() || authMode !== 'activate') return;
-    try {
-      const { data, error: err } = await supabase
-        .from('students')
-        .select('portal_password')
-        .eq('id', studentId.trim())
-        .single();
-
-      if (err || !data) {
-        setError('Student ID not found in our records. Please check and try again.');
-        return;
-      }
-
-      if (data.portal_password && data.portal_password !== 'yash123') {
-        alert('This Student ID is already activated. Please Sign In.');
-        setAuthMode('login');
-        resetForm();
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      // Helper: strip country code and spaces for comparison
-      const normalizePhone = (p) => (p || '').replace(/^\+91/, '').replace(/^0/, '').replace(/\s+/g, '').trim();
-
-      // 1. Fetch student by ID
-      const { data, error: err } = await supabase
-        .from('students')
-        .select('*')
-        .eq('id', studentId.trim())
-        .single();
-
-      if (err || !data) throw new Error('Student ID not found. Please check and try again.');
-
-      // 2. Compare phone numbers after normalizing both sides
-      const inputPhone = normalizePhone(phone);
-      const storedStudent = normalizePhone(data.student_phone);
-      const storedParent = normalizePhone(data.parent_phone);
-
-      if (inputPhone !== storedStudent && inputPhone !== storedParent) {
-        throw new Error('Verification failed. Use the ID and Phone provided during admission.');
-      }
-
-      // 2. Upload Files if provided
-      let photoUrl = data.photo;
-      let marksheetUrl = data.marksheet_url;
-
-      if (photoFile) {
-        const fileExt = photoFile.name.split('.').pop();
-        const fileName = `${data.id}_photo.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('gallery').upload(fileName, photoFile, { upsert: true });
-        if (uploadError) throw new Error('Photo upload failed: ' + uploadError.message);
-        const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
-        photoUrl = publicUrl.publicUrl;
-      }
-
-      if (marksheetFile) {
-        const fileExt = marksheetFile.name.split('.').pop();
-        const fileName = `${data.id}_marksheet.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('gallery').upload(fileName, marksheetFile, { upsert: true });
-        if (uploadError) throw new Error('Marksheet upload failed: ' + uploadError.message);
-        const { data: publicUrl } = supabase.storage.from('gallery').getPublicUrl(fileName);
-        marksheetUrl = publicUrl.publicUrl;
-      }
-
-      // 3. Update student record
-      const { error: upError } = await supabase
-        .from('students')
-        .update({ 
-          portal_password: password.trim(), 
-          portal_enabled: true,
-          photo: photoUrl,
-          marksheet_url: marksheetUrl
-        })
-        .eq('id', data.id);
-
-      if (upError) throw upError;
-
-      alert('Account activated successfully! Please sign in with your new password.');
-      setAuthMode('login');
-      setPassword('');
-      setPhotoFile(null);
-      setMarksheetFile(null);
-      setStudentId('');
-      setPhone('');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -221,91 +109,16 @@ const StudentPortal = () => {
         
         <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
           <div className="card-base" style={{ width: '100%', maxWidth: '450px', padding: '3rem', textAlign: 'center' }}>
-
-            {authMode === 'signup' ? (
-              /* ---- Already Activated Warning Screen ---- */
-              <>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
-                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Account Activation</h2>
-                <div style={{ backgroundColor: '#FFF7ED', border: '2px solid #FED7AA', borderRadius: '12px', padding: '1.5rem', marginBottom: '1.5rem', textAlign: 'left' }}>
-                  <p style={{ margin: 0, fontWeight: 700, color: '#92400E', marginBottom: '0.5rem' }}>⚠️ Already activated your account?</p>
-                  <p style={{ margin: 0, color: '#78350F', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                    Do <strong>NOT</strong> activate again. Use <strong>Sign In</strong> with your existing password instead.<br /><br />
-                    To change your password or phone number, log in and go to <strong>My Profile</strong>.
-                  </p>
-                </div>
-                <button
-                  className="cta-primary"
-                  style={{ border: 'none', cursor: 'pointer', width: '100%', padding: '1rem', marginBottom: '1rem' }}
-                  onClick={() => { setAuthMode('login'); resetForm(); }}
-                >
-                  Go to Sign In
-                </button>
-                <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-                  <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1rem' }}>Activating for the <strong>very first time?</strong></p>
-                  <button
-                    onClick={() => { setAuthMode('activate'); resetForm(); }}
-                    style={{ color: '#1A237E', background: 'none', border: '1px solid #1A237E', borderRadius: '8px', padding: '0.6rem 1.5rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}
-                  >
-                    Yes, I am new — Activate Now
-                  </button>
-                </div>
-              </>
-            ) : authMode === 'activate' ? (
-              /* ---- First-time Activation Form ---- */
-              <>
-                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Activate Portal Account</h2>
-                <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>
-                  Enter your Student ID and registered phone to set your password.
-                </p>
-                <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} onBlur={handleStudentIdBlur} className="portal-input" required />
-                  <input type="tel" placeholder="Registered Phone Number" value={phone} onChange={e => setPhone(e.target.value)} className="portal-input" required />
-                  <input type="password" placeholder="Set New Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', textAlign: 'left' }}>
-                    <div className="file-upload-box">
-                      <label style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>PROFILE PHOTO</label>
-                      <label className="portal-file-label">
-                        <FiCamera /> {photoFile ? 'Selected' : 'Choose...'}
-                        <input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files[0])} style={{ display: 'none' }} />
-                      </label>
-                    </div>
-                    <div className="file-upload-box">
-                      <label style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '0.4rem' }}>MARKSHEET PDF</label>
-                      <label className="portal-file-label">
-                        <FiFile /> {marksheetFile ? 'Selected' : 'Choose...'}
-                        <input type="file" accept=".pdf,image/*" onChange={e => setMarksheetFile(e.target.files[0])} style={{ display: 'none' }} />
-                      </label>
-                    </div>
-                  </div>
-                  <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
-                    {loading ? 'Processing...' : 'Upload & Activate'}
-                  </button>
-                </form>
-                {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
-                <div style={{ marginTop: '1.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-                  <p style={{ fontSize: '0.9rem' }}>Already activated? <button onClick={() => { setAuthMode('login'); resetForm(); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
-                </div>
-              </>
-            ) : (
-              /* ---- Login Form ---- */
-              <>
-                <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Student Portal Login</h2>
-                <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>Sign in to access results, notes, and payments.</p>
-                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} className="portal-input" required />
-                  <input type="password" placeholder="Portal Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
-                  <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
-                    {loading ? 'Signing in...' : 'Sign In'}
-                  </button>
-                </form>
-                {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
-                <div style={{ marginTop: '2rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
-                  <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => { setAuthMode('signup'); resetForm(); }} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
-                </div>
-              </>
-            )}
-
+            <h2 style={{ color: '#1A237E', marginBottom: '1rem' }}>Student Portal Login</h2>
+            <p style={{ color: '#64748B', marginBottom: '2rem', fontSize: '0.9rem' }}>Sign in to access results, notes, and payments.</p>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input type="text" placeholder="Student ID (e.g. XI2026001)" value={studentId} onChange={e => setStudentId(e.target.value)} className="portal-input" required />
+              <input type="password" placeholder="Portal Password" value={password} onChange={e => setPassword(e.target.value)} className="portal-input" required />
+              <button disabled={loading} className="cta-primary" style={{ border: 'none', margin: '1rem 0' }}>
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+            {error && <p style={{ color: '#EF4444', backgroundColor: '#FEE2E2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem' }}>{error}</p>}
           </div>
         </main>
       </div>
