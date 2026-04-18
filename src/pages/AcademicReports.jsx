@@ -554,7 +554,7 @@ const AcademicReports = () => {
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
-          @page { size: A4; margin: 15mm; }
+          @page { size: A4; margin: 10mm; }
           html, body { 
             height: auto !important; 
             overflow: visible !important; 
@@ -562,44 +562,46 @@ const AcademicReports = () => {
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            font-size: 11px !important;
+            font-size: 10px !important;
           }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
+          .print-container { width: 100% !important; max-width: 190mm !important; margin: 0 auto !important; }
           .card-base { 
             border: none !important; 
             box-shadow: none !important; 
             width: 100% !important; 
-            margin-bottom: 10px !important; 
+            margin-bottom: 5px !important; 
             padding: 0 !important; 
             min-height: 0 !important; 
-            background: transparent !important;
           }
           table { 
             width: 100% !important; 
-            border: 1px solid #eee !important; 
-            font-size: 9px !important; 
+            border: 1px solid #e2e8f0 !important; 
+            font-size: 8px !important; 
             border-collapse: collapse !important; 
             table-layout: fixed !important; 
           }
           th { 
-            background-color: #f8fafc !important; 
+            background-color: #f1f5f9 !important; 
             color: #1e293b !important; 
+            padding: 4px !important; 
             border: 1px solid #e2e8f0 !important;
-            padding: 6px !important; 
           }
           td { 
-            padding: 6px !important; 
+            padding: 4px !important; 
             border: 1px solid #e2e8f0 !important;
+            word-wrap: break-word;
           }
           .recharts-responsive-container { 
             width: 100% !important; 
-            height: 250px !important; 
-            margin: 10px 0 !important;
+            max-width: 180mm !important;
+            height: 200px !important; 
+            margin: 5px auto !important;
           }
-          .print-header { margin-bottom: 15px !important; }
-          .signatory-box { min-width: 180px; text-align: center; }
-          .AcademicNote { font-size: 8px !important; }
+          .print-header { margin-bottom: 10px !important; }
+          .AcademicNote { font-size: 7px !important; line-height: 1.2 !important; }
+          .signatory-box { min-width: 150px; text-align: center; }
         }
       `}</style>
     </div>
