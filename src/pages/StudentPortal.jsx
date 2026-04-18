@@ -27,6 +27,13 @@ const StudentPortal = () => {
   const [photoFile, setPhotoFile] = useState(null);
   const [marksheetFile, setMarksheetFile] = useState(null);
 
+  // Profile Edit States
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [profileMsg, setProfileMsg] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+
   useEffect(() => {
     const saved = sessionStorage.getItem('student_session');
     if (saved) {
@@ -140,11 +147,13 @@ const StudentPortal = () => {
 
       if (upError) throw upError;
 
-      alert('Account activated successfully with your documents! Please sign in.');
+      alert('Account activated successfully! Please sign in with your new password.');
       setAuthMode('login');
       setPassword('');
       setPhotoFile(null);
       setMarksheetFile(null);
+      setStudentId('');
+      setPhone('');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -244,7 +253,12 @@ const StudentPortal = () => {
                {authMode === 'login' ? (
                  <p style={{ fontSize: '0.9rem' }}>First time here? <button onClick={() => setAuthMode('signup')} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Activate your account</button></p>
                ) : (
-                 <p style={{ fontSize: '0.9rem' }}>Already activated? <button onClick={() => setAuthMode('login')} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
+                 <>
+                   <p style={{ fontSize: '0.85rem', color: '#64748B', backgroundColor: '#FFF7ED', padding: '0.75rem', borderRadius: '8px', border: '1px solid #FED7AA' }}>
+                     ⚠️ Already activated? Do not activate again — use <strong>Sign In</strong> instead. Activating again will reset your password.
+                   </p>
+                   <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>Already activated? <button onClick={() => setAuthMode('login')} style={{ color: '#B8860B', background: 'none', border: 'none', fontWeight: 700, cursor: 'pointer' }}>Sign In</button></p>
+                 </>
                )}
             </div>
           </div>
@@ -384,37 +398,69 @@ const StudentPortal = () => {
            )}
 
            {activeTab === 'profile' && (
-             <div className="animate-in" style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <div className="card-base" style={{ padding: '2.5rem', textAlign: 'center' }}>
-                   <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundColor: '#F1F5F9', margin: '0 auto 1.5rem', overflow: 'hidden', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-                      {student.photo ? <img src={student.photo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <FiUser size={50} color="#CBD5E1" style={{ marginTop: '30px' }} />}
-                   </div>
-                   <h2 style={{ color: '#1A237E', margin: '0 0 0.5rem 0' }}>{student.name}</h2>
-                   <p style={{ color: '#64748B', fontWeight: 600 }}>ID: {student.id}</p>
-                   
-                   <div style={{ textAlign: 'left', marginTop: '2rem', display: 'grid', gap: '1rem', borderTop: '1px solid #E2E8F0', paddingTop: '2rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                         <span style={{ color: '#64748B' }}>Standard</span>
-                         <span style={{ fontWeight: 600 }}>{student.standard}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                         <span style={{ color: '#64748B' }}>Phone number</span>
-                         <span style={{ fontWeight: 600 }}>{student.student_phone || student.parent_phone}</span>
-                      </div>
-                      <div style={{ padding: '1.5rem', backgroundColor: '#F8FAFC', borderRadius: '12px', marginTop: '1rem' }}>
-                         <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '0.75rem', fontWeight: 700 }}>VERIFIED DOCUMENTS</p>
-                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <FiCheckCircle color="#10B981" />
-                            <span style={{ flex: 1, fontSize: '0.9rem' }}>Previous Marksheet</span>
-                            {student.marksheet_url ? (
-                               <a href={student.marksheet_url} target="_blank" rel="noreferrer" style={{ color: '#B8860B', fontWeight: 700, fontSize: '0.8rem' }}>VIEW <FiExternalLink /></a>
-                            ) : (
-                               <span style={{ color: '#EF4444', fontSize: '0.8rem' }}>Missing</span>
-                            )}
-                         </div>
-                      </div>
-                   </div>
-                </div>
+             <div className="animate-in" style={{ maxWidth: '640px', margin: '0 auto', display: 'grid', gap: '1.5rem' }}>
+
+               {/* Profile Card */}
+               <div className="card-base" style={{ padding: '2rem', textAlign: 'center' }}>
+                  <div style={{ width: '100px', height: '100px', borderRadius: '50%', backgroundColor: '#F1F5F9', margin: '0 auto 1rem', overflow: 'hidden', border: '4px solid white', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                     {student.photo ? <img src={student.photo} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Profile" /> : <FiUser size={40} color="#CBD5E1" style={{ marginTop: '28px' }} />}
+                  </div>
+                  <h2 style={{ color: '#1A237E', margin: '0 0 0.25rem 0' }}>{student.name}</h2>
+                  <p style={{ color: '#64748B', fontWeight: 600, margin: 0 }}>ID: {student.id} &nbsp;|&nbsp; Std: {student.standard}</p>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1.5rem', borderTop: '1px solid #E2E8F0', paddingTop: '1.5rem' }}>
+                     <div><p style={{ margin: 0, fontSize: '0.75rem', color: '#94A3B8' }}>PHONE</p><p style={{ margin: 0, fontWeight: 700 }}>{student.student_phone || student.parent_phone || '—'}</p></div>
+                     <div><p style={{ margin: 0, fontSize: '0.75rem', color: '#94A3B8' }}>MARKSHEET</p>
+                        {student.marksheet_url
+                          ? <a href={student.marksheet_url} target="_blank" rel="noreferrer" style={{ color: '#B8860B', fontWeight: 700, fontSize: '0.9rem' }}>View <FiExternalLink /></a>
+                          : <span style={{ color: '#EF4444', fontSize: '0.9rem' }}>Not uploaded</span>}
+                     </div>
+                  </div>
+               </div>
+
+               {profileMsg && (
+                 <div style={{ padding: '1rem', borderRadius: '8px', background: profileMsg.type === 'success' ? '#ECFDF5' : '#FEE2E2', color: profileMsg.type === 'success' ? '#16A34A' : '#DC2626', fontWeight: 600, textAlign: 'center' }}>
+                   {profileMsg.text}
+                 </div>
+               )}
+
+               {/* Change Password */}
+               <div className="card-base" style={{ padding: '2rem' }}>
+                  <h3 style={{ color: '#1A237E', marginTop: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiLock /> Change Password</h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                     <input className="portal-input" type="password" placeholder="New Password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                     <input className="portal-input" type="password" placeholder="Confirm New Password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                     <button className="cta-primary" style={{ border: 'none', cursor: 'pointer', padding: '0.9rem' }} disabled={profileLoading} onClick={async () => {
+                       if (!newPassword || newPassword.length < 4) return setProfileMsg({ type: 'error', text: 'Password must be at least 4 characters.' });
+                       if (newPassword !== confirmPassword) return setProfileMsg({ type: 'error', text: 'Passwords do not match.' });
+                       setProfileLoading(true); setProfileMsg(null);
+                       const { error } = await supabase.from('students').update({ portal_password: newPassword }).eq('id', student.id);
+                       setProfileLoading(false);
+                       if (error) return setProfileMsg({ type: 'error', text: 'Failed: ' + error.message });
+                       setProfileMsg({ type: 'success', text: '✅ Password updated! Use your new password next time you log in.' });
+                       setNewPassword(''); setConfirmPassword('');
+                     }}>{profileLoading ? 'Saving...' : 'Update Password'}</button>
+                  </div>
+               </div>
+
+               {/* Change Phone */}
+               <div className="card-base" style={{ padding: '2rem' }}>
+                  <h3 style={{ color: '#1A237E', marginTop: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiUser /> Update Phone Number</h3>
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                     <input className="portal-input" type="tel" placeholder="New Phone Number (e.g. 9876543210)" value={newPhone} onChange={e => setNewPhone(e.target.value)} />
+                     <button className="cta-primary" style={{ border: 'none', cursor: 'pointer', padding: '0.9rem' }} disabled={profileLoading} onClick={async () => {
+                       if (!newPhone || newPhone.length < 10) return setProfileMsg({ type: 'error', text: 'Please enter a valid phone number.' });
+                       setProfileLoading(true); setProfileMsg(null);
+                       const { error } = await supabase.from('students').update({ student_phone: newPhone }).eq('id', student.id);
+                       setProfileLoading(false);
+                       if (error) return setProfileMsg({ type: 'error', text: 'Failed: ' + error.message });
+                       setStudent(prev => ({ ...prev, student_phone: newPhone }));
+                       sessionStorage.setItem('student_session', JSON.stringify({ ...student, student_phone: newPhone }));
+                       setProfileMsg({ type: 'success', text: '✅ Phone number updated successfully!' });
+                       setNewPhone('');
+                     }}>{profileLoading ? 'Saving...' : 'Update Phone'}</button>
+                  </div>
+               </div>
+
              </div>
            )}
 
