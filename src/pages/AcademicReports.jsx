@@ -17,6 +17,7 @@ const AcademicReports = () => {
   const [selectedTestId, setSelectedTestId] = useState('all');
   const [selectedStandard, setSelectedStandard] = useState('');
   const [standards, setStandards] = useState([]);
+  const [printOrientation, setPrintOrientation] = useState('portrait'); // 'portrait' or 'landscape'
   
   const [reportData, setReportData] = useState({ tests: [], performance: [], results: [] });
   const [debugStatus, setDebugStatus] = useState('');
@@ -210,12 +211,62 @@ const AcademicReports = () => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="page-header no-print">
-        <div>
-          <h1 className="page-title">Academic Performance Reports</h1>
-          <p className="page-subtitle">Detailed test analytics, student progress tracking, and professional reports</p>
+      <style>{`
+        @media print {
+          @page { size: ${printOrientation}; }
+          .print-content { width: 100%; max-width: 100%; }
+        }
+      `}</style>
+      <div className="no-print" style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '2rem',
+        padding: '1.5rem',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--primary-blue)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <FiBarChart2 /> Academic Performance Reports
+          </h1>
+          <div style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '4px', borderRadius: '8px', gap: '4px' }}>
+            <button 
+              onClick={() => setPrintOrientation('portrait')}
+              style={{ 
+                padding: '6px 12px', 
+                borderRadius: '6px', 
+                border: 'none', 
+                fontSize: '0.8rem', 
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: printOrientation === 'portrait' ? 'white' : 'transparent',
+                boxShadow: printOrientation === 'portrait' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: printOrientation === 'portrait' ? 'var(--primary-blue)' : '#64748B'
+              }}
+            >
+              Portrait
+            </button>
+            <button 
+              onClick={() => setPrintOrientation('landscape')}
+              style={{ 
+                padding: '6px 12px', 
+                borderRadius: '6px', 
+                border: 'none', 
+                fontSize: '0.8rem', 
+                fontWeight: 600,
+                cursor: 'pointer',
+                backgroundColor: printOrientation === 'landscape' ? 'white' : 'transparent',
+                boxShadow: printOrientation === 'landscape' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                color: printOrientation === 'landscape' ? 'var(--primary-blue)' : '#64748B'
+              }}
+            >
+              Landscape
+            </button>
+          </div>
         </div>
-        <button className="btn-secondary" onClick={handlePrint}>
+        <button onClick={() => window.print()} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem' }}>
           <FiPrinter /> Print / Export PDF
         </button>
       </div>
@@ -554,7 +605,7 @@ const AcademicReports = () => {
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
-          @page { margin: 15mm; }
+          @page { size: ${printOrientation === 'landscape' ? 'A4 landscape' : 'A4'}; margin: 10mm; }
           html, body { 
             height: auto !important; 
             overflow: visible !important; 
@@ -577,7 +628,7 @@ const AcademicReports = () => {
           table { 
             width: 100% !important; 
             border: 1px solid #ddd !important; 
-            font-size: 11px !important; 
+            font-size: ${printOrientation === 'landscape' ? '11px' : '10px'} !important; 
             border-collapse: collapse !important; 
             table-layout: fixed !important; 
           }
@@ -596,7 +647,7 @@ const AcademicReports = () => {
           }
           .recharts-responsive-container { 
             width: 100% !important; 
-            height: 300px !important; 
+            height: ${printOrientation === 'landscape' ? '400px' : '300px'} !important; 
             margin-bottom: 20px !important; 
           }
           .print-header { margin-bottom: 25px !important; }
