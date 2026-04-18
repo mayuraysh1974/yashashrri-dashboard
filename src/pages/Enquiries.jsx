@@ -62,8 +62,13 @@ const Enquiries = () => {
         if (matches) nextNum = parseInt(matches[0].slice(-3)) + 1;
       }
       
+      // Smart Prefix Mapping
+      let prefix = enq.standard;
+      if (enq.standard.includes('11')) prefix = 'XI';
+      else if (enq.standard.includes('12')) prefix = 'XII';
+      
       const sequence = String(nextNum).padStart(3, '0');
-      const newId = `${enq.standard}${currentYear}${sequence}`;
+      const newId = `${prefix}${currentYear}${sequence}`;
 
       // 2. Create the Student Record
       const { error: studentError } = await supabase
