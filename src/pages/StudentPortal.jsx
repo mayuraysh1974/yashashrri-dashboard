@@ -84,18 +84,26 @@ const StudentPortal = () => {
     setLoading(true);
     setError(null);
     try {
-      // Normalize phone: strip +91 or leading 0
-      const rawPhone = phone.trim().replace(/^\+91/, '').replace(/^0/, '').replace(/\s+/g, '');
+      // Helper: strip country code and spaces for comparison
+      const normalizePhone = (p) => (p || '').replace(/^\+91/, '').replace(/^0/, '').replace(/\s+/g, '').trim();
 
-      // 1. Verify student exists by ID and Phone
+      // 1. Fetch student by ID
       const { data, error: err } = await supabase
         .from('students')
         .select('*')
         .eq('id', studentId.trim())
-        .or(`parent_phone.ilike.%${rawPhone},student_phone.ilike.%${rawPhone}`)
         .single();
 
-      if (err || !data) throw new Error('Verification failed. Use the ID and Phone provided during admission.');
+      if (err || !data) throw new Error('Student ID not found. Please check and try again.');
+
+      // 2. Compare phone numbers after normalizing both sides
+      const inputPhone = normalizePhone(phone);
+      const storedStudent = normalizePhone(data.student_phone);
+      const storedParent = normalizePhone(data.parent_phone);
+
+      if (inputPhone !== storedStudent && inputPhone !== storedParent) {
+        throw new Error('Verification failed. Use the ID and Phone provided during admission.');
+      }
 
       // 2. Upload Files if provided
       let photoUrl = data.photo;
