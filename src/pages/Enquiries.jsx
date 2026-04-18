@@ -146,15 +146,19 @@ const Enquiries = () => {
   if (loading) return <div className="loading-spinner">Loading...</div>;
 
   const tabStyle = (tab) => ({
-    padding: '0.6rem 1.5rem',
-    borderRadius: '8px 8px 0 0',
+    padding: '0.85rem 2.2rem',
+    borderRadius: '10px 10px 0 0',
     border: 'none',
     cursor: 'pointer',
     fontWeight: 700,
-    fontSize: '0.95rem',
+    fontSize: '1rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
     background: activeTab === tab ? 'var(--primary-blue)' : '#E2E8F0',
     color: activeTab === tab ? 'white' : '#475569',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    boxShadow: activeTab === tab ? '0 -2px 8px rgba(26,35,126,0.15)' : 'none'
   });
 
   return (
@@ -164,18 +168,18 @@ const Enquiries = () => {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0', marginTop: '1rem' }}>
         <button style={tabStyle('enquiries')} onClick={() => setActiveTab('enquiries')}>
-          <FiMessageCircle style={{ marginRight: '0.4rem' }} />
+          <FiMessageCircle />
           Quick Enquiries ({enquiries.length})
         </button>
         <button style={tabStyle('applications')} onClick={() => setActiveTab('applications')}>
-          <FiFileText style={{ marginRight: '0.4rem' }} />
+          <FiFileText />
           Online Applications ({applications.length})
         </button>
       </div>
 
-      <div className="card" style={{ borderRadius: '0 8px 8px 8px' }}>
+      <div className="card" style={{ borderRadius: '0 12px 12px 12px', padding: '0' }}>
         <div className="table-responsive">
 
           {/* ---- ENQUIRIES TAB ---- */}
@@ -183,11 +187,11 @@ const Enquiries = () => {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Date</th>
-                  <th>Student Info</th>
-                  <th>Contact</th>
-                  <th>Status</th>
-                  <th>Admin Actions</th>
+                  <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>Date</th>
+                  <th style={{ padding: '1rem 1.5rem', minWidth: '180px' }}>Student Info</th>
+                  <th style={{ padding: '1rem 1.5rem', minWidth: '130px' }}>Contact</th>
+                  <th style={{ padding: '1rem 1.5rem' }}>Status</th>
+                  <th style={{ padding: '1rem 1.5rem', minWidth: '220px' }}>Admin Actions</th>
                 </tr>
               </thead>
               <tbody>
