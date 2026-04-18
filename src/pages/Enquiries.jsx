@@ -64,8 +64,11 @@ const Enquiries = () => {
       
       // Smart Prefix Mapping
       let prefix = enq.standard;
-      if (enq.standard.includes('11')) prefix = 'XI';
-      else if (enq.standard.includes('12')) prefix = 'XII';
+      if (enq.standard.includes('11') || enq.standard === 'XI') prefix = 'XI';
+      else if (enq.standard.includes('12') || enq.standard === 'XII') prefix = 'XII';
+      else if (enq.standard.includes('10') || enq.standard === 'X') prefix = 'X';
+      else if (enq.standard.includes('9') || enq.standard === 'IX') prefix = 'IX';
+      else if (enq.standard.includes('8') || enq.standard === 'VIII') prefix = 'VIII';
       
       const sequence = String(nextNum).padStart(3, '0');
       const newId = `${prefix}${currentYear}${sequence}`;
