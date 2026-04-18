@@ -18,3 +18,6 @@ UPDATE online_admissions SET standard = 'IX' WHERE standard ILIKE '%9th%';
 UPDATE online_admissions SET standard = 'X' WHERE standard ILIKE '%10th%';
 UPDATE online_admissions SET standard = 'XI' WHERE standard ILIKE '%11th%';
 UPDATE online_admissions SET standard = 'XII' WHERE standard ILIKE '%12th%';
+
+-- Add status column to online_admissions if missing
+ALTER TABLE online_admissions ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Pending';
