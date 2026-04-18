@@ -227,11 +227,11 @@ const LandingPage = ({ isAuthenticated }) => {
                   style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '1px solid #CBD5E1' }}
                 >
                   <option value="">Select Standard</option>
-                  <option value="8th Standard">8th Standard</option>
-                  <option value="9th Standard">9th Standard</option>
-                  <option value="10th Standard">10th Standard</option>
-                  <option value="11th Science">11th Science</option>
-                  <option value="12th Science">12th Science</option>
+                  <option value="VIII">VIII</option>
+                  <option value="IX">IX</option>
+                  <option value="X">X</option>
+                  <option value="XI">XI</option>
+                  <option value="XII">XII</option>
                 </select>
               </div>
               <div className="input-group">
