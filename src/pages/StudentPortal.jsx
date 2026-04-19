@@ -49,8 +49,27 @@ const StudentPortal = () => {
     }
 
     // Fetch Library (Notes)
-    const { data: notes } = await supabase.from('library_resources').select('*').eq('standard', studentData.standard);
-    const sortedNotes = notes ? notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0)) : [];
+    const { data: allNotes } = await supabase.from('library_resources').select('*');
+    let notes = [];
+    if (allNotes) {
+       const studentStd = (studentData.standard || '').trim().toLowerCase();
+       // Fallback map for unmigrated database records
+       const fallbackMap = {
+         'xii': ['12', '12th'],
+         'xi': ['11', '11th'],
+         'x': ['10', '10th'],
+         'ix': ['9', '9th'],
+         'viii': ['8', '8th']
+       };
+       const acceptedValues = [studentStd, ...(fallbackMap[studentStd] || [])];
+
+       notes = allNotes.filter(n => {
+          const noteStd = (n.standard || '').trim().toLowerCase();
+          if (Array.isArray(n.standards) && n.standards.some(s => acceptedValues.includes(s.trim().toLowerCase()))) return true;
+          return acceptedValues.some(val => noteStd === val || noteStd.includes(val));
+       });
+    }
+    const sortedNotes = notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0));
     setLibrary(sortedNotes);
 
     // Fetch Payments
