@@ -39,7 +39,7 @@ const StudentPortal = () => {
 
   const fetchAllData = async (studentData) => {
     // Fetch Results
-    const { data: tests } = await supabase.from('tests').select('*').contains('standards', [studentData.standard]).order('date', { ascending: false });
+    const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
     const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
     if (tests) {
       setResults(tests.map(t => ({
