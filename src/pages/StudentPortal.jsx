@@ -49,14 +49,10 @@ const StudentPortal = () => {
     }
 
     // Fetch Library (Notes)
-    const { data: allNotes, error: notesError } = await supabase.from('library_resources').select('*');
+    const { data: allNotes } = await supabase.from('library_resources').select('*');
     let notes = [];
-    if (notesError) {
-       window._debug_allNotes = `Error: ${notesError.message || JSON.stringify(notesError)}`;
-    } else if (allNotes) {
-       window._debug_allNotes = allNotes.length;
+    if (allNotes) {
        const studentStd = (studentData.standard || '').trim().toLowerCase();
-       window._debug_std = studentStd;
        // Fallback map for unmigrated database records
        const fallbackMap = {
          'xii': ['12', '12th'],
@@ -72,8 +68,6 @@ const StudentPortal = () => {
           if (Array.isArray(n.standards) && n.standards.some(s => acceptedValues.includes(s.trim().toLowerCase()))) return true;
           return acceptedValues.some(val => noteStd === val || noteStd.includes(val));
        });
-    } else {
-       window._debug_allNotes = 'null/no-error';
     }
     const sortedNotes = notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0));
     setLibrary(sortedNotes);
@@ -235,7 +229,7 @@ const StudentPortal = () => {
 
            {activeTab === 'library' && (
              <div className="animate-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                {library.length === 0 ? <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94A3B8' }}>No library resources assigned to your standard yet. (Debug: Total DB notes = {window._debug_allNotes}, Your Std = {window._debug_std})</p> : library.map(file => (
+                {library.length === 0 ? <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94A3B8' }}>No library resources assigned to your standard yet.</p> : library.map(file => (
                   <div key={file.id} className="card-base" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column' }}>
                      <div style={{ padding: '1rem', backgroundColor: '#F1F5F9', borderRadius: '12px', marginBottom: '1rem', textAlign: 'center' }}>
                         <FiBookOpen size={40} color="#1A237E" />
