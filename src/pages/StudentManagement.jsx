@@ -557,21 +557,6 @@ const StudentManagement = () => {
                       <option value="Inactive">Inactive</option>
                     </select>
                   </div>
-
-                  <div className="input-group" style={{ marginTop: '1.5rem', backgroundColor: formData.portal_enabled ? 'var(--bg-surface)' : '#fee2e2', padding: '1rem', borderRadius: '8px', border: formData.portal_enabled ? '1px solid var(--border-color)' : '1px solid var(--danger-red)' }}>
-                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: 0, cursor: 'pointer' }}>
-                      <div>
-                        <span style={{ fontWeight: 600, color: formData.portal_enabled ? 'var(--primary-blue)' : 'var(--danger-red)', display: 'block', marginBottom: '0.2rem' }}>Student Portal Access</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 400 }}>Allow this student to log in to the app?</span>
-                      </div>
-                      <input 
-                        type="checkbox" 
-                        checked={formData.portal_enabled} 
-                        onChange={e => setFormData({...formData, portal_enabled: e.target.checked})} 
-                        style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                      />
-                    </label>
-                  </div>
                </div>
             </div>
 
