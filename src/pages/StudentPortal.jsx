@@ -49,8 +49,9 @@ const StudentPortal = () => {
     }
 
     // Fetch Library (Notes)
-    const { data: notes } = await supabase.from('library_resources').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
-    setLibrary(notes || []);
+    const { data: notes } = await supabase.from('library_resources').select('*').eq('standard', studentData.standard);
+    const sortedNotes = notes ? notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0)) : [];
+    setLibrary(sortedNotes);
 
     // Fetch Payments
     const { data: payHistory } = await supabase.from('online_payments').select('*').eq('student_name', studentData.name).order('created_at', { ascending: false });
@@ -186,21 +187,24 @@ const StudentPortal = () => {
            {activeTab === 'results' && (
              <div className="animate-in" style={{ display: 'grid', gap: '1rem' }}>
                 <h3 style={{ color: '#1A237E', marginBottom: '1rem' }}>Performance Records</h3>
-                {results.map(test => (
-                  <div key={test.id} className="card-base" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                     <div>
-                        <h4 style={{ margin: 0 }}>{test.name}</h4>
-                        <span style={{ fontSize: '0.8rem', color: '#64748B' }}>{test.subject} • {test.date}</span>
-                     </div>
-                     <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-                        <div style={{ textAlign: 'center' }}>
-                           <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: test.score !== 'N/A' ? '#10B981' : '#CBD5E1' }}>{test.score}</p>
-                           <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>/ {test.total_marks || test.totalMarks}</span>
-                        </div>
-                        {test.solution_url && <a href={test.solution_url} target="_blank" rel="noreferrer" className="btn-secondary" style={{ backgroundColor: '#B8860B', color: 'white', border: 'none' }}><FiDownload /> Solution</a>}
-                     </div>
-                  </div>
-                ))}
+                {results.map(test => {
+                  const isTestPast = new Date().toISOString().split('T')[0] >= test.date;
+                  return (
+                    <div key={test.id} className="card-base" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div>
+                          <h4 style={{ margin: 0 }}>{test.name}</h4>
+                          <span style={{ fontSize: '0.8rem', color: '#64748B' }}>{test.subject} • {test.date}</span>
+                       </div>
+                       <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                          <div style={{ textAlign: 'center' }}>
+                             <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: test.score !== 'N/A' ? '#10B981' : '#CBD5E1' }}>{test.score}</p>
+                             <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>/ {test.total_marks || test.totalMarks}</span>
+                          </div>
+                          {test.solution_url && isTestPast && <a href={test.solution_url} target="_blank" rel="noreferrer" className="btn-secondary" style={{ backgroundColor: '#B8860B', color: 'white', border: 'none' }}><FiDownload /> Solution</a>}
+                       </div>
+                    </div>
+                  );
+                })}
              </div>
            )}
 
