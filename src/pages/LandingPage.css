@@ -554,3 +554,34 @@
 .cta-secondary:hover {
   background: rgba(26, 35, 126, 0.05);
 }
+
+/* Testimonials Section Styling */
+.testimonials-section {
+  position: relative;
+}
+
+.testimonial-card {
+  transition: all 0.3s ease;
+  border: 1px solid #E2E8F0;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  border-color: #B8860B;
+}
+
+/* Mobile Adjustments for Landing Page Section Headers */
+@media (max-width: 768px) {
+  .section-header h2 {
+    font-size: 2.5rem;
+  }
+  .testimonials-grid {
+    grid-template-columns: 1fr !important;
+    padding: 0 1rem;
+  }
+  .testimonial-card {
+    padding: 2rem 1.5rem !important;
+  }
+}
+

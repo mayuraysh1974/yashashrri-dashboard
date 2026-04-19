@@ -196,3 +196,66 @@ input:focus, select:focus, textarea:focus {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Global Mobile Responsiveness Fixes */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* Force minimum width to trigger scrolling */
+}
+
+@media (max-width: 768px) {
+  .card-base {
+    padding: 1rem !important;
+  }
+  
+  button, input, select {
+    font-size: 16px !important; /* Prevent iOS zoom on focus and improve readability */
+    padding: 0.8rem 1rem !important; /* Better touch targets */
+  }
+
+  .page-title {
+    font-size: 1.5rem !important;
+  }
+
+  /* Make grid layouts stack on mobile */
+  .stats-grid, .dashboard-grid, .responsive-grid, .responsive-grid-2col, .responsive-grid-3col {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+  }
+  
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+  
+  .card-base {
+    margin-bottom: 1rem;
+  }
+}
+
+.responsive-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.responsive-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.responsive-grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+

@@ -206,8 +206,8 @@ const TeacherManagement = () => {
         </div>
       </div>
 
-      <div className="card-base no-print" style={{ flex: 1, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto', height: '100%' }}>
+      <div className="card-base no-print table-container" style={{ flex: 1 }}>
+        <div style={{ height: '100%' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead className="no-print" style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0 }}>
               <tr>
@@ -268,7 +268,7 @@ const TeacherManagement = () => {
 
             <PrintHeader title="Faculty Financial Ledger" subTitle={`Ledger for: ${selectedTeacher.name} | ID: ${selectedTeacher.id} | Dept: ${selectedTeacher.subject}`} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+            <div className="responsive-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '2.5rem' }}>
               <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: '12px' }}>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total Share Earned</span>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>₹{financeData.summary.totalEarned.toLocaleString()}</div>
@@ -283,7 +283,7 @@ const TeacherManagement = () => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div className="responsive-grid-2col">
               {/* Entitlement Form */}
               <div className="card-base" style={{ padding: '1.5rem', backgroundColor: '#fcfcfc' }}>
                 <h3 className="no-print" style={{ fontSize: '1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiActivity /> Add Share Entitlement</h3>
@@ -294,7 +294,7 @@ const TeacherManagement = () => {
                         <label>Description (e.g. March 2026 Batch X Share)</label>
                         <input type="text" value={shareForm.description} onChange={e => setShareForm({...shareForm, description: e.target.value})} placeholder="Batch / Period details..." />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
                         <div className="input-group">
                             <label>Amount (₹)</label>
                             <input type="number" value={shareForm.amount} onChange={e => setShareForm({...shareForm, amount: Number(e.target.value)})} />
@@ -336,7 +336,7 @@ const TeacherManagement = () => {
                 <h3 className="print-only" style={{ display: 'none', marginBottom: '1rem' }}>Recent Payments Record</h3>
                 
                 <div className="no-print" style={{ display: 'grid', gap: '1rem' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
                         <div className="input-group">
                             <label>Paid Amount (₹)</label>
                             <input type="number" value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: Number(e.target.value)})} />
@@ -346,7 +346,7 @@ const TeacherManagement = () => {
                             <input type="date" value={paymentForm.date} onChange={e => setPaymentForm({...paymentForm, date: e.target.value})} />
                         </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
                         <div className="input-group">
                             <label>Mode</label>
                             <select value={paymentForm.paymentMode} onChange={e => setPaymentForm({...paymentForm, paymentMode: e.target.value})}>
@@ -413,6 +413,8 @@ const TeacherManagement = () => {
           th { -webkit-print-color-adjust: exact; }
           .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; }
         }
+        .responsive-grid { display: grid; gap: 1.5rem; }
+        .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
       `}</style>
 
       {showModal && (
@@ -423,7 +425,7 @@ const TeacherManagement = () => {
               <button onClick={() => setShowModal(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
               <div className="input-group">
                 <label>Faculty ID</label>
                 <input type="text" placeholder="e.g. T005" value={formData.id} onChange={e => setFormData({...formData, id: e.target.value})} disabled={editMode} style={{ backgroundColor: editMode ? 'var(--bg-main)' : 'inherit' }} />

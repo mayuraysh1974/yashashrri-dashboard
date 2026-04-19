@@ -328,8 +328,8 @@ const StudentManagement = () => {
         </select>
       </div>
 
-      <div className="card-base no-print" style={{ overflow: 'auto', flex: 1 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div className="card-base no-print table-container" style={{ flex: 1 }}>
+        <table>
           <thead>
             <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
               <th style={{ padding: '1rem' }}>Student Details</th>
@@ -390,11 +390,11 @@ const StudentManagement = () => {
               <button onClick={() => setShowModal(false)} style={{ background: 'transparent' }}><FiX size={24} /></button>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '2rem' }}>
+            <div className="responsive-grid" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
                {/* Left Column: Core Data */}
                <div>
                   <div style={{ borderBottom: '1px solid var(--border-color)', marginBottom: '1rem', paddingBottom: '0.5rem', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ACADEMIC & PERSONAL</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
                     <div className="input-group">
                       <label>Full Name</label>
                       <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
@@ -445,7 +445,7 @@ const StudentManagement = () => {
                   </div>
 
                   <div style={{ borderBottom: '1px solid var(--border-color)', margin: '1.5rem 0 1rem 0', paddingBottom: '0.5rem', fontWeight: 700, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>STUDENT PORTAL AUTHENTICATION</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
                     <div className="input-group">
                       <label>Portal Access</label>
                       <select value={formData.portal_enabled ? 'true' : 'false'} onChange={e => setFormData({...formData, portal_enabled: e.target.value === 'true'})}>
@@ -595,7 +595,7 @@ const StudentManagement = () => {
               <button onClick={() => setShowProfile(null)} style={{ background: 'transparent' }}><FiX size={28} /></button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+            <div className="responsive-grid-2col">
                <div>
                   <div style={{ backgroundColor: 'var(--bg-main)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2rem' }}>
                      <h3 style={{ fontSize: '1.1rem', marginBottom: '1.25rem', color: 'var(--primary-blue)' }}>Contact Information</h3>
