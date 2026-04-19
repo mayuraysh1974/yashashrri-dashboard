@@ -49,9 +49,11 @@ const StudentPortal = () => {
     }
 
     // Fetch Library (Notes)
-    const { data: allNotes } = await supabase.from('library_resources').select('*');
+    const { data: allNotes, error: notesError } = await supabase.from('library_resources').select('*');
     let notes = [];
-    if (allNotes) {
+    if (notesError) {
+       window._debug_allNotes = `Error: ${notesError.message || JSON.stringify(notesError)}`;
+    } else if (allNotes) {
        window._debug_allNotes = allNotes.length;
        const studentStd = (studentData.standard || '').trim().toLowerCase();
        window._debug_std = studentStd;
@@ -71,7 +73,7 @@ const StudentPortal = () => {
           return acceptedValues.some(val => noteStd === val || noteStd.includes(val));
        });
     } else {
-       window._debug_allNotes = 'null/error';
+       window._debug_allNotes = 'null/no-error';
     }
     const sortedNotes = notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0));
     setLibrary(sortedNotes);
