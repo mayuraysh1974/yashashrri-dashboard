@@ -350,7 +350,7 @@ const AcademicReports = () => {
         </div>
       </div>
 
-      <div className="card-base" style={{ flex: 1, padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
+      <div className="card-base report-content-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
         {loading && (
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
              <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
@@ -498,7 +498,7 @@ const AcademicReports = () => {
                 />
                 
                 {/* Dashboard Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+                <div className="stats-grid-compact" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                    <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
                       <p style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Tests Attempted</p>
                       <h2 style={{ color: '#1A237E', margin: 0, fontSize: '2rem' }}>{studentStats.summary.totalTests}</h2>
@@ -514,7 +514,7 @@ const AcademicReports = () => {
                 </div>
 
                 {/* Performance Chart */}
-                <div className="card-base" style={{ padding: '2rem', marginBottom: '2.5rem', minHeight: '400px' }}>
+                <div className="card-base chart-container-card" style={{ padding: '1.5rem', marginBottom: '2rem', minHeight: '350px' }}>
                   <h3 style={{ fontSize: '1.1rem', color: '#1A237E', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <FiTrendingUp style={{ color: '#B8860B' }} /> Performance Progress Curve
                   </h3>
@@ -642,10 +642,27 @@ const AcademicReports = () => {
           .recharts-responsive-container { 
             width: 100% !important; 
             height: 320px !important; 
-            margin: 20px auto 30px auto !important;
+            margin: 15px auto 20px auto !important;
           }
           .AcademicNote { font-size: 10px !important; line-height: 1.4 !important; color: #475569 !important; }
           .signatory-box { min-width: 200px; text-align: center; }
+        }
+
+        /* Screen spacing refinements */
+        .report-content-area {
+          padding: 2rem;
+        }
+        @media (max-width: 768px) {
+          .report-content-area {
+            padding: 1rem;
+          }
+          .chart-container-card {
+            padding: 1rem !important;
+            margin-bottom: 1.5rem !important;
+          }
+          .stats-grid-compact {
+            gap: 0.75rem !important;
+          }
         }
       `}</style>
     </div>
