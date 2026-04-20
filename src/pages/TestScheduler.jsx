@@ -21,6 +21,7 @@ const TestScheduler = () => {
   const [activeTestId, setActiveTestId] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
 
+  // Fetch initial data
   useEffect(() => {
     fetchTests();
     fetchStandards();
