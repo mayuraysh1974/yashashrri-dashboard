@@ -31,11 +31,10 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Install Capacitor Android
-        run: npx cap add android || echo "Already exists"
-
-      - name: Sync Capacitor
-        run: npx cap sync android
+      - name: Initialize Android Platform
+        run: |
+          npx cap add android
+          npx cap sync android
 
       - name: Build Android APK (Debug)
         run: |
