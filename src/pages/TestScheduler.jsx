@@ -19,6 +19,7 @@ const TestScheduler = () => {
   const [uploading, setUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [activeTestId, setActiveTestId] = useState(null);
+  const [studentResults, setStudentResults] = useState([]);
 
   useEffect(() => {
     fetchTests();
