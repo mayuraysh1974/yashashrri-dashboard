@@ -39,6 +39,7 @@ jobs:
           npm install -g @capacitor/cli @capacitor/assets
           npx cap add android || npx cap sync android
           npx capacitor-assets generate --android
+          sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' android/app/src/main/AndroidManifest.xml
           npx cap copy android
 
       - name: Build Android APK (Debug)
