@@ -3,7 +3,6 @@
   "appName": "Yashashrri ERP",
   "webDir": "dist",
   "server": {
-    "url": "https://yashashrri-dashboard.vercel.app",
-    "cleartext": true
+    "androidScheme": "https"
   }
 }
