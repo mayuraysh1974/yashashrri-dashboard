@@ -36,8 +36,9 @@ jobs:
 
       - name: Initialize Capacitor and Android
         run: |
-          npm install -g @capacitor/cli
+          npm install -g @capacitor/cli @capacitor/assets
           npx cap add android || npx cap sync android
+          npx capacitor-assets generate --android
           npx cap copy android
 
       - name: Build Android APK (Debug)
