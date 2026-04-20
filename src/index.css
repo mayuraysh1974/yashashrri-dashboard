@@ -242,20 +242,96 @@ table {
   }
 }
 
-.responsive-grid {
-  display: grid;
-  gap: 2rem;
+/* --- Global Mobile UI Optimization & PWA Preparation --- */
+@media (max-width: 768px) {
+  :root {
+    --radius-lg: 12px;
+  }
+
+  body {
+    padding-bottom: 75px; /* Reserve space for Mobile Bottom Nav */
+    background-color: #F8FAFC;
+  }
+
+  .main-content {
+    padding: 12px !important;
+  }
+
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 1.5rem 1rem !important;
+    gap: 1rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .page-header > div:last-child {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .page-header .btn-primary, 
+  .page-header .btn-secondary {
+    flex: 1;
+    min-width: 140px;
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.8rem !important;
+    justify-content: center;
+  }
+
+  .page-title {
+    font-size: 1.4rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .page-subtitle {
+    font-size: 0.8rem !important;
+    line-height: 1.4;
+  }
+
+  .card-base {
+    padding: 1rem !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .input-group {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Table Mobile Enhancements */
+  .table-container table {
+    min-width: 500px;
+  }
+
+  /* Compact top-nav for mobile */
+  .top-nav {
+    padding: 0.5rem 1rem !important;
+    height: 64px !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+  }
+
+  .top-nav .logo img {
+    height: 32px !important;
+  }
+
+  /* Animation for app-like transitions */
+  .animate-in {
+    animation: slideUp 0.3s ease-out;
+  }
 }
 
-.responsive-grid-2col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.responsive-grid-3col {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+/* Print Overrides */
+@media print {
+  .no-print { display: none !important; }
 }
 

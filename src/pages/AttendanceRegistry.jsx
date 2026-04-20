@@ -171,65 +171,69 @@ const AttendanceRegistry = () => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="page-header">
+      <div className="page-header animate-in">
         <div>
           <h1 className="page-title">{mode === 'Daily' ? 'Daily Attendance' : 'Subject-wise Attendance'}</h1>
           <p className="page-subtitle">Academic registry and lecture-level tracking</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ display: 'flex', backgroundColor: 'var(--bg-main)', padding: '0.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="mode-toggle-compact" style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-color)', height: '42px' }}>
               <button 
                 onClick={() => setMode('Daily')}
-                style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Daily' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Daily' ? 'white' : 'var(--text-secondary)', fontWeight: 600 }}
+                style={{ padding: '0 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Daily' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Daily' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem' }}
               >Daily</button>
               <button 
                 onClick={() => setMode('Subject')}
-                style={{ padding: '0.5rem 1rem', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Subject' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Subject' ? 'white' : 'var(--text-secondary)', fontWeight: 600 }}
-              >Subject-wise</button>
+                style={{ padding: '0 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Subject' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Subject' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem' }}
+              >Subject</button>
           </div>
-          <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)' }}><FiSend /> Notify Absentees</button>
-          <button className="btn-primary" onClick={handleSave}><FiSave /> Save Attendance</button>
+          <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)', padding: '0 15px', height: '42px' }}><FiSend /> Notify</button>
+          <button className="btn-primary" onClick={handleSave} style={{ padding: '0 15px', height: '42px' }}><FiSave /> Save</button>
         </div>
       </div>
 
-      <div className="card-base" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-        <div className="input-group" style={{ marginBottom: 0, width: '160px' }}>
-          <label><FiCalendar /> Date</label>
-          <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
-        </div>
-        <div className="input-group" style={{ marginBottom: 0, width: '160px' }}>
-          <label><FiFilter /> Class</label>
-          <select value={selectedStandard} onChange={e => setSelectedStandard(e.target.value)}>
-            <option value="">All Classes</option>
-            {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
-          </select>
-        </div>
-        {mode === 'Subject' && (
-          <div className="input-group" style={{ marginBottom: 0, width: '220px' }}>
-            <label><FiBook /> Lecture Subject</label>
-            <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
-              <option value="">Choose Subject...</option>
-              {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+      <div className="card-base animate-in" style={{ padding: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiCalendar /> Date</label>
+            <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }} />
+          </div>
+          <div className="input-group" style={{ marginBottom: 0 }}>
+            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiFilter /> Class</label>
+            <select value={selectedStandard} onChange={e => setSelectedStandard(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
+              <option value="">All Classes</option>
+              {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
             </select>
           </div>
-        )}
-        <div className="input-group" style={{ marginBottom: 0, flex: 1, minWidth: '200px' }}>
-          <label><FiUserCheck /> Search Student</label>
-          <input 
-            type="text" 
-            placeholder="Search by name or ID..." 
-            value={searchTerm} 
-            onChange={e => setSearchTerm(e.target.value)} 
-          />
+          {mode === 'Subject' && (
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiBook /> Subject</label>
+              <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
+                <option value="">Choose Subject...</option>
+                {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+          )}
+          <div className="input-group" style={{ marginBottom: 0, gridColumn: mode === 'Subject' ? 'span 1' : 'span 1' }}>
+            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiUserCheck /> Search</label>
+            <input 
+              type="text" 
+              placeholder="Name or ID..." 
+              value={searchTerm} 
+              onChange={e => setSearchTerm(e.target.value)} 
+              style={{ height: '40px', fontSize: '0.9rem' }}
+            />
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}><FiUserCheck /> All Present</button>
+        
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiUserCheck /> Mark All Present</button>
           {mode === 'Subject' && (
             <button className="btn-secondary" onClick={() => {
               const newAtt = { ...subjectAttendance };
               displayedStudents.forEach(s => newAtt[s.id] = 'No Class');
               setSubjectAttendance(newAtt);
-            }} disabled={!selectedSubject} style={{ padding: '0.6rem 1rem', fontSize: '0.8rem' }}><FiXCircle /> No Class</button>
+            }} disabled={!selectedSubject} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiXCircle /> No Class Today</button>
           )}
         </div>
       </div>
@@ -256,35 +260,35 @@ const AttendanceRegistry = () => {
                      <div style={{ fontWeight: 600 }}>{student.name}</div>
                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
                   </td>
-                  <td style={{ padding: '1rem', textAlign: 'center' }}>
-                     <div style={{ display: 'inline-flex', gap: '0.5rem', backgroundColor: 'var(--bg-main)', padding: '0.25rem', borderRadius: 'var(--radius-md)' }}>
+                  <td style={{ padding: '1rem', textAlign: 'right' }}>
+                     <div className="status-toggle-pill" style={{ display: 'inline-flex', gap: '2px', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                         <button 
                           onClick={() => handleStatusChange(student.id, 'Present')}
                           style={{ 
-                            padding: '0.4rem 1.5rem', fontSize: '0.8rem', borderRadius: '6px',
+                            padding: '0.5rem 12px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
                             backgroundColor: status === 'Present' ? 'var(--success-green)' : 'transparent',
-                            color: status === 'Present' ? 'white' : 'var(--text-secondary)',
-                            border: 'none', cursor: 'pointer'
+                            color: status === 'Present' ? 'white' : '#64748B',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
                           }}
-                        >Present</button>
+                        >P</button>
                         <button 
                           onClick={() => handleStatusChange(student.id, 'Absent')}
                           style={{ 
-                            padding: '0.4rem 1.5rem', fontSize: '0.8rem', borderRadius: '6px',
+                            padding: '0.5rem 12px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
                             backgroundColor: status === 'Absent' ? 'var(--danger-red)' : 'transparent',
-                            color: status === 'Absent' ? 'white' : 'var(--text-secondary)',
-                            border: 'none', cursor: 'pointer'
+                            color: status === 'Absent' ? 'white' : '#64748B',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
                           }}
-                        >Absent</button>
+                        >A</button>
                         <button 
                           onClick={() => handleStatusChange(student.id, 'No Class')}
                           style={{ 
-                            padding: '0.4rem 1.5rem', fontSize: '0.8rem', borderRadius: '6px',
-                            backgroundColor: status === 'No Class' ? 'var(--text-muted)' : 'transparent',
-                            color: status === 'No Class' ? 'white' : 'var(--text-secondary)',
-                            border: 'none', cursor: 'pointer'
+                            padding: '0.5rem 8px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
+                            backgroundColor: status === 'No Class' ? '#94A3B8' : 'transparent',
+                            color: status === 'No Class' ? 'white' : '#64748B',
+                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
                           }}
-                        >No Class</button>
+                        >N/C</button>
                      </div>
                   </td>
                 </tr>
