@@ -176,19 +176,40 @@ const AcademicReports = () => {
     window.print();
   };
 
-  const PrintHeader = ({ title, subTitle }) => (
+  const PrintHeader = ({ title, subTitle, studentDetails }) => (
     <div className="print-only" style={{ textAlign: 'center', marginBottom: '30px' }}>
-      <div style={{ marginBottom: '15px' }}>
-        <img src="/logo.png" alt="Yashashrri Logo" style={{ maxWidth: '400px', height: 'auto' }} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <img src="/logo.png" alt="Yashashrri Logo" style={{ height: '70px', width: 'auto' }} />
+        <div style={{ textAlign: 'right', fontSize: '10px', color: '#64748B', lineHeight: '1.4' }}>
+          <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A237E', marginBottom: '4px' }}>YASHASHRRI CLASSES</div>
+          <div>ESTD 1999 | Reg. No: MAH/PUNE/123/2010</div>
+          <div>Talegaon Dabhade, Pune - 410506</div>
+          <div>Mob: +91 73874 20737 | www.yashashrri.com</div>
+        </div>
       </div>
-      <div style={{ fontSize: '11px', color: '#64748B', lineHeight: '1.6' }}>
-        Main Br: "Shree Ekveera Prasad", Vaidya Colony, Nr. Axis bank ATM, Talegaon Dabhade, PUNE - 410506<br />
-        Branch 2: Silverwinds, C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Talegaon Dabhade, PUNE - 410506<br />
-        Contact: +91 73874 20737 | Email: mayuraysh1974@gmail.com
+      
+      <div style={{ borderTop: '2px solid #1A237E', borderBottom: '2px solid #1A237E', padding: '10px 0', margin: '15px 0', backgroundColor: '#F8FAFC' }}>
+        <h2 style={{ fontSize: '20px', color: '#1A237E', margin: 0, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 900 }}>{title}</h2>
       </div>
-      <hr style={{ border: 'none', borderTop: '2px solid #1A237E', margin: '20px 0' }} />
-      <h2 style={{ fontSize: '18px', color: '#1A237E', margin: '10px 0', textTransform: 'uppercase', fontWeight: 800 }}>{title}</h2>
-      {subTitle && <div style={{ fontSize: '14px', color: '#475569', fontWeight: 700, backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'inline-block' }}>{subTitle}</div>}
+
+      {studentDetails && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '15px', textAlign: 'left', marginBottom: '25px', padding: '15px', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+          <div>
+            <div style={{ fontSize: '9px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>Student Full Name</div>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1A237E' }}>{studentDetails.name}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '9px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>Academic Standard</div>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1A237E' }}>{studentDetails.standard}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '9px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>Unique Student ID</div>
+            <div style={{ fontSize: '14px', fontWeight: 800, color: '#1A237E' }}>{studentDetails.id}</div>
+          </div>
+        </div>
+      )}
+      
+      {!studentDetails && subTitle && <div style={{ fontSize: '14px', color: '#475569', fontWeight: 700, backgroundColor: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'inline-block' }}>{subTitle}</div>}
     </div>
   );
 
@@ -471,7 +492,10 @@ const AcademicReports = () => {
           <>
             {selectedStudent ? (
               <>
-                <PrintHeader title="Student Progress Analysis Report" subTitle={`Student: ${selectedStudent.name} | Std: ${selectedStudent.standard}`} />
+                <PrintHeader 
+                  title="STATEMENT OF ACADEMIC PERFORMANCE" 
+                  studentDetails={selectedStudent}
+                />
                 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                    <div className="card-base" style={{ padding: '1.25rem', textAlign: 'center', background: '#F8FAFC' }}>
@@ -574,7 +598,7 @@ const AcademicReports = () => {
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @media print {
-          @page { size: A4; margin: 10mm; }
+          @page { size: A4 portrait; margin: 15mm; }
           html, body { 
             height: auto !important; 
             overflow: visible !important; 
@@ -582,46 +606,41 @@ const AcademicReports = () => {
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            font-size: 10px !important;
           }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
-          .print-container { width: 100% !important; max-width: 190mm !important; margin: 0 auto !important; }
           .card-base { 
             border: none !important; 
             box-shadow: none !important; 
             width: 100% !important; 
             margin-bottom: 5px !important; 
             padding: 0 !important; 
-            min-height: 0 !important; 
           }
           table { 
             width: 100% !important; 
-            border: 1px solid #e2e8f0 !important; 
-            font-size: 8px !important; 
+            border: 1.5px solid #1A237E !important; 
+            font-size: 11px !important; 
             border-collapse: collapse !important; 
-            table-layout: fixed !important; 
           }
           th { 
-            background-color: #f1f5f9 !important; 
-            color: #1e293b !important; 
-            padding: 4px !important; 
-            border: 1px solid #e2e8f0 !important;
+            background-color: #1A237E !important; 
+            color: white !important; 
+            padding: 8px !important; 
+            border: 1px solid #1A237E !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           td { 
-            padding: 4px !important; 
-            border: 1px solid #e2e8f0 !important;
-            word-wrap: break-word;
+            padding: 8px !important; 
+            border: 1px solid #E2E8F0 !important;
           }
           .recharts-responsive-container { 
             width: 100% !important; 
-            max-width: 180mm !important;
-            height: 220px !important; 
-            margin: 15px auto 25px auto !important;
+            height: 320px !important; 
+            margin: 20px auto 30px auto !important;
           }
-          .print-header { margin-bottom: 15px !important; }
-          .AcademicNote { font-size: 7px !important; line-height: 1.2 !important; margin-top: 15px !important; }
-          .signatory-box { min-width: 150px; text-align: center; margin-top: 20px !important; }
+          .AcademicNote { font-size: 10px !important; line-height: 1.4 !important; color: #475569 !important; }
+          .signatory-box { min-width: 200px; text-align: center; }
         }
       `}</style>
     </div>
