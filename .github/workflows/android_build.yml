@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
       - name: Install Dependencies
@@ -31,10 +31,11 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - name: Initialize Android Platform
+      - name: Initialize Capacitor and Android
         run: |
-          npx cap add android
-          npx cap sync android
+          npm install -g @capacitor/cli
+          npx cap add android || npx cap sync android
+          npx cap copy android
 
       - name: Build Android APK (Debug)
         run: |
