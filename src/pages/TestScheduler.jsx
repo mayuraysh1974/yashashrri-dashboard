@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell, FiEdit2, FiTrash2, FiBarChart2 } from 'react-icons/fi';
+import { FiPlus, FiCalendar, FiBook, FiUsers, FiX, FiCheckCircle, FiBell, FiEdit2, FiTrash2, FiBarChart2, FiSearch } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 
 const TestScheduler = () => {
