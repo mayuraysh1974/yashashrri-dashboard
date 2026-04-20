@@ -491,99 +491,104 @@ const AcademicReports = () => {
         ) : (
           <>
             {selectedStudent ? (
-              <>
+              <div className="animate-in">
                 <PrintHeader 
                   title="STATEMENT OF ACADEMIC PERFORMANCE" 
                   studentDetails={selectedStudent}
                 />
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                   <div className="card-base" style={{ padding: '1.25rem', textAlign: 'center', background: '#F8FAFC' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Tests Attempted</span>
-                      <h3 style={{ fontSize: '1.8rem', color: 'var(--primary-blue)' }}>{studentStats.summary.totalTests}</h3>
+                {/* Dashboard Stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Tests Attempted</p>
+                      <h2 style={{ color: '#1A237E', margin: 0, fontSize: '2rem' }}>{studentStats.summary.totalTests}</h2>
                    </div>
-                   <div className="card-base" style={{ padding: '1.25rem', textAlign: 'center', background: '#F8FAFC' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Average Percentage</span>
-                      <h3 style={{ fontSize: '1.8rem', color: 'var(--accent-gold)' }}>{studentStats.summary.avgPercentage}%</h3>
+                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Average Percentage</p>
+                      <h2 style={{ color: '#B8860B', margin: 0, fontSize: '2rem' }}>{studentStats.summary.avgPercentage}%</h2>
                    </div>
-                   <div className="card-base" style={{ padding: '1.25rem', textAlign: 'center', background: '#ECFDF5' }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Passed / Cleared</span>
-                      <h3 style={{ fontSize: '1.8rem', color: 'var(--success-green)' }}>{studentStats.summary.passCount}</h3>
+                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#ECFDF5', borderLeft: '4px solid #10B981' }}>
+                      <p style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Tests Cleared</p>
+                      <h2 style={{ color: '#059669', margin: 0, fontSize: '2rem' }}>{studentStats.summary.passCount}</h2>
                    </div>
                 </div>
 
-                <div className="card-base" style={{ padding: '2rem', marginBottom: '2rem', minHeight: '350px' }}>
-                  <h3 style={{ fontSize: '1rem', color: 'var(--primary-blue)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <FiTrendingUp /> Detailed Progress Curve (Percentage vs Passing Threshold)
+                {/* Performance Chart */}
+                <div className="card-base" style={{ padding: '2rem', marginBottom: '2.5rem', minHeight: '400px' }}>
+                  <h3 style={{ fontSize: '1.1rem', color: '#1A237E', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <FiTrendingUp style={{ color: '#B8860B' }} /> Performance Progress Curve
                   </h3>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={studentStats.progress}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" fontSize={10} padding={{ left: 10, right: 10 }} />
-                      <YAxis tickFormatter={t => `${t}%`} fontSize={10} domain={[0, 100]} width={40} />
-                      <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
-                      <Legend verticalAlign="bottom" height={36} />
-                      <Line type="monotone" dataKey="percentage" name="Student Score %" stroke="var(--primary-blue)" strokeWidth={4} dot={{ r: 6, fill: 'var(--primary-blue)' }} activeDot={{ r: 8 }} />
-                      <Line type="step" dataKey="minMarks" name="Passing Threshold %" stroke="var(--danger-red)" strokeDasharray="5 5" strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <div className="no-print" style={{ height: '20px' }}></div> {/* Spacer for screen */}
+                  <div style={{ height: '320px', width: '100%' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={studentStats.progress}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                        <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748B' }} padding={{ left: 20, right: 20 }} />
+                        <YAxis tickFormatter={t => `${t}%`} fontSize={11} tick={{ fill: '#64748B' }} domain={[0, 100]} width={45} />
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
+                        <Legend verticalAlign="bottom" height={36} />
+                        <Line type="monotone" dataKey="percentage" name="Student Score %" stroke="#1A237E" strokeWidth={4} dot={{ r: 6, fill: '#1A237E', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
+                        <Line type="step" dataKey="minMarks" name="Passing %" stroke="#EF4444" strokeDasharray="6 4" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="no-print" style={{ height: '20px' }}></div>
                 </div>
 
-                <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '650px' }}>
-                    <thead>
-                      <tr style={{ backgroundColor: '#1A237E', color: 'white', textAlign: 'left' }}>
-                        <th style={{ padding: '1rem' }}>Test Name</th>
-                        <th style={{ padding: '1rem' }}>Subject</th>
-                        <th style={{ padding: '1rem' }}>Date</th>
-                        <th style={{ padding: '1rem', textAlign: 'right' }}>Score</th>
-                        <th style={{ padding: '1rem', textAlign: 'center' }}>Result</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {studentStats.progress.map((p, idx) => {
-                        const isAbsent = p.score === 0 && p.percentage === 0; // In this view, -1 was converted to 0 percentage
-                        // Note: Progress analysis is student-centric, so "Top" doesn't apply here (Top is relative to class).
-                        // But we will highlight Pass/Fail and Absent.
-                        const isFail = p.percentage < p.minMarks;
-
-                        return (
-                          <tr key={idx} style={{ 
-                            borderBottom: '1px solid var(--border-color)',
-                            backgroundColor: isAbsent ? '#F8FAFC' : (isFail ? '#FEF2F2' : 'transparent'),
-                            color: isAbsent ? '#64748B' : 'inherit',
-                            fontStyle: isAbsent ? 'italic' : 'normal',
-                            opacity: isAbsent ? 0.8 : 1,
-                            WebkitPrintColorAdjust: 'exact',
-                            printColorAdjust: 'exact'
-                          }}>
-                            <td style={{ padding: '1rem', fontWeight: 600 }}>{p.name}</td>
-                            <td style={{ padding: '1rem' }}>{p.subject}</td>
-                            <td style={{ padding: '1rem' }}>{new Date(p.date).toLocaleDateString()}</td>
-                            <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700 }}>
-                              {isAbsent ? 'ABSENT' : `${p.score} / ${p.totalMarks}`} ({p.percentage}%)
-                            </td>
-                            <td style={{ padding: '1rem', textAlign: 'center' }}>
-                              {isAbsent ? (
-                                <span style={{ color: '#64748B', fontWeight: 800 }}>-</span>
-                              ) : !isFail ? (
-                                <span style={{ color: 'var(--success-green)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiCheckCircle /> PASSED</span>
-                              ) : (
-                                <span style={{ color: 'var(--danger-red)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem' }}><FiXCircle /> FAILED</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                {/* Marks Table */}
+                <div className="card-base" style={{ padding: '0', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+                   <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                      <h3 style={{ fontSize: '1rem', color: '#1A237E', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <FiBook style={{ color: '#B8860B' }} /> Detailed Test Marks Table
+                      </h3>
+                   </div>
+                   <div style={{ overflowX: 'auto' }}>
+                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                       <thead>
+                         <tr style={{ backgroundColor: '#F8FAFC', color: '#475569' }}>
+                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>TEST NAME</th>
+                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>SUBJECT</th>
+                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>DATE</th>
+                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800, textAlign: 'right' }}>SCORE</th>
+                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800, textAlign: 'center' }}>RESULT</th>
+                         </tr>
+                       </thead>
+                       <tbody>
+                         {studentStats.progress.length === 0 ? (
+                           <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>No test records found for this student.</td></tr>
+                         ) : studentStats.progress.map((p, idx) => {
+                           const isAbsent = p.isAbsent;
+                           const isFail = p.percentage < p.minMarks;
+                           return (
+                             <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9', backgroundColor: isAbsent ? '#F8FAFC' : 'white' }}>
+                               <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, color: '#1E293B' }}>{p.name}</td>
+                               <td style={{ padding: '1.25rem 1.5rem', color: '#64748B' }}>{p.subject}</td>
+                               <td style={{ padding: '1.25rem 1.5rem', color: '#64748B' }}>{new Date(p.date).toLocaleDateString()}</td>
+                               <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', fontWeight: 700, color: isFail ? '#EF4444' : '#10B981' }}>
+                                 {isAbsent ? 'ABSENT' : `${p.score} / ${p.totalMarks}`}
+                                 {!isAbsent && <span style={{ marginLeft: '8px', fontSize: '0.75rem', fontWeight: 500, color: '#94A3B8' }}>({p.percentage}%)</span>}
+                               </td>
+                               <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                                 {isAbsent ? (
+                                   <span style={{ color: '#94A3B8' }}>—</span>
+                                 ) : !isFail ? (
+                                   <span style={{ color: '#059669', backgroundColor: '#D1FAE5', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>PASSED</span>
+                                 ) : (
+                                   <span style={{ color: '#DC2626', backgroundColor: '#FEE2E2', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>FAILED</span>
+                                 )}
+                               </td>
+                             </tr>
+                           );
+                         })}
+                       </tbody>
+                     </table>
+                   </div>
                 </div>
-                <div className="no-print" style={{ marginTop: '1.5rem', padding: '0.75rem', backgroundColor: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '0.8rem', color: '#64748B' }}>
-                   <strong>Diagnostic Info:</strong> {debugStatus || 'Ready'}
+
+                <div className="no-print" style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#F1F5F9', borderRadius: '8px', fontSize: '0.8rem', color: '#64748B' }}>
+                   <strong>Status:</strong> Found {studentStats.progress.length} academic record(s).
                 </div>
                 <PrintFooter />
-              </>
+              </div>
             ) : (
               <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <FiSearch size={48} style={{ marginBottom: '1rem', opacity: 0.5 }} />
