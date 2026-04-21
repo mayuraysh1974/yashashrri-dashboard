@@ -4,14 +4,16 @@
   left: 0;
   right: 0;
   height: 75px;
-  background-color: var(--bg-surface);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-around;
   align-items: center;
   border-top: 1px solid var(--border-color);
   z-index: 1000;
+  padding: 0 10px;
   padding-bottom: env(safe-area-inset-bottom);
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-nav-item {
@@ -19,16 +21,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  font-weight: 700;
   gap: 4px;
-  padding: 8px;
   flex: 1;
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-nav-item svg {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
+  transition: transform 0.2s;
 }
 
 .mobile-nav-item.active {
@@ -36,10 +41,11 @@
 }
 
 .mobile-nav-item.active svg {
-  color: var(--accent-gold);
+  transform: translateY(-4px);
+  color: var(--primary-blue);
+  filter: drop-shadow(0 2px 4px rgba(26, 35, 126, 0.2));
 }
 
-/* Hide mobile nav on large screens */
 @media (min-width: 769px) {
   .mobile-nav {
     display: none;

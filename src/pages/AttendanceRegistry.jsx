@@ -238,65 +238,128 @@ const AttendanceRegistry = () => {
         </div>
       </div>
 
-      <div className="card-base" style={{ flex: 1, overflow: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-surface)', zIndex: 1 }}>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>
-              <th style={{ padding: '1rem' }}>Student Profile</th>
-              <th style={{ padding: '1rem', textAlign: 'center' }}>Attendance Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(mode === 'Subject' && !selectedSubject) ? (
-              <tr><td colSpan="2" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>Select a subject to filter enrolled students.</td></tr>
-            ) : displayedStudents.length === 0 ? (
-              <tr><td colSpan="2" style={{ padding: '2rem', textAlign: 'center' }}>No students found for this selection. Ensure students are assigned this subject in their profile.</td></tr>
-            ) : displayedStudents.map(student => {
-              const status = getEffectiveStatus(student.id);
+      <div className="card-base" style={{ flex: 1, overflow: 'auto', padding: 0 }}>
+        {/* Desktop Table View */}
+        <div className="desktop-only">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-surface)', zIndex: 1 }}>
+              <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border-color)' }}>
+                <th style={{ padding: '1rem' }}>Student Profile</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Attendance Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(mode === 'Subject' && !selectedSubject) ? (
+                <tr><td colSpan="2" style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>Select a subject to filter enrolled students.</td></tr>
+              ) : displayedStudents.length === 0 ? (
+                <tr><td colSpan="2" style={{ padding: '2rem', textAlign: 'center' }}>No students found for this selection.</td></tr>
+              ) : displayedStudents.map(student => {
+                const status = getEffectiveStatus(student.id);
+                return (
+                  <tr key={student.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '1rem' }}>
+                       <div style={{ fontWeight: 600 }}>{student.name}</div>
+                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                       <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
+                          <button 
+                            onClick={() => handleStatusChange(student.id, 'Present')}
+                            className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}
+                          >Present</button>
+                          <button 
+                            onClick={() => handleStatusChange(student.id, 'Absent')}
+                            className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}
+                          >Absent</button>
+                          <button 
+                            onClick={() => handleStatusChange(student.id, 'No Class')}
+                            className={`btn-attendance ${status === 'No Class' ? 'no-class' : ''}`}
+                          >No Class</button>
+                       </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-              return (
-                <tr key={student.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem' }}>
-                     <div style={{ fontWeight: 600 }}>{student.name}</div>
-                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'right' }}>
-                     <div className="status-toggle-pill" style={{ display: 'inline-flex', gap: '2px', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                        <button 
-                          onClick={() => handleStatusChange(student.id, 'Present')}
-                          style={{ 
-                            padding: '0.5rem 12px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
-                            backgroundColor: status === 'Present' ? 'var(--success-green)' : 'transparent',
-                            color: status === 'Present' ? 'white' : '#64748B',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
-                          }}
-                        >P</button>
-                        <button 
-                          onClick={() => handleStatusChange(student.id, 'Absent')}
-                          style={{ 
-                            padding: '0.5rem 12px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
-                            backgroundColor: status === 'Absent' ? 'var(--danger-red)' : 'transparent',
-                            color: status === 'Absent' ? 'white' : '#64748B',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
-                          }}
-                        >A</button>
-                        <button 
-                          onClick={() => handleStatusChange(student.id, 'No Class')}
-                          style={{ 
-                            padding: '0.5rem 8px', fontSize: '0.75rem', borderRadius: '6px', fontWeight: 800,
-                            backgroundColor: status === 'No Class' ? '#94A3B8' : 'transparent',
-                            color: status === 'No Class' ? 'white' : '#64748B',
-                            border: 'none', cursor: 'pointer', transition: 'all 0.2s'
-                          }}
-                        >N/C</button>
-                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        {/* Mobile Card View */}
+        <div className="mobile-only" style={{ padding: '0.5rem' }}>
+          {(mode === 'Subject' && !selectedSubject) ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Select a subject to begin.</div>
+          ) : displayedStudents.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>No students found.</div>
+          ) : displayedStudents.map(student => {
+            const status = getEffectiveStatus(student.id);
+            return (
+              <div key={student.id} className="attendance-mobile-card" style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '0.5rem', borderRadius: '12px', backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{student.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{student.id} • {student.standard}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
+                  <button 
+                    onClick={() => handleStatusChange(student.id, 'Present')}
+                    className={`btn-attendance-mobile ${status === 'Present' ? 'present' : ''}`}
+                  >Present</button>
+                  <button 
+                    onClick={() => handleStatusChange(student.id, 'Absent')}
+                    className={`btn-attendance-mobile ${status === 'Absent' ? 'absent' : ''}`}
+                  >Absent</button>
+                  <button 
+                    onClick={() => handleStatusChange(student.id, 'No Class')}
+                    className={`btn-attendance-mobile ${status === 'No Class' ? 'no-class' : ''}`}
+                  >No Class</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      <style>{`
+        .btn-attendance {
+          padding: 0.5rem 1rem;
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+          background: white;
+          color: #64748B;
+          font-weight: 600;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-attendance.present { background: var(--success-green); color: white; border-color: var(--success-green); }
+        .btn-attendance.absent { background: var(--danger-red); color: white; border-color: var(--danger-red); }
+        .btn-attendance.no-class { background: #94A3B8; color: white; border-color: #94A3B8; }
+
+        .btn-attendance-mobile {
+          padding: 0.75rem 0.25rem;
+          border-radius: 8px;
+          border: 1px solid var(--border-color);
+          background: #F8FAFC;
+          color: #64748B;
+          font-weight: 700;
+          font-size: 0.75rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .btn-attendance-mobile.present { background: var(--success-green); color: white; border-color: var(--success-green); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .btn-attendance-mobile.absent { background: var(--danger-red); color: white; border-color: var(--danger-red); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .btn-attendance-mobile.no-class { background: #64748B; color: white; border-color: #64748B; }
+
+        @media (max-width: 768px) {
+          .desktop-only { display: none; }
+          .mobile-only { display: block; }
+        }
+        @media (min-width: 769px) {
+          .desktop-only { display: block; }
+          .mobile-only { display: none; }
+        }
+      `}</style>
     </div>
   );
 };
