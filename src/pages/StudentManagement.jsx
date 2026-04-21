@@ -10,6 +10,7 @@ const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [subjectSearch, setSubjectSearch] = useState('');
   const [collegeFilter, setCollegeFilter] = useState('');
+  const [standardFilter, setStandardFilter] = useState('');
   const [sortBy, setSortBy] = useState('');
   const [printMode, setPrintMode] = useState('directory');
   const [students, setStudents] = useState([]);
@@ -254,9 +255,10 @@ const StudentManagement = () => {
   const filteredStudents = students
     .filter(s => {
       const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (s.standard && s.standard.toLowerCase().includes(searchTerm.toLowerCase()));
+                            (s.id && s.id.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesCollege = collegeFilter ? s.collegeId === Number(collegeFilter) : true;
-      return matchesSearch && matchesCollege;
+      const matchesStandard = standardFilter ? s.standard === standardFilter : true;
+      return matchesSearch && matchesCollege && matchesStandard;
     })
     .sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
@@ -319,6 +321,11 @@ const StudentManagement = () => {
         <select value={collegeFilter} onChange={(e) => setCollegeFilter(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>
            <option value="">All Colleges</option>
            {colleges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+
+        <select value={standardFilter} onChange={(e) => setStandardFilter(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>
+           <option value="">All Classes</option>
+           {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
         </select>
 
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>

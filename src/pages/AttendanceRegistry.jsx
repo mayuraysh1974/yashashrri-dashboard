@@ -114,15 +114,45 @@ const AttendanceRegistry = () => {
 
     if (mode === 'Subject' && !selectedSubject) return alert('Please select a subject first.');
 
+    setLoading(true);
     const { error } = await supabase
       .from(table)
       .upsert(records, { onConflict: mode === 'Daily' ? 'student_id, date' : 'student_id, subject_id, date' });
     
     if (error) {
       alert('Error saving attendance: ' + error.message);
-    } else {
-      alert('Attendance saved successfully!');
+      setLoading(false);
+      return;
     }
+
+    // --- Smart Sync Logic ---
+    // If we marked students Absent for the day, also mark them Absent for all their subjects
+    if (mode === 'Daily') {
+      const absenteeRecords = [];
+      displayedStudents.forEach(student => {
+        const status = dailyAttendance[student.id] || 'Absent';
+        if (status === 'Absent') {
+          // Add a record for every subject this student is enrolled in
+          student.student_subjects?.forEach(sub => {
+            absenteeRecords.push({
+              student_id: student.id,
+              subject_id: sub.subject_id,
+              date: selectedDate,
+              status: 'Absent'
+            });
+          });
+        }
+      });
+
+      if (absenteeRecords.length > 0) {
+        await supabase
+          .from('student_subject_attendance')
+          .upsert(absenteeRecords, { onConflict: 'student_id, subject_id, date' });
+      }
+    }
+
+    alert('Attendance saved and synchronized successfully!');
+    setLoading(false);
   };
 
   const markAllEnrolledPresent = () => {
