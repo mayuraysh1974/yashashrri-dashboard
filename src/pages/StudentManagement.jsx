@@ -312,80 +312,102 @@ const StudentManagement = () => {
         </div>
       </div>
 
-      <div className="card-base no-print" style={{ display: 'flex', gap: '1rem', padding: '1rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div className="search-bar" style={{ backgroundColor: 'var(--bg-main)', flex: 1, minWidth: '250px', maxWidth: '400px' }}>
+      <div className="card-base no-print" style={{ display: 'flex', gap: '0.75rem', padding: '1rem', marginBottom: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="search-bar" style={{ backgroundColor: 'var(--bg-main)', flex: 1, minWidth: '100%', marginBottom: '0.5rem' }}>
           <FiSearch style={{ color: 'var(--text-secondary)' }} />
           <input type="text" className="search-input" placeholder="Search students..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
         
-        <select value={collegeFilter} onChange={(e) => setCollegeFilter(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>
-           <option value="">All Colleges</option>
-           {colleges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+          <select value={collegeFilter} onChange={(e) => setCollegeFilter(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', fontSize: '0.8rem' }}>
+             <option value="">All Colleges</option>
+             {colleges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
 
-        <select value={standardFilter} onChange={(e) => setStandardFilter(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>
-           <option value="">All Classes</option>
-           {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
-        </select>
-
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ padding: '0.4rem 1rem', borderRadius: 'var(--radius-full)', border: '1px solid transparent', backgroundColor: 'var(--bg-main)', outline: 'none', cursor: 'pointer' }}>
-           <option value="">Default Sort</option>
-           <option value="name">Sort A-Z (Name)</option>
-           <option value="id">Sort by Student ID</option>
-        </select>
+          <select value={standardFilter} onChange={(e) => setStandardFilter(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', fontSize: '0.8rem' }}>
+             <option value="">All Classes</option>
+             {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+          </select>
+        </div>
       </div>
 
-      <div className="card-base no-print table-container" style={{ flex: 1 }}>
-        <table>
-          <thead>
-            <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
-              <th style={{ padding: '1rem' }}>Student Details</th>
-              <th style={{ padding: '1rem' }}>Parent Contact</th>
-              <th style={{ padding: '1rem' }}>Standard</th>
-              <th style={{ padding: '1rem' }}>College</th>
-              <th style={{ padding: '1rem', textAlign: 'right' }}>Balance</th>
-              <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map(s => (
-              <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {s.photo ? <img src={`${s.photo}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <FiUser size={20} color="#cbd5e1" />}
-                   </div>
-                   <div>
-                     <div style={{ fontWeight: 600 }}>{s.name}</div>
-                     <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ID: {s.id}</div>
-                   </div>
-                </td>
-                <td style={{ padding: '1rem' }}>
-                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{s.parentName || 'N/A'}</div>
-                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span><FiPhone size={10} /> {s.parentPhone || 'N/A'}</span>
-                      {s.parentPhone && (
-                         <a href={`https://wa.me/91${s.parentPhone.replace(/\D/g, '')}?text=Hello%20${encodeURIComponent(s.parentName || 'Parent')},%20this%20is%20Yashashrri%20Classes.`} target="_blank" rel="noreferrer" style={{ color: '#25D366', display: 'flex', alignItems: 'center' }} title="Message on WhatsApp">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                               <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-5.824 4.74-10.563 10.564-10.563 5.826 0 10.564 4.738 10.564 10.561s-4.738 10.565-10.564 10.565z"/>
-                            </svg>
-                         </a>
-                      )}
-                   </div>
-                </td>
-                <td style={{ padding: '1rem' }}>{s.standard}</td>
-                <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{s.collegeName || <span style={{ color: 'var(--text-muted)' }}>Not Assigned</span>}</td>
-                <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: s.balance > 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>₹{s.balance.toLocaleString()}</td>
-                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                   <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                      <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => setShowProfile(s)} title="View Profile"><FiTrendingUp /></button>
-                      <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
-                      <button className="btn-secondary" style={{ padding: '0.4rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
-                   </div>
-                </td>
+      <div className="card-base no-print" style={{ flex: 1, overflow: 'auto', padding: 0, background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        {/* Desktop Table */}
+        <div className="desktop-only card-base" style={{ padding: 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ textAlign: 'left', borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-main)' }}>
+                <th style={{ padding: '1rem' }}>Student Details</th>
+                <th style={{ padding: '1rem' }}>Parent Contact</th>
+                <th style={{ padding: '1rem' }}>Standard</th>
+                <th style={{ padding: '1rem' }}>College</th>
+                <th style={{ padding: '1rem', textAlign: 'right' }}>Balance</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredStudents.map(s => (
+                <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--bg-main)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {s.photo ? <img src={`${s.photo}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <FiUser size={20} color="#cbd5e1" />}
+                     </div>
+                     <div>
+                       <div style={{ fontWeight: 600 }}>{s.name}</div>
+                       <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ID: {s.id}</div>
+                     </div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>
+                     <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{s.parentName || 'N/A'}</div>
+                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span><FiPhone size={10} /> {s.parentPhone || 'N/A'}</span>
+                     </div>
+                  </td>
+                  <td style={{ padding: '1rem' }}>{s.standard}</td>
+                  <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{s.collegeName || 'N/A'}</td>
+                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: s.balance > 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>₹{s.balance.toLocaleString()}</td>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                        <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => setShowProfile(s)}><FiTrendingUp /></button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
+                     </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="mobile-only">
+          {filteredStudents.map(s => (
+            <div key={s.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '12px', backgroundColor: 'var(--bg-main)', overflow: 'hidden', flexShrink: 0 }}>
+                  {s.photo ? <img src={`${s.photo}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <FiUser size={24} color="#cbd5e1" style={{ margin: '13px' }} />}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{s.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {s.id} • {s.standard}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Balance</div>
+                  <div style={{ fontWeight: 800, color: s.balance > 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>₹{s.balance.toLocaleString()}</div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                <button className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => setShowProfile(s)}><FiTrendingUp /> Profile</button>
+                <button className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /> Edit</button>
+                {s.parentPhone && (
+                  <a href={`tel:${s.parentPhone}`} className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem', justifyContent: 'center' }}><FiPhone /> Call</a>
+                )}
+              </div>
+            </div>
+          ))}
+          {filteredStudents.length === 0 && <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>No students found matching your filters.</div>}
+        </div>
       </div>
 
       {/* Enroll Modal */}

@@ -56,14 +56,28 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ 
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' 
-      }}>
+      <div className="dashboard-metrics-grid">
         <MetricCard title="Total Students" value={metrics.totalStudents} subtitle="Active Students" icon={<FiUsers size={24} />} />
         <MetricCard title="Fees Collected" value={`₹${(metrics.feesCollected || 0).toLocaleString()}`} subtitle="In Total" icon={<FiDollarSign size={24} />} color="var(--success-green)" />
         <MetricCard title="Fee Alerts" value={metrics.defaulters} subtitle="Active Defaulters" icon={<FiAlertCircle size={24} />} color="var(--danger-red)" />
         <MetricCard title="Teachers" value={`${metrics.presentTeachers} / ${metrics.totalTeachers}`} subtitle="Total Faculty Count" icon={<FiUserCheck size={24} />} />
       </div>
+
+      <style>{`
+        .dashboard-metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-metrics-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+          }
+        }
+      `}</style>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', alignItems: 'start', maxWidth: '800px' }}>
         <ActivityFeed data={metrics.activities} />
