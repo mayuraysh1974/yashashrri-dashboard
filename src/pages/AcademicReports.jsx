@@ -710,9 +710,3 @@ const AcademicReports = () => {
 };
 
 export default AcademicReports;
->
-    </div>
-  );
-};
-
-export default AcademicReports;

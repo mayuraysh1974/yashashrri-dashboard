@@ -398,21 +398,3 @@ const AttendanceReports = () => {
 };
 
 export default AttendanceReports;
-
-      <style>{`
-        @media print {
-          .no-print { display: none !important; }
-          .print-header { display: block !important; }
-          .print-only { display: block !important; }
-          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-          body { background: white !important; }
-          .content-area { padding: 0 !important; position: static !important; }
-          table { width: 100% !important; border: 1px solid #ddd !important; }
-          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-export default AttendanceReports;
