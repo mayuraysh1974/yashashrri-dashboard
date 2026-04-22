@@ -55,30 +55,46 @@ const StandardMaster = () => {
         </button>
       </div>
 
-      <div className="card-base" style={{ overflow: 'auto', flex: 1 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border-color)' }}>
-              <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>Standard / Class Name</th>
-              <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="2" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
-            ) : standards.map((s) => (
-              <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem', fontWeight: 600 }}>{s.standard}</td>
-                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                      <button onClick={() => { setFormData(s); setEditMode(true); setShowModal(true); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-blue)' }}><FiEdit2 /></button>
-                      <button onClick={() => handleDelete(s.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger-red)' }}><FiTrash2 /></button>
-                    </div>
-                </td>
+      <div className="card-base" style={{ overflow: 'auto', flex: 1, padding: 0, background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        {/* Desktop Table */}
+        <div className="desktop-only card-base" style={{ padding: 0 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <thead>
+              <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border-color)' }}>
+                <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>Standard / Class Name</th>
+                <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {standards.map((s) => (
+                <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', fontWeight: 600 }}>{s.standard}</td>
+                  <td style={{ padding: '1rem', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                        <button onClick={() => { setFormData(s); setEditMode(true); setShowModal(true); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary-blue)' }}><FiEdit2 /></button>
+                        <button onClick={() => handleDelete(s.id)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--danger-red)' }}><FiTrash2 /></button>
+                      </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="mobile-only">
+          {standards.map((s) => (
+            <div key={s.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{s.standard}</div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button className="btn-secondary" style={{ padding: '0.5rem' }} onClick={() => { setFormData(s); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
+                <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {loading && <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>}
       </div>
 
       {showModal && (

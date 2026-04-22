@@ -168,177 +168,85 @@ const Enquiries = () => {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0', marginTop: '1rem' }}>
+      <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1rem', marginTop: '1rem' }}>
         <button style={tabStyle('enquiries')} onClick={() => setActiveTab('enquiries')}>
-          <FiMessageCircle />
-          Quick Enquiries ({enquiries.length})
+          <FiMessageCircle /> Quick ({enquiries.length})
         </button>
         <button style={tabStyle('applications')} onClick={() => setActiveTab('applications')}>
-          <FiFileText />
-          Online Applications ({applications.length})
+          <FiFileText /> Apps ({applications.length})
         </button>
       </div>
 
-      <div className="card" style={{ borderRadius: '0 12px 12px 12px', padding: '0' }}>
-        <div className="table-responsive">
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {/* ---- ENQUIRIES TAB ---- */}
+        {activeTab === 'enquiries' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {enquiries.length === 0 ? (
+              <div className="card-base" style={{ textAlign: 'center', padding: '2rem', color: '#64748B' }}>No enquiries received.</div>
+            ) : enquiries.map((enq) => (
+              <div key={enq.id} className="card-base" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{enq.student_name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{enq.standard} • {new Date(enq.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : (enq.status === 'Admitted' ? 'bg-success' : 'bg-primary')}`} style={{ padding: '0.3rem 0.6rem', fontSize: '0.65rem' }}>
+                    {enq.status}
+                  </span>
+                </div>
+                
+                <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{enq.phone}</div>
 
-          {/* ---- ENQUIRIES TAB ---- */}
-          {activeTab === 'enquiries' && (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>Date</th>
-                  <th style={{ padding: '1rem 1.5rem', minWidth: '180px' }}>Student Info</th>
-                  <th style={{ padding: '1rem 1.5rem', minWidth: '130px' }}>Contact</th>
-                  <th style={{ padding: '1rem 1.5rem' }}>Status</th>
-                  <th style={{ padding: '1rem 1.5rem', minWidth: '220px' }}>Admin Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enquiries.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: '#64748B' }}>
-                      No quick enquiries received yet.
-                    </td>
-                  </tr>
+                {enq.status !== 'Admitted' ? (
+                  <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                    <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem' }} onClick={() => confirmAdmission(enq)}><FiCheck /> Admit</button>
+                    <a href={`tel:${enq.phone}`} className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', justifyContent: 'center' }}><FiMessageCircle /> Call</a>
+                    <button className="btn-secondary" style={{ flex: 0.3, padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => deleteEnquiry(enq.id)}><FiTrash2 /></button>
+                  </div>
                 ) : (
-                  enquiries.map((enq) => (
-                    <tr key={enq.id}>
-                      <td style={{ padding: '1.25rem' }}>{new Date(enq.created_at).toLocaleDateString()}</td>
-                      <td style={{ padding: '1.25rem' }}>
-                        <div className="fw-bold" style={{ fontSize: '1rem', color: 'var(--primary-blue)' }}>{enq.student_name}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.2rem' }}>{enq.standard}</div>
-                      </td>
-                      <td style={{ padding: '1.25rem', fontWeight: 600 }}>{enq.phone}</td>
-                      <td style={{ padding: '1.25rem' }}>
-                        <span className={`status-badge ${enq.status === 'New' ? 'bg-danger' : (enq.status === 'Admitted' ? 'bg-success' : 'bg-primary')}`}
-                          style={{ padding: '0.4rem 0.8rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700 }}>
-                          {enq.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '0.75rem', flexDirection: 'column', minWidth: '200px' }}>
-                          {enq.status !== 'Admitted' ? (
-                            <>
-                              {enq.status === 'New' && (
-                                <textarea
-                                  placeholder="Add reply notes..."
-                                  value={replyText[enq.id] || ''}
-                                  onChange={(e) => handleReplyChange(enq.id, e.target.value)}
-                                  rows="2"
-                                  style={{ padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }}
-                                ></textarea>
-                              )}
-                              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                {enq.status === 'New' && (
-                                  <button className="btn btn-sm btn-primary" onClick={() => updateStatus(enq.id, 'Replied', replyText[enq.id])} style={{ flex: 1 }}>
-                                    <FiCheck /> Mark Replied
-                                  </button>
-                                )}
-                                <button className="btn btn-sm"
-                                  style={{ backgroundColor: 'var(--success-green)', color: 'white', border: 'none', flex: 1, padding: '0.5rem' }}
-                                  onClick={() => confirmAdmission(enq)}>
-                                  <FiCheck /> Confirm Admission
-                                </button>
-                              </div>
-                              {enq.status === 'Replied' && enq.reply_notes && (
-                                <div style={{ fontSize: '0.8rem', color: '#64748B', fontStyle: 'italic', backgroundColor: '#F1F5F9', padding: '0.5rem', borderRadius: '6px' }}>
-                                  <FiMessageCircle /> Note: {enq.reply_notes}
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            <div style={{ fontSize: '0.9rem', color: 'var(--success-green)', fontWeight: 700, backgroundColor: '#ECFDF5', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <FiCheckCircle /> {enq.reply_notes || 'Admission Confirmed'}
-                            </div>
-                          )}
-                          <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }} onClick={() => deleteEnquiry(enq.id)}>
-                            <FiTrash2 /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  <div style={{ fontSize: '0.8rem', color: 'var(--success-green)', fontWeight: 700, backgroundColor: '#ECFDF5', padding: '0.5rem', borderRadius: '8px', textAlign: 'center' }}>
+                    <FiCheckCircle /> Admission Confirmed
+                  </div>
                 )}
-              </tbody>
-            </table>
-          )}
+              </div>
+            ))}
+          </div>
+        )}
 
-          {/* ---- APPLICATIONS TAB ---- */}
-          {activeTab === 'applications' && (
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Student Info</th>
-                  <th>Contact & Email</th>
-                  <th>Gender / DOB</th>
-                  <th>Status</th>
-                  <th>Admin Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: '#64748B' }}>
-                      No online applications received yet.
-                    </td>
-                  </tr>
-                ) : (
-                  applications.map((app) => (
-                    <tr key={app.id}>
-                      <td style={{ padding: '1.25rem' }}>{new Date(app.created_at).toLocaleDateString()}</td>
-                      <td style={{ padding: '1.25rem' }}>
-                        <div className="fw-bold" style={{ fontSize: '1rem', color: 'var(--primary-blue)' }}>
-                          <FiUser style={{ marginRight: '0.3rem' }} />{app.full_name}
-                        </div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '0.2rem' }}>Std: {app.standard}</div>
-                        {app.address && <div style={{ fontSize: '0.8rem', color: '#94A3B8', marginTop: '0.2rem' }}>{app.address}</div>}
-                      </td>
-                      <td style={{ padding: '1.25rem' }}>
-                        <div style={{ fontWeight: 600 }}>{app.phone}</div>
-                        <div style={{ fontSize: '0.85rem', color: '#64748B' }}>{app.email}</div>
-                      </td>
-                      <td style={{ padding: '1.25rem', fontSize: '0.9rem' }}>
-                        <div>{app.gender}</div>
-                        <div style={{ color: '#64748B' }}>{app.dob}</div>
-                      </td>
-                      <td style={{ padding: '1.25rem' }}>
-                        <span style={{
-                          padding: '0.4rem 0.8rem', borderRadius: '50px', fontSize: '0.75rem', fontWeight: 700,
-                          background: app.status === 'Admitted' ? '#ECFDF5' : '#FFF7ED',
-                          color: app.status === 'Admitted' ? '#16A34A' : '#EA580C'
-                        }}>
-                          {app.status || 'Pending'}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '0.5rem', flexDirection: 'column', minWidth: '180px' }}>
-                          {app.status !== 'Admitted' && (
-                            <button className="btn btn-sm"
-                              style={{ backgroundColor: 'var(--success-green)', color: 'white', border: 'none', padding: '0.5rem' }}
-                              onClick={() => confirmAdmission({ ...app, student_name: app.full_name, _source: 'application' })}>
-                              <FiCheck /> Confirm Admission
-                            </button>
-                          )}
-                          {app.status === 'Admitted' && (
-                            <div style={{ fontSize: '0.9rem', color: 'var(--success-green)', fontWeight: 700, backgroundColor: '#ECFDF5', padding: '0.75rem', borderRadius: '8px', textAlign: 'center' }}>
-                              <FiCheckCircle /> Admitted
-                            </div>
-                          )}
-                          <button className="btn btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: 'none' }} onClick={() => deleteApplication(app.id)}>
-                            <FiTrash2 /> Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
+        {/* ---- APPLICATIONS TAB ---- */}
+        {activeTab === 'applications' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {applications.length === 0 ? (
+              <div className="card-base" style={{ textAlign: 'center', padding: '2rem', color: '#64748B' }}>No online applications received.</div>
+            ) : applications.map((app) => (
+              <div key={app.id} className="card-base" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{app.full_name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Std: {app.standard} • {new Date(app.created_at).toLocaleDateString()}</div>
+                  </div>
+                  <span style={{ padding: '0.3rem 0.6rem', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 700, background: app.status === 'Admitted' ? '#ECFDF5' : '#FFF7ED', color: app.status === 'Admitted' ? '#16A34A' : '#EA580C' }}>
+                    {app.status || 'Pending'}
+                  </span>
+                </div>
+                
+                <div style={{ fontSize: '0.85rem' }}>
+                  <div><strong>Phone:</strong> {app.phone}</div>
+                  <div><strong>Email:</strong> {app.email}</div>
+                </div>
 
-        </div>
+                <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                  {app.status !== 'Admitted' ? (
+                    <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem' }} onClick={() => confirmAdmission({ ...app, student_name: app.full_name, _source: 'application' })}><FiCheck /> Admit</button>
+                  ) : (
+                    <div style={{ flex: 1, fontSize: '0.8rem', color: 'var(--success-green)', fontWeight: 700, textAlign: 'center' }}><FiCheckCircle /> Admitted</div>
+                  )}
+                  <button className="btn-secondary" style={{ flex: 0.3, padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => deleteApplication(app.id)}><FiTrash2 /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

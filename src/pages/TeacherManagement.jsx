@@ -206,8 +206,9 @@ const TeacherManagement = () => {
         </div>
       </div>
 
-      <div className="card-base no-print table-container" style={{ flex: 1 }}>
-        <div style={{ height: '100%' }}>
+      <div className="card-base no-print" style={{ flex: 1, overflow: 'auto', padding: 0, background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        {/* Desktop Table */}
+        <div className="desktop-only card-base" style={{ padding: 0 }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead className="no-print" style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)', position: 'sticky', top: 0 }}>
               <tr>
@@ -244,12 +245,48 @@ const TeacherManagement = () => {
               ))}
             </tbody>
           </table>
-          {!loading && filteredTeachers.length === 0 && (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              No faculty found
-            </div>
-          )}
         </div>
+
+        {/* Mobile Cards */}
+        <div className="mobile-only">
+          {filteredTeachers.map(t => (
+            <div key={t.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{t.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {t.id} • {t.subject}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Balance</div>
+                  <div style={{ fontWeight: 800, color: t.balance > 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>₹{t.balance.toLocaleString()}</div>
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem', backgroundColor: 'var(--bg-main)', padding: '0.75rem', borderRadius: '8px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>Earned</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>₹{t.totalEarned.toLocaleString()}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)' }}>Paid</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--success-green)' }}>₹{t.totalPaid.toLocaleString()}</div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
+                <button className="btn-secondary" style={{ flex: 1.5, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => handleFinanceOpen(t)}><FiDollarSign /> Finance Ledger</button>
+                <button className="btn-secondary" style={{ flex: 0.5, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => handleEdit(t)}><FiEdit2 /></button>
+                <button className="btn-secondary" style={{ flex: 0.5, fontSize: '0.75rem', padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(t.id)}><FiTrash2 /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {!loading && filteredTeachers.length === 0 && (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            No faculty found
+          </div>
+        )}
       </div>
 
       {/* Finance Ledger Modal */}

@@ -25,7 +25,6 @@ const DigitalLibrary = () => {
     const { data, error } = await supabase.from('library_resources').select('*');
     if (error) console.error('fetchResources error:', error);
     
-    // Fallback sort if we remove order() to test if created_at exists later
     const sortedData = data ? data.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0)) : [];
     
     setResources(sortedData);
@@ -33,7 +32,6 @@ const DigitalLibrary = () => {
   };
 
   const handleSaveResource = async () => {
-    // If multiple files, name is optional as we use filename. If 1 file/video, name is required.
     const isSingle = uploadFiles.length <= 1 && !formData.videoLink;
     if (isSingle && !formData.name) return alert('Resource title is required');
     if (uploadFiles.length === 0 && !formData.videoLink) return alert('Provide a file or video link');
@@ -53,7 +51,6 @@ const DigitalLibrary = () => {
           const { data: publicUrlData } = supabase.storage.from('library-files').getPublicUrl(filePath);
           const fileUrl = publicUrlData?.publicUrl || null;
 
-          // If multiple files, use filename for individual entries, otherwise use the title provided
           const recordName = uploadFiles.length > 1 ? file.name : (formData.name || file.name);
 
           const { error: insError } = await supabase.from('library_resources').insert({
@@ -90,10 +87,8 @@ const DigitalLibrary = () => {
   const handleDelete = async (resource) => {
     if (!window.confirm('Delete this resource? This cannot be undone.')) return;
     
-    // 1. Delete the physical file from cloud storage if it exists and is not an external video link
     if (resource.video_link && resource.video_link.includes('supabase.co')) {
       try {
-        // Extract the file path from the public URL
         const urlParts = resource.video_link.split('/');
         const filePath = urlParts.slice(urlParts.indexOf('library-files') + 1).join('/');
         if (filePath) {
@@ -104,7 +99,6 @@ const DigitalLibrary = () => {
       }
     }
 
-    // 2. Delete the record from the database
     const { error } = await supabase.from('library_resources').delete().eq('id', resource.id);
     if (error) {
        alert('Error deleting resource: ' + error.message);
@@ -114,141 +108,145 @@ const DigitalLibrary = () => {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="page-header">
+    <div className="digital-library-container" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1.25rem' }}>
+      <div className="page-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 className="page-title">Digital Library</h1>
-          <p className="page-subtitle">Cloud PDF Uploads and Academic Repository</p>
+          <h1 className="page-title" style={{ fontSize: '1.5rem', color: '#1A237E', margin: 0 }}>Digital Library</h1>
+          <p className="page-subtitle" style={{ color: '#64748B', fontSize: '0.85rem' }}>Manage PDFs and Video Resources</p>
         </div>
-        <button className="btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn-primary" onClick={() => setShowModal(true)} style={{ fontSize: '0.85rem', padding: '0.6rem 1.25rem' }}>
           <FiPlus /> New Resource
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1.5rem', flex: 1, minHeight: 0, flexDirection: 'row' }}>
+      <div className="library-layout" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 350px), 1fr))', gap: '1.5rem', flex: 1 }}>
         
-        <div className="card-base" style={{ flex: '1', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed var(--border-color)', backgroundColor: 'var(--bg-main)', minWidth: '300px' }}>
-          <div style={{ padding: '1.5rem', backgroundColor: 'rgba(212, 175, 55, 0.1)', borderRadius: '50%', color: 'var(--accent-gold)', marginBottom: '1.5rem' }}>
-            <FiUploadCloud size={60} />
+        <div className="card-base" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #CBD5E1', backgroundColor: '#F8FAFC' }}>
+          <div style={{ padding: '1.25rem', backgroundColor: 'rgba(184, 134, 11, 0.1)', borderRadius: '50%', color: '#B8860B', marginBottom: '1rem' }}>
+            <FiUploadCloud size={40} />
           </div>
-          <h3 style={{ color: 'var(--primary-blue)', marginBottom: '0.5rem' }}>Cloud File Storage</h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', textAlign: 'center', marginBottom: '2.5rem' }}>
-            Upload PDFs to Supabase Storage. Files are stored permanently in the cloud and accessible from anywhere.
+          <h3 style={{ color: '#1A237E', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Cloud Repository</h3>
+          <p style={{ color: '#64748B', fontSize: '0.85rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+            Upload academic notes, PDFs, or link YouTube videos directly to student portals.
           </p>
-          <button className="btn-primary" style={{ padding: '0.75rem 2rem' }} onClick={() => setShowModal(true)}>Upload Notes (PDF)</button>
+          <button className="btn-primary" style={{ padding: '0.7rem 1.5rem', fontSize: '0.85rem' }} onClick={() => setShowModal(true)}>Upload Notes</button>
         </div>
 
-        <div className="card-base" style={{ flex: '2', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '1.2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-surface)' }}>
-            <h3 style={{ color: 'var(--primary-blue)', fontSize: '1.1rem' }}>Resource Repository</h3>
+        <div className="card-base" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '1rem', borderBottom: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }}>
+            <h3 style={{ color: '#1A237E', fontSize: '1rem', margin: 0 }}>Recent Uploads</h3>
           </div>
+          
           <div style={{ flex: 1, overflowY: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>File Name</th>
-                  <th style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Standard</th>
-                  <th style={{ padding: '1rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Upload Date</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
-                ) : resources.length === 0 ? (
-                  <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No resources uploaded yet.</td></tr>
-                ) : resources.map((r, i) => (
-                  <tr key={r.id || i} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                        <div style={{ padding: '0.4rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px' }}>
-                            <FiFile color="var(--primary-blue)" size={20} />
-                        </div>
-                        <div>
-                          <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{r.name}</p>
-                          {(r.video_link || r.videoLink) && (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', color: 'var(--primary-blue)', fontSize: '0.75rem', marginTop: '0.4rem', backgroundColor: 'rgba(212,175,55,0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 600 }}>
-                              <FiVideo /> Linked
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{r.standard}</td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{r.date || (r.created_at ? r.created_at.split('T')[0] : '')}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                        {(r.video_link || r.videoLink) && (
-                          <a 
-                            href={r.video_link || r.videoLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            className="btn-secondary" 
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                          >
-                           <FiEye /> View
-                          </a>
-                        )}
-                        <button onClick={() => handleDelete(r)} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--danger-red)', border: 'none', cursor: 'pointer' }}><FiTrash2 size={16} /></button>
-                      </div>
-                    </td>
+            <div className="desktop-only">
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ backgroundColor: '#F1F5F9', borderBottom: '1px solid #E2E8F0' }}>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.75rem', color: '#64748B', fontWeight: 800 }}>FILE / TITLE</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.75rem', color: '#64748B', fontWeight: 800 }}>STANDARD</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textAlign: 'center' }}>ACTION</th>
                   </tr>
-                ))}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
+                  ) : resources.length === 0 ? (
+                    <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8' }}>No records.</td></tr>
+                  ) : resources.map((r, i) => (
+                    <tr key={r.id || i} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                      <td style={{ padding: '0.75rem 1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <FiFile color="#1A237E" size={18} />
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B' }}>{r.name}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.75rem 1rem', color: '#64748B', fontSize: '0.8rem', fontWeight: 700 }}>{r.standard}</td>
+                      <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                          <a href={r.video_link || r.videoLink} target="_blank" rel="noopener noreferrer" style={{ color: '#B8860B' }}><FiEye size={16} /></a>
+                          <button onClick={() => handleDelete(r)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}><FiTrash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mobile-only" style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
+               {resources.map((r, i) => (
+                  <div key={r.id || i} className="card-base" style={{ padding: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
+                     <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>{r.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>Std: {r.standard} • {r.date}</div>
+                     </div>
+                     <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <a href={r.video_link || r.videoLink} target="_blank" rel="noopener noreferrer" style={{ color: '#B8860B', padding: '0.5rem' }}><FiEye size={18} /></a>
+                        <button onClick={() => handleDelete(r)} style={{ background: 'none', border: 'none', color: '#EF4444', padding: '0.5rem' }}><FiTrash2 size={18} /></button>
+                     </div>
+                  </div>
+               ))}
+               {resources.length === 0 && !loading && <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No resources found.</p>}
+            </div>
           </div>
         </div>
       </div>
 
       {showModal && (
         <div className="modal-overlay">
-          <div className="card-base" style={{ width: '100%', maxWidth: '450px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)', borderTop: '4px solid var(--accent-gold)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Upload Resource</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
+          <div className="card-base" style={{ width: '90%', maxWidth: '400px', padding: '1.25rem', backgroundColor: 'white', borderTop: '4px solid #B8860B' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ fontSize: '1.1rem', color: '#1A237E', margin: 0 }}>Add New Resource</h2>
+              <button onClick={() => setShowModal(false)} style={{ background: 'transparent', color: '#64748B', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
             </div>
             
-            <div className="input-group">
-              <label>Resource Title</label>
-              <input type="text" placeholder="e.g. Maths Chapter 1 Notes" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-            </div>
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div className="input-group">
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Title</label>
+                <input type="text" placeholder="e.g. Physics Ch 2 Notes" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }} />
+              </div>
 
-            <div className="input-group">
-              <label>Select Standard</label>
-              <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})}>
-                <option value="">Choose Standard...</option>
-                {standards.map(s => (
-                  <option key={s.id} value={s.standard}>{s.standard}</option>
-                ))}
-              </select>
-            </div>
+              <div className="input-group">
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Standard</label>
+                <select value={formData.standard} onChange={e => setFormData({...formData, standard: e.target.value})} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }}>
+                  <option value="">Choose Standard...</option>
+                  {standards.map(s => (
+                    <option key={s.id} value={s.standard}>{s.standard}</option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="input-group">
-              <label>Select Files (PDF, Images, etc.)</label>
-              <input type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.html,.mp4,.jpg,.png" onChange={e => setUploadFiles(Array.from(e.target.files))} />
-              {uploadFiles.length > 0 && (
-                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--success-green)', fontWeight: 600 }}>
-                  {uploadFiles.length} files selected
-                </div>
-              )}
-            </div>
+              <div className="input-group">
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>File Upload (PDF/Image)</label>
+                <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setUploadFiles(Array.from(e.target.files))} style={{ width: '100%', fontSize: '0.8rem' }} />
+              </div>
 
-            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: '1rem 0', fontSize: '0.8rem' }}>OR</div>
+              <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.7rem', fontWeight: 800 }}>OR</div>
 
-            <div className="input-group">
-              <label>External Video / YouTube Link</label>
-              <input type="text" placeholder="https://youtu.be/..." value={formData.videoLink} onChange={e => setFormData({...formData, videoLink: e.target.value})} />
-            </div>
+              <div className="input-group">
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Video URL</label>
+                <input type="text" placeholder="YouTube link" value={formData.videoLink} onChange={e => setFormData({...formData, videoLink: e.target.value})} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }} />
+              </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-              <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleSaveResource} disabled={uploading}>
-                {uploading ? 'Uploading...' : 'Upload & Save'}
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+                <button className="btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn-primary" style={{ flex: 2 }} onClick={handleSaveResource} disabled={uploading}>
+                  {uploading ? 'Working...' : 'Save Resource'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @media (max-width: 768px) {
+          .desktop-only { display: none !important; }
+        }
+        @media (min-width: 769px) {
+          .mobile-only { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

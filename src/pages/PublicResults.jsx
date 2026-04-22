@@ -153,71 +153,100 @@ const PublicResults = () => {
   }
 
   return (
-    <div className="landing-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <nav className="landing-nav" style={{ position: 'relative', background: '#FFFFFF', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+    <div className="landing-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F8FAFC' }}>
+      <nav className="landing-nav" style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 100, 
+        background: '#FFFFFF', 
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        height: '70px',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '0 5%'
+      }}>
         <div className="landing-logo">
-          <img src="/logo.png" alt="Yashashrri Logo" style={{ height: '50px' }} />
+          <img src="/logo.png" alt="Yashashrri Logo" style={{ height: '45px' }} />
         </div>
         <div className="nav-actions">
-          <button onClick={handleLogout} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#EF4444', border: '1px solid #EF4444' }}>
+          <button onClick={handleLogout} className="btn-secondary" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.4rem', 
+            color: '#EF4444', 
+            border: '1px solid #EF4444',
+            padding: '0.4rem 0.75rem',
+            fontSize: '0.8rem',
+            fontWeight: 700
+          }}>
             <FiLogOut /> Logout
           </button>
         </div>
       </nav>
 
-      <main style={{ flex: 1, padding: '4rem 5%', backgroundColor: '#F8FAFC' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+      <main className="public-results-main" style={{ flex: 1, padding: '2rem 5%' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h1 style={{ color: '#1A237E', margin: 0, fontSize: '2rem' }}>Welcome, {student.name}</h1>
-              <p style={{ color: '#64748B', fontWeight: 600, marginTop: '0.5rem' }}>{student.standard} | ID: {student.id}</p>
+              <h1 style={{ color: '#1A237E', margin: 0, fontSize: '1.25rem' }}>Welcome, {student.name}</h1>
+              <p style={{ color: '#64748B', fontWeight: 600, marginTop: '4px', fontSize: '0.8rem' }}>{student.standard} | ID: {student.id}</p>
             </div>
             <div style={{ textAlign: 'right' }}>
-               <span style={{ backgroundColor: '#10B98115', color: '#10B981', padding: '0.4rem 1rem', borderRadius: '50px', fontWeight: 700, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                 <FiCheckCircle /> Verified Profile
+               <span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.3rem 0.75rem', borderRadius: '50px', fontWeight: 800, fontSize: '0.7rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                 <FiCheckCircle /> Verified
                </span>
             </div>
           </div>
 
-          <section style={{ display: 'grid', gap: '1.5rem' }}>
+          <section style={{ display: 'grid', gap: '0.75rem' }}>
             {results.length === 0 ? (
-              <div className="card-base" style={{ textAlign: 'center', padding: '4rem' }}>
-                <FiFileText size={48} color="#CBD5E1" style={{ marginBottom: '1.5rem' }} />
-                <h3 style={{ color: '#64748B' }}>No Academic Records Found</h3>
-                <p style={{ color: '#94A3B8' }}>Tests assigned to your class will appear here once scheduled.</p>
+              <div className="card-base" style={{ textAlign: 'center', padding: '3rem' }}>
+                <FiFileText size={40} color="#CBD5E1" style={{ marginBottom: '1rem' }} />
+                <h3 style={{ color: '#64748B', fontSize: '1rem' }}>No Records Found</h3>
+                <p style={{ color: '#94A3B8', fontSize: '0.8rem' }}>Tests for your class will appear here once scheduled.</p>
               </div>
             ) : results.map(test => (
-              <div key={test.id} className="card-base" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem' }}>
-                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                  <div style={{ backgroundColor: '#F1F5F9', padding: '1rem', borderRadius: '12px', color: '#1A237E' }}>
-                    <FiFileText size={24} />
+              <div key={test.id} className="card-base" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1 }}>
+                  <div className="desktop-only" style={{ backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '10px', color: '#1A237E' }}>
+                    <FiFileText size={20} />
                   </div>
                   <div>
-                    <h4 style={{ margin: 0, fontSize: '1.1rem', color: '#1A237E' }}>{test.name}</h4>
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem', color: '#64748B', marginTop: '0.25rem' }}>
-                      <span style={{ fontWeight: 600 }}>{test.subject}</span>
+                    <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#1E293B' }}>{test.name}</h4>
+                    <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.7rem', color: '#64748B', marginTop: '4px' }}>
+                      <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{test.subject}</span>
                       <span>•</span>
-                      <span>{new Date(test.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <span>{new Date(test.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontSize: '0.7rem', color: '#94A3B8', textTransform: 'uppercase', marginBottom: '0.25rem', letterSpacing: '0.5px' }}>Performance</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <span style={{ fontSize: '1.75rem', fontWeight: 800, color: test.score !== 'N/A' ? '#10B981' : '#CBD5E1' }}>{test.score}</span>
-                      <span style={{ color: '#94A3B8', fontWeight: 600 }}>/ {test.total_marks || test.totalMarks}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', justifyContent: 'flex-end' }}>
+                      <span style={{ fontSize: '1.1rem', fontWeight: 800, color: test.score !== 'N/A' ? '#10B981' : '#CBD5E1' }}>{test.score}</span>
+                      <span style={{ color: '#94A3B8', fontWeight: 600, fontSize: '0.75rem' }}>/{test.total_marks || test.totalMarks}</span>
                     </div>
                   </div>
 
                   {test.solution_url ? (
-                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#D4AF37', color: 'white', border: 'none', padding: '0.6rem 1.25rem', borderRadius: '8px' }}>
-                      <FiDownload /> Get Solution
+                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ 
+                      textDecoration: 'none', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.3rem', 
+                      backgroundColor: '#B8860B', 
+                      color: 'white', 
+                      padding: '0.4rem 0.75rem', 
+                      borderRadius: '6px',
+                      fontSize: '0.7rem',
+                      fontWeight: 700
+                    }}>
+                      <FiDownload size={14} /> Key
                     </a>
                   ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#94A3B8', fontSize: '0.8rem', fontStyle: 'italic', backgroundColor: '#F1F5F9', padding: '0.5rem 1rem', borderRadius: '8px' }}>
-                      <FiClock /> Solution Pending
+                    <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#94A3B8', fontSize: '0.7rem', fontStyle: 'italic', backgroundColor: '#F8FAFC', padding: '0.4rem 0.75rem', borderRadius: '6px' }}>
+                      <FiClock size={12} /> Pending
                     </div>
                   )}
                 </div>
@@ -227,9 +256,16 @@ const PublicResults = () => {
         </div>
       </main>
 
-      <footer className="landing-footer" style={{ marginTop: 'auto', background: '#F8FAFC', borderTop: '1px solid #E2E8F0', padding: '2rem' }}>
-        <p style={{ color: '#94A3B8', fontSize: '0.85rem' }}>&copy; 2026 Yashashrri Classes. Dashboard secure & encrypted.</p>
+      <footer className="landing-footer" style={{ marginTop: 'auto', background: '#F8FAFC', borderTop: '1px solid #E2E8F0', padding: '1.5rem' }}>
+        <p style={{ color: '#94A3B8', fontSize: '0.75rem', margin: 0, textAlign: 'center' }}>&copy; 2026 Yashashrri Classes. Verified academic portal.</p>
       </footer>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .public-results-main { padding: 1.25rem !important; }
+          .desktop-only { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

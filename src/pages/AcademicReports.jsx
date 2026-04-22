@@ -350,7 +350,17 @@ const AcademicReports = () => {
         </div>
       </div>
 
-      <div className="card-base report-content-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', position: 'relative' }}>
+      <div className="card-base report-content-area" style={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflowY: 'auto', 
+        position: 'relative',
+        padding: 0,
+        background: 'transparent',
+        border: 'none',
+        boxShadow: 'none'
+      }}>
         {loading && (
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.7)', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
              <div className="spinner" style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid var(--primary-blue)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
@@ -359,7 +369,7 @@ const AcademicReports = () => {
         )}
 
         {activeTab === 'monthly' ? (
-          <>
+          <div className="card-base" style={{ padding: '1rem' }}>
             <PrintHeader 
               title={selectedTestId === 'all' ? "Monthly Academic Performance Report" : "Specific Test Performance Report"} 
               subTitle={`${selectedTestId === 'all' ? `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : `Test: ${reportData.tests.find(t => String(t.id) === String(selectedTestId))?.name} | Date: ${new Date(reportData.tests.find(t => String(t.id) === String(selectedTestId))?.date).toLocaleDateString()}`}`} 
@@ -425,7 +435,7 @@ const AcademicReports = () => {
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--primary-blue)', fontWeight: 700 }}>{perf?.avg}%</td>
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--success-green)', fontWeight: 700 }}>{perf?.passing}%</td>
                           </tr>
-                          <tr>
+                          <tr className="no-print">
                             <td colSpan="6" style={{ padding: '0 1rem 1rem 1rem' }}>
                                <div style={{ backgroundColor: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0.5rem', marginTop: '0.5rem' }}>
                                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Student-wise Breakdown</div>
@@ -487,104 +497,116 @@ const AcademicReports = () => {
                 </div>
               </div>
             )}
-          </>
+          </div>
         ) : (
-          <>
+          <div className="student-report-wrapper" style={{ padding: 0 }}>
             {selectedStudent ? (
-              <div className="animate-in">
+              <div className="animate-in student-report-container" style={{ padding: '1rem' }}>
                 <PrintHeader 
                   title="STATEMENT OF ACADEMIC PERFORMANCE" 
                   studentDetails={selectedStudent}
                 />
                 
                 {/* Dashboard Stats */}
-                <div className="stats-grid-compact" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Total Tests Attempted</p>
-                      <h2 style={{ color: '#1A237E', margin: 0, fontSize: '2rem' }}>{studentStats.summary.totalTests}</h2>
+                <div className="stats-grid-compact" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+                   <div className="card-base" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tests Attempted</p>
+                      <h2 style={{ color: '#1A237E', margin: 0, fontSize: '1.5rem' }}>{studentStats.summary.totalTests}</h2>
                    </div>
-                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Average Percentage</p>
-                      <h2 style={{ color: '#B8860B', margin: 0, fontSize: '2rem' }}>{studentStats.summary.avgPercentage}%</h2>
+                   <div className="card-base" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#F8FAFC' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Avg. Percentage</p>
+                      <h2 style={{ color: '#B8860B', margin: 0, fontSize: '1.5rem' }}>{studentStats.summary.avgPercentage}%</h2>
                    </div>
-                   <div className="card-base" style={{ padding: '1.5rem', textAlign: 'center', backgroundColor: '#ECFDF5', borderLeft: '4px solid #10B981' }}>
-                      <p style={{ fontSize: '0.75rem', color: '#047857', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem' }}>Tests Cleared</p>
-                      <h2 style={{ color: '#059669', margin: 0, fontSize: '2rem' }}>{studentStats.summary.passCount}</h2>
+                   <div className="card-base" style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#ECFDF5', borderLeft: '4px solid #10B981' }}>
+                      <p style={{ fontSize: '0.65rem', color: '#047857', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Tests Cleared</p>
+                      <h2 style={{ color: '#059669', margin: 0, fontSize: '1.5rem' }}>{studentStats.summary.passCount}</h2>
                    </div>
                 </div>
 
                 {/* Performance Chart */}
-                <div className="card-base chart-container-card" style={{ padding: '1.5rem', marginBottom: '2rem', minHeight: '350px' }}>
-                  <h3 style={{ fontSize: '1.1rem', color: '#1A237E', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div className="card-base chart-container-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', minHeight: '300px' }}>
+                  <h3 style={{ fontSize: '1rem', color: '#1A237E', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <FiTrendingUp style={{ color: '#B8860B' }} /> Performance Progress Curve
                   </h3>
-                  <div style={{ height: '320px', width: '100%' }}>
+                  <div style={{ height: '240px', width: '100%' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={studentStats.progress}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="name" fontSize={11} tick={{ fill: '#64748B' }} padding={{ left: 20, right: 20 }} />
-                        <YAxis tickFormatter={t => `${t}%`} fontSize={11} tick={{ fill: '#64748B' }} domain={[0, 100]} width={45} />
-                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }} />
-                        <Legend verticalAlign="bottom" height={36} />
-                        <Line type="monotone" dataKey="percentage" name="Student Score %" stroke="#1A237E" strokeWidth={4} dot={{ r: 6, fill: '#1A237E', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
-                        <Line type="step" dataKey="minMarks" name="Passing %" stroke="#EF4444" strokeDasharray="6 4" strokeWidth={2} dot={false} />
+                        <XAxis dataKey="name" fontSize={9} tick={{ fill: '#64748B' }} padding={{ left: 10, right: 10 }} />
+                        <YAxis tickFormatter={t => `${t}%`} fontSize={9} tick={{ fill: '#64748B' }} domain={[0, 100]} width={35} />
+                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', fontSize: '10px' }} />
+                        <Legend verticalAlign="bottom" height={36} iconSize={10} wrapperStyle={{ fontSize: '10px' }} />
+                        <Line type="monotone" dataKey="percentage" name="Student Score %" stroke="#1A237E" strokeWidth={3} dot={{ r: 4, fill: '#1A237E', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                        <Line type="step" dataKey="minMarks" name="Passing %" stroke="#EF4444" strokeDasharray="6 4" strokeWidth={1.5} dot={false} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="no-print" style={{ height: '20px' }}></div>
                 </div>
 
                 {/* Marks Table */}
                 <div className="card-base" style={{ padding: '0', overflow: 'hidden', border: '1px solid #E2E8F0' }}>
-                   <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                      <h3 style={{ fontSize: '1rem', color: '#1A237E', margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <FiBook style={{ color: '#B8860B' }} /> Detailed Test Marks Table
-                      </h3>
+                   {/* Desktop Table */}
+                   <div className="desktop-only">
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#F8FAFC', color: '#475569' }}>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 800 }}>TEST NAME</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 800 }}>SUBJECT</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 800 }}>DATE</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 800, textAlign: 'right' }}>SCORE</th>
+                          <th style={{ padding: '1rem', fontSize: '0.75rem', fontWeight: 800, textAlign: 'center' }}>RESULT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {studentStats.progress.length === 0 ? (
+                          <tr><td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8' }}>No test records found.</td></tr>
+                        ) : studentStats.progress.map((p, idx) => {
+                          const isAbsent = p.isAbsent;
+                          const isFail = p.percentage < p.minMarks;
+                          return (
+                            <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9', backgroundColor: isAbsent ? '#F8FAFC' : 'white' }}>
+                              <td style={{ padding: '0.75rem 1rem', fontWeight: 600, fontSize: '0.85rem' }}>{p.name}</td>
+                              <td style={{ padding: '0.75rem 1rem', color: '#64748B', fontSize: '0.8rem' }}>{p.subject}</td>
+                              <td style={{ padding: '0.75rem 1rem', color: '#64748B', fontSize: '0.8rem' }}>{new Date(p.date).toLocaleDateString()}</td>
+                              <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 700, fontSize: '0.85rem', color: isFail ? '#EF4444' : '#10B981' }}>
+                                {isAbsent ? 'ABSENT' : `${p.score}/${p.totalMarks}`}
+                              </td>
+                              <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                                <span style={{ 
+                                  color: isAbsent ? '#94A3B8' : (!isFail ? '#059669' : '#DC2626'), 
+                                  backgroundColor: isAbsent ? '#F1F5F9' : (!isFail ? '#D1FAE5' : '#FEE2E2'), 
+                                  padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: 800 
+                                }}>
+                                  {isAbsent ? 'ABS' : (!isFail ? 'PASSED' : 'FAILED')}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                    </div>
-                   <div style={{ overflowX: 'auto' }}>
-                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                       <thead>
-                         <tr style={{ backgroundColor: '#F8FAFC', color: '#475569' }}>
-                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>TEST NAME</th>
-                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>SUBJECT</th>
-                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800 }}>DATE</th>
-                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800, textAlign: 'right' }}>SCORE</th>
-                           <th style={{ padding: '1.25rem 1.5rem', fontSize: '0.8rem', fontWeight: 800, textAlign: 'center' }}>RESULT</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                         {studentStats.progress.length === 0 ? (
-                           <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>No test records found for this student.</td></tr>
-                         ) : studentStats.progress.map((p, idx) => {
-                           const isAbsent = p.isAbsent;
-                           const isFail = p.percentage < p.minMarks;
-                           return (
-                             <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9', backgroundColor: isAbsent ? '#F8FAFC' : 'white' }}>
-                               <td style={{ padding: '1.25rem 1.5rem', fontWeight: 600, color: '#1E293B' }}>{p.name}</td>
-                               <td style={{ padding: '1.25rem 1.5rem', color: '#64748B' }}>{p.subject}</td>
-                               <td style={{ padding: '1.25rem 1.5rem', color: '#64748B' }}>{new Date(p.date).toLocaleDateString()}</td>
-                               <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right', fontWeight: 700, color: isFail ? '#EF4444' : '#10B981' }}>
-                                 {isAbsent ? 'ABSENT' : `${p.score} / ${p.totalMarks}`}
-                                 {!isAbsent && <span style={{ marginLeft: '8px', fontSize: '0.75rem', fontWeight: 500, color: '#94A3B8' }}>({p.percentage}%)</span>}
-                               </td>
-                               <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
-                                 {isAbsent ? (
-                                   <span style={{ color: '#94A3B8' }}>—</span>
-                                 ) : !isFail ? (
-                                   <span style={{ color: '#059669', backgroundColor: '#D1FAE5', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>PASSED</span>
-                                 ) : (
-                                   <span style={{ color: '#DC2626', backgroundColor: '#FEE2E2', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>FAILED</span>
-                                 )}
-                               </td>
-                             </tr>
-                           );
-                         })}
-                       </tbody>
-                     </table>
+
+                   {/* Mobile Cards */}
+                   <div className="mobile-only" style={{ padding: '0.75rem' }}>
+                      {studentStats.progress.map((p, idx) => (
+                        <div key={idx} style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                           <div>
+                             <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{p.name}</div>
+                             <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{p.subject} • {new Date(p.date).toLocaleDateString()}</div>
+                           </div>
+                           <div style={{ textAlign: 'right' }}>
+                             <div style={{ fontWeight: 800, fontSize: '0.9rem', color: p.isAbsent ? '#64748B' : (p.percentage < p.minMarks ? '#EF4444' : '#10B981') }}>
+                               {p.isAbsent ? 'ABSENT' : `${p.score}/${p.totalMarks}`}
+                             </div>
+                             <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-secondary)' }}>{p.percentage}%</div>
+                           </div>
+                        </div>
+                      ))}
                    </div>
                 </div>
 
-                <div className="no-print" style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#F1F5F9', borderRadius: '8px', fontSize: '0.8rem', color: '#64748B' }}>
+                <div className="no-print" style={{ marginTop: '1.5rem', padding: '0.75rem', backgroundColor: '#F1F5F9', borderRadius: '8px', fontSize: '0.75rem', color: '#64748B' }}>
                    <strong>Status:</strong> Found {studentStats.progress.length} academic record(s).
                 </div>
                 <PrintFooter />
@@ -595,76 +617,100 @@ const AcademicReports = () => {
                 <p>Select a student to view their detailed academic progress and graphical analysis.</p>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
       <style>{`
         .print-only { display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         @media print {
-          @page { size: A4 portrait; margin: 15mm; }
-          html, body { 
-            height: auto !important; 
-            overflow: visible !important; 
+          @page { 
+            size: A4 portrait; 
+            margin: 10mm; 
+          }
+          
+          body, html { 
             background: white !important;
-            width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
           }
+
           .no-print { display: none !important; }
           .print-only { display: block !important; }
+          
+          .app-layout { padding: 0 !important; }
+          .main-workspace { padding: 0 !important; }
+          .content-area { padding: 0 !important; position: static !important; }
+          
+          .student-report-container {
+             padding: 0 !important;
+             margin: 0 !important;
+             width: 100% !important;
+             display: block !important;
+          }
+
           .card-base { 
             border: none !important; 
             box-shadow: none !important; 
             width: 100% !important; 
-            margin-bottom: 5px !important; 
+            margin-bottom: 10px !important; 
             padding: 0 !important; 
+            background: white !important;
           }
+
           table { 
             width: 100% !important; 
-            border: 1.5px solid #1A237E !important; 
-            font-size: 11px !important; 
+            border: 1px solid #1A237E !important; 
+            font-size: 10px !important; 
             border-collapse: collapse !important; 
           }
+          
           th { 
             background-color: #1A237E !important; 
             color: white !important; 
-            padding: 8px !important; 
-            border: 1px solid #1A237E !important;
+            padding: 6px !important; 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
+          
           td { 
-            padding: 8px !important; 
+            padding: 6px !important; 
             border: 1px solid #E2E8F0 !important;
           }
+
           .recharts-responsive-container { 
-            width: 100% !important; 
-            height: 320px !important; 
-            margin: 15px auto 20px auto !important;
+            height: 220px !important; 
+            margin: 10px auto !important;
           }
-          .AcademicNote { font-size: 10px !important; line-height: 1.4 !important; color: #475569 !important; }
-          .signatory-box { min-width: 200px; text-align: center; }
+
+          .stats-grid-compact {
+             display: grid !important;
+             grid-template-columns: repeat(3, 1fr) !important;
+             gap: 10px !important;
+          }
+
+          .AcademicNote { font-size: 9px !important; line-height: 1.3 !important; }
+          .signatory-box { min-width: 150px; }
         }
 
-        /* Screen spacing refinements */
-        .report-content-area {
-          padding: 2rem;
-        }
+        /* Responsive refinements */
         @media (max-width: 768px) {
-          .report-content-area {
-            padding: 1rem;
-          }
-          .chart-container-card {
-            padding: 1rem !important;
-            margin-bottom: 1.5rem !important;
-          }
           .stats-grid-compact {
-            gap: 0.75rem !important;
+             grid-template-columns: 1fr !important;
           }
         }
       `}</style>
+    </div>
+  );
+};
+
+export default AcademicReports;
+>
     </div>
   );
 };

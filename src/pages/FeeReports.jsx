@@ -216,16 +216,20 @@ const FeeReports = () => {
       </div>
 
       {activeTab === 'collection' && (
-        <div className="card-base no-print" style={{ padding: '1rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'flex-end', backgroundColor: 'var(--accent-gold-light)', border: '1px solid var(--accent-gold-faded)' }}>
+        <div className="card-base no-print" style={{ padding: '0.75rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--accent-gold-light)', border: '1px solid var(--accent-gold-faded)' }}>
+           <div style={{ textAlign: 'left' }}>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', margin: 0 }}>Period Total</p>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--success-green)', margin: 0 }}>₹{collection.summary?.totalCollection?.toLocaleString() || 0}</h2>
+           </div>
            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Period Total Collection</p>
-              <h2 style={{ fontSize: '1.5rem', color: 'var(--success-green)' }}>₹{collection.summary?.totalCollection?.toLocaleString() || 0}</h2>
+              <p style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', textTransform: 'uppercase', margin: 0 }}>Txns</p>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)', margin: 0 }}>{collection.summary?.transactions || 0}</h2>
            </div>
         </div>
       )}
 
       {/* Printable Area */}
-      <div className="card-base" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '1.5rem' }}>
+      <div className="card-base" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', padding: '0.5rem', background: 'transparent', border: 'none', boxShadow: 'none' }}>
         <PrintHeader 
           title={
             activeTab === 'arrears' ? "Pending Fees (Arrears) Report" : 
@@ -237,113 +241,183 @@ const FeeReports = () => {
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'arrears' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                  <th style={{ padding: '0.75rem' }}>Student Name</th>
-                  <th style={{ padding: '0.75rem' }}>Standard</th>
-                  <th style={{ padding: '0.75rem' }}>Enrolled Subjects</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Paid</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Pending</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {/* Desktop Table */}
+              <div className="desktop-only card-base" style={{ padding: 0 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
+                      <th style={{ padding: '0.75rem' }}>Student Name</th>
+                      <th style={{ padding: '0.75rem' }}>Standard</th>
+                      <th style={{ padding: '0.75rem' }}>Enrolled Subjects</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Paid</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Pending</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {arrears
+                      .filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((s) => (
+                      <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.75rem', fontWeight: 600 }}>{s.name} <br/><span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ID: {s.id}</span></td>
+                        <td style={{ padding: '0.75rem' }}>{s.standard}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{s.subjects}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--success-green)' }}>₹{s.feesPaid.toLocaleString()}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger-red)' }}>₹{s.balance.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="mobile-only">
                 {arrears
                   .filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
                   .map((s) => (
-                  <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{s.name} <br/><span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ID: {s.id}</span></td>
-                    <td style={{ padding: '0.75rem' }}>{s.standard}</td>
-                    <td style={{ padding: '0.75rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{s.subjects}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--success-green)' }}>₹{s.feesPaid.toLocaleString()}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--danger-red)' }}>₹{s.balance.toLocaleString()}</td>
-                  </tr>
+                  <div key={s.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                       <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{s.name}</div>
+                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{s.standard}</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Paid: ₹{s.feesPaid.toLocaleString()}</div>
+                       <div style={{ fontWeight: 800, color: 'var(--danger-red)', fontSize: '1rem' }}>₹{s.balance.toLocaleString()}</div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ fontWeight: 800, backgroundColor: 'var(--bg-main)' }}>
-                   <td colSpan="4" style={{ padding: '1rem', textAlign: 'right' }}>Filtered Total Outstanding:</td>
-                   <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--danger-red)' }}>₹{arrears.filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, s) => acc + s.balance, 0).toLocaleString()}</td>
-                </tr>
-              </tfoot>
-            </table>
+              </div>
+              
+              <div className="card-base" style={{ padding: '1rem', fontWeight: 800, backgroundColor: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between' }}>
+                 <span>Filtered Total Outstanding:</span>
+                 <span style={{ color: 'var(--danger-red)' }}>₹{arrears.filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, s) => acc + s.balance, 0).toLocaleString()}</span>
+              </div>
+            </div>
           )}
 
           {activeTab === 'collection' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                  <th style={{ padding: '0.75rem' }}>Date</th>
-                  <th style={{ padding: '0.75rem' }}>Student Name</th>
-                  <th style={{ padding: '0.75rem' }}>Mode</th>
-                  <th style={{ padding: '0.75rem' }}>Remarks</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {/* Desktop Table */}
+              <div className="desktop-only card-base" style={{ padding: 0 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
+                      <th style={{ padding: '0.75rem' }}>Date</th>
+                      <th style={{ padding: '0.75rem' }}>Student Name</th>
+                      <th style={{ padding: '0.75rem' }}>Mode</th>
+                      <th style={{ padding: '0.75rem' }}>Remarks</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {collection.collections
+                      .filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((f) => (
+                      <tr key={f.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.75rem' }}>{f.paymentDate}</td>
+                        <td style={{ padding: '0.75rem', fontWeight: 600 }}>{f.studentName} <br/><span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{f.standard}</span></td>
+                        <td style={{ padding: '0.75rem' }}>{f.paymentMode}</td>
+                        <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{f.remarks}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: f.amountPaid < 0 ? 'var(--danger-red)' : '' }}>
+                          {f.amountPaid < 0 ? `- ₹${Math.abs(f.amountPaid).toLocaleString()}` : `₹${f.amountPaid.toLocaleString()}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="mobile-only">
                 {collection.collections
                   .filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()))
                   .map((f) => (
-                  <tr key={f.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '0.75rem' }}>{f.paymentDate}</td>
-                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{f.studentName} <br/><span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{f.standard}</span></td>
-                    <td style={{ padding: '0.75rem' }}>{f.paymentMode}</td>
-                    <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{f.remarks}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 600, color: f.amountPaid < 0 ? 'var(--danger-red)' : '' }}>
-                      {f.amountPaid < 0 ? `- ₹${Math.abs(f.amountPaid).toLocaleString()}` : `₹${f.amountPaid.toLocaleString()}`}
-                    </td>
-                  </tr>
+                  <div key={f.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                       <div style={{ fontWeight: 700 }}>{f.studentName}</div>
+                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{f.paymentDate}</div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{f.paymentMode} {f.remarks && `• ${f.remarks}`}</div>
+                       <div style={{ fontWeight: 800, color: f.amountPaid < 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>
+                         {f.amountPaid < 0 ? `- ₹${Math.abs(f.amountPaid).toLocaleString()}` : `₹${f.amountPaid.toLocaleString()}`}
+                       </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ fontWeight: 800, backgroundColor: 'var(--bg-main)' }}>
-                   <td colSpan="4" style={{ padding: '1rem', textAlign: 'right' }}>Filtered Total Collection:</td>
-                   <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--success-green)' }}>
-                     ₹{collection.collections.filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, f) => acc + f.amountPaid, 0).toLocaleString()}
-                   </td>
-                </tr>
-              </tfoot>
-            </table>
+              </div>
+
+              <div className="card-base" style={{ padding: '1rem', fontWeight: 800, backgroundColor: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between' }}>
+                 <span>Filtered Total Collection:</span>
+                 <span style={{ color: 'var(--success-green)' }}>
+                   ₹{collection.collections.filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, f) => acc + f.amountPaid, 0).toLocaleString()}
+                 </span>
+              </div>
+            </div>
           )}
 
           {activeTab === 'faculty' && (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
-                  <th style={{ padding: '0.75rem' }}>Faculty ID</th>
-                  <th style={{ padding: '0.75rem' }}>Faculty Name</th>
-                  <th style={{ padding: '0.75rem' }}>Specialization</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Total Earned</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Total Paid</th>
-                  <th style={{ padding: '0.75rem', textAlign: 'right' }}>Balance Due</th>
-                  <th className="no-print" style={{ padding: '0.75rem', textAlign: 'center' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {/* Desktop Table */}
+              <div className="desktop-only card-base" style={{ padding: 0 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#1A237E', color: 'white', borderBottom: '2px solid var(--border-color)', textAlign: 'left' }}>
+                      <th style={{ padding: '0.75rem' }}>Faculty ID</th>
+                      <th style={{ padding: '0.75rem' }}>Faculty Name</th>
+                      <th style={{ padding: '0.75rem' }}>Specialization</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Total Earned</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Total Paid</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'right' }}>Balance Due</th>
+                      <th className="no-print" style={{ padding: '0.75rem', textAlign: 'center' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {facultySummary
+                      .filter(t => (t.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((t) => (
+                      <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '0.75rem' }}>{t.id}</td>
+                        <td style={{ padding: '0.75rem', fontWeight: 600 }}>{t.name}</td>
+                        <td style={{ padding: '0.75rem' }}>{t.subject}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right' }}>₹{t.totalEarned.toLocaleString()}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--success-green)' }}>₹{t.totalPaid.toLocaleString()}</td>
+                        <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: t.balance > 0 ? 'var(--danger-red)' : 'var(--text-secondary)' }}>₹{t.balance.toLocaleString()}</td>
+                        <td className="no-print" style={{ padding: '0.75rem', textAlign: 'center' }}>
+                           <button onClick={() => handleFinanceOpen(t)} className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><FiDollarSign /> Ledger</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Cards */}
+              <div className="mobile-only">
                 {facultySummary
                   .filter(t => (t.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
                   .map((t) => (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '0.75rem' }}>{t.id}</td>
-                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{t.name}</td>
-                    <td style={{ padding: '0.75rem' }}>{t.subject}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right' }}>₹{t.totalEarned.toLocaleString()}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--success-green)' }}>₹{t.totalPaid.toLocaleString()}</td>
-                    <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700, color: t.balance > 0 ? 'var(--danger-red)' : 'var(--text-secondary)' }}>₹{t.balance.toLocaleString()}</td>
-                    <td className="no-print" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                       <button onClick={() => handleFinanceOpen(t)} className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><FiDollarSign /> Ledger</button>
-                    </td>
-                  </tr>
+                  <div key={t.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                       <div>
+                         <div style={{ fontWeight: 700 }}>{t.name}</div>
+                         <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{t.subject}</div>
+                       </div>
+                       <button onClick={() => handleFinanceOpen(t)} className="btn-secondary" style={{ padding: '0.4rem', borderRadius: '50%' }}><FiDollarSign /></button>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-main)', padding: '0.5rem', borderRadius: '6px' }}>
+                       <div style={{ fontSize: '0.75rem' }}>Due: <span style={{ fontWeight: 700, color: 'var(--danger-red)' }}>₹{t.balance.toLocaleString()}</span></div>
+                       <div style={{ fontSize: '0.75rem' }}>Paid: <span style={{ fontWeight: 700, color: 'var(--success-green)' }}>₹{t.totalPaid.toLocaleString()}</span></div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ fontWeight: 800, backgroundColor: 'var(--bg-main)' }}>
-                   <td colSpan="5" style={{ padding: '1rem', textAlign: 'right' }}>Grand Total Liabilities (Payable):</td>
-                   <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--danger-red)' }}>₹{facultySummary.reduce((acc, t) => acc + t.balance, 0).toLocaleString()}</td>
-                   <td className="no-print"></td>
-                </tr>
-              </tfoot>
-            </table>
+              </div>
+
+              <div className="card-base" style={{ padding: '1rem', fontWeight: 800, backgroundColor: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between' }}>
+                 <span>Grand Total Liabilities:</span>
+                 <span style={{ color: 'var(--danger-red)' }}>₹{facultySummary.reduce((acc, t) => acc + t.balance, 0).toLocaleString()}</span>
+              </div>
+            </div>
           )}
         </div>
 

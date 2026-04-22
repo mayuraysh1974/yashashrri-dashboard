@@ -260,92 +260,123 @@ const FeesPayment = () => {
         </div>
       </div>
 
-      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-        <div className="card-base" style={{ padding: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center', borderTop: '4px solid var(--accent-gold)' }}>
-          <div style={{ padding: '1.5rem', backgroundColor: 'var(--accent-gold-light)', borderRadius: '12px', color: 'var(--accent-gold)' }}>
-            <FiDollarSign size={32} />
+      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+        <div className="card-base" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', borderLeft: '4px solid var(--accent-gold)' }}>
+          <div style={{ padding: '0.75rem', backgroundColor: 'var(--accent-gold-light)', borderRadius: '12px', color: 'var(--accent-gold)' }}>
+            <FiDollarSign size={24} />
           </div>
-          <div>
-            <h2 style={{ fontSize: '1.1rem', color: 'var(--primary-blue)', marginBottom: '0.25rem' }}>Quick Collection</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem', fontSize: '0.85rem' }}>Automated receipt generation for immediate payments.</p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className="btn-primary" onClick={() => setShowModal(true)}>Collect Fees Now</button>
-              <button className="btn-secondary" style={{ backgroundColor: '#fee2e2', color: 'var(--danger-red)', borderColor: '#fecaca', whiteSpace: 'nowrap' }} onClick={() => { setStudentSearch(''); setShowRefundModal(true); }}>Process Refund</button>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Quick Action</div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <button className="btn-primary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem' }} onClick={() => setShowModal(true)}>Collect</button>
+              <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', color: 'var(--danger-red)' }} onClick={() => setShowRefundModal(true)}>Refund</button>
             </div>
           </div>
         </div>
         
-        <div className="card-base" style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Top Arrears {filterStd && `(${filterStd})`}</h3>
-            <button className="btn-secondary" style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }} onClick={() => setShowDefaultersModal(true)}>View All Reminders</button>
+        <div className="card-base desktop-only" style={{ padding: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Top Arrears</h3>
+            <button className="btn-secondary" style={{ fontSize: '0.6rem', padding: '0.2rem 0.4rem' }} onClick={() => setShowDefaultersModal(true)}>Reminders</button>
           </div>
-          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-             {students.filter(s => s.balance > 0 && (!filterStd || s.standard === filterStd)).sort((a,b) => b.balance - a.balance).slice(0, 5).map(s => (
-               <div key={s.id} style={{ minWidth: '150px', padding: '0.75rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                 <div style={{ fontSize: '0.85rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
-                 <div style={{ fontSize: '0.9rem', color: 'var(--danger-red)', fontWeight: 800 }}>₹{s.balance.toLocaleString()}</div>
+          <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto' }}>
+             {students.filter(s => s.balance > 0 && (!filterStd || s.standard === filterStd)).sort((a,b) => b.balance - a.balance).slice(0, 3).map(s => (
+               <div key={s.id} style={{ minWidth: '120px', padding: '0.5rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                 <div style={{ fontSize: '0.75rem', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--danger-red)', fontWeight: 800 }}>₹{s.balance.toLocaleString()}</div>
                </div>
              ))}
           </div>
         </div>
       </div>
 
-      <div className="card-base no-print" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1.5rem', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h3 style={{ color: 'var(--primary-blue)', margin: 0 }}>Recent Payment History</h3>
-          <div className="search-bar" style={{ backgroundColor: 'var(--bg-main)', minWidth: '200px', maxWidth: '300px' }}>
+      <div className="card-base no-print" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', background: 'transparent', border: 'none', boxShadow: 'none' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 0.5rem' }}>
+          <h3 style={{ color: 'var(--primary-blue)', margin: 0, fontSize: '1.1rem' }}>Payment History</h3>
+          <div className="search-bar" style={{ backgroundColor: 'white', border: '1px solid var(--border-color)', minWidth: '150px', maxWidth: '250px' }}>
             <FiSearch style={{ color: 'var(--text-secondary)' }} />
             <input 
               type="text" 
               className="search-input" 
-              placeholder="Search history by student name..." 
+              placeholder="Search..." 
               value={historySearch} 
               onChange={(e) => setHistorySearch(e.target.value)} 
+              style={{ fontSize: '0.8rem' }}
             />
           </div>
         </div>
-        <div style={{ overflowY: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Student Name</th>
-                <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Date</th>
-                <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Amount</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Mode</th>
-                <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history
-                .filter(fee => !filterStd || fee.standard === filterStd)
-                .filter(fee => (fee.studentName || '').toLowerCase().includes(historySearch.toLowerCase()))
-                .map(fee => (
-                <tr key={fee.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '1rem' }}>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{fee.studentName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Standard: {fee.standard}</div>
-                  </td>
-                  <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{fee.paymentDate}</td>
-                  <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: fee.amountPaid < 0 ? 'var(--danger-red)' : 'var(--primary-blue)' }}>
-                    {fee.amountPaid < 0 ? `- ₹${Math.abs(fee.amountPaid).toLocaleString()}` : `₹${fee.amountPaid.toLocaleString()}`}
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px' }}>{fee.paymentMode}</span>
-                  </td>
-                  <td style={{ padding: '1rem', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                    <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', gap: '0.3rem' }} onClick={() => handleReprint(fee)}>
-                      <FiPrinter size={12} /> Reprint
-                    </button>
-                    <button className="btn-secondary" style={{ padding: '0.4rem 0.6rem', color: 'var(--danger-red)', borderColor: '#fecaca' }} onClick={() => handleDeleteFee(fee.id)} title="Delete Record">
-                      <FiTrash2 size={12} />
-                    </button>
-                  </td>
+        
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem' }}>
+          {/* Desktop Table */}
+          <div className="desktop-only card-base" style={{ padding: 0 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }}>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Student Name</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Date</th>
+                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Amount</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Mode</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {history.filter(fee => !filterStd || fee.standard === filterStd).length === 0 && <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No recent payments found {filterStd && `for ${filterStd}`}.</p>}
+              </thead>
+              <tbody>
+                {history
+                  .filter(fee => !filterStd || fee.standard === filterStd)
+                  .filter(fee => (fee.studentName || '').toLowerCase().includes(historySearch.toLowerCase()))
+                  .map(fee => (
+                  <tr key={fee.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{fee.studentName}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Standard: {fee.standard}</div>
+                    </td>
+                    <td style={{ padding: '1rem', fontSize: '0.9rem' }}>{fee.paymentDate}</td>
+                    <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: fee.amountPaid < 0 ? 'var(--danger-red)' : 'var(--primary-blue)' }}>
+                      {fee.amountPaid < 0 ? `- ₹${Math.abs(fee.amountPaid).toLocaleString()}` : `₹${fee.amountPaid.toLocaleString()}`}
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center' }}>
+                      <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px' }}>{fee.paymentMode}</span>
+                    </td>
+                    <td style={{ padding: '1rem', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                      <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', gap: '0.3rem' }} onClick={() => handleReprint(fee)}>
+                        <FiPrinter size={12} /> Reprint
+                      </button>
+                      <button className="btn-secondary" style={{ padding: '0.4rem 0.6rem', color: 'var(--danger-red)', borderColor: '#fecaca' }} onClick={() => handleDeleteFee(fee.id)} title="Delete Record">
+                        <FiTrash2 size={12} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="mobile-only">
+            {history
+              .filter(fee => !filterStd || fee.standard === filterStd)
+              .filter(fee => (fee.studentName || '').toLowerCase().includes(historySearch.toLowerCase()))
+              .map(fee => (
+              <div key={fee.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{fee.studentName}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{fee.paymentDate} • {fee.paymentMode}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem', color: fee.amountPaid < 0 ? 'var(--danger-red)' : 'var(--primary-blue)' }}>
+                      {fee.amountPaid < 0 ? `- ₹${Math.abs(fee.amountPaid).toLocaleString()}` : `₹${fee.amountPaid.toLocaleString()}`}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
+                  <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem' }} onClick={() => handleReprint(fee)}><FiPrinter /> Reprint Receipt</button>
+                  <button className="btn-secondary" style={{ flex: 0.3, padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => handleDeleteFee(fee.id)}><FiTrash2 /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {history.filter(fee => !filterStd || fee.standard === filterStd).length === 0 && <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>No recent payments found.</p>}
         </div>
       </div>
 

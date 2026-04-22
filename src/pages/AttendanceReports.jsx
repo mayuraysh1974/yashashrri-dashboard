@@ -150,34 +150,60 @@ const AttendanceReports = () => {
         </button>
       </div>
 
-      <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '0.5rem', display: 'flex', gap: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+      <div className="card-base no-print" style={{ 
+        marginBottom: '1rem', 
+        padding: '0.3rem', 
+        display: 'flex', 
+        backgroundColor: '#F1F5F9', 
+        borderRadius: '10px',
+        overflowX: 'auto'
+      }}>
           {[
-            { id: 'student-monthly', label: 'Student Monthly' },
-            { id: 'class-daily', label: 'Daily Class-wise' },
-            { id: 'class-monthly', label: 'Monthly Class-wise' },
-            { id: 'subject-monthly', label: 'Subject-wise Monthly' }
+            { id: 'student-monthly', label: 'Monthly' },
+            { id: 'class-daily', label: 'Daily Class' },
+            { id: 'class-monthly', label: 'Monthly Class' },
+            { id: 'subject-monthly', label: 'Subject-wise' }
           ].map(tab => (
             <button 
               key={tab.id}
-              style={{ padding: '0.6rem 1.2rem', borderRadius: '8px', border: 'none', background: activeTab === tab.id ? 'var(--bg-surface)' : 'transparent', color: activeTab === tab.id ? 'var(--primary-blue)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none' }}
+              style={{ 
+                flex: 1,
+                padding: '0.6rem 0.5rem', 
+                borderRadius: '8px', 
+                border: 'none', 
+                background: activeTab === tab.id ? 'white' : 'transparent', 
+                color: activeTab === tab.id ? 'var(--primary-blue)' : 'var(--text-secondary)', 
+                fontWeight: 600, 
+                cursor: 'pointer', 
+                boxShadow: activeTab === tab.id ? 'var(--shadow-sm)' : 'none',
+                fontSize: '0.75rem',
+                whiteSpace: 'nowrap'
+              }}
               onClick={() => { setActiveTab(tab.id); setReportData(null); }}
             >{tab.label}</button>
           ))}
       </div>
 
-      <div className="card-base no-print" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+      <div className="card-base no-print" style={{ 
+        padding: '1rem', 
+        marginBottom: '1rem', 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+        gap: '1rem', 
+        alignItems: 'flex-end' 
+      }}>
           {activeTab === 'student-monthly' && (
-            <div className="input-group" style={{ width: '250px', marginBottom: 0 }}>
-              <label><FiUser /> Student</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Student</label>
               <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}>
                 <option value="">Choose Student...</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.standard})</option>)}
+                {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
           )}
           {(activeTab === 'class-daily' || activeTab === 'class-monthly') && (
-            <div className="input-group" style={{ width: '200px', marginBottom: 0 }}>
-              <label><FiLayers /> Standard</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Standard</label>
               <select value={selectedStandard} onChange={e => setSelectedStandard(e.target.value)}>
                 <option value="">Choose Class...</option>
                 {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
@@ -185,8 +211,8 @@ const AttendanceReports = () => {
             </div>
           )}
           {activeTab === 'subject-monthly' && (
-            <div className="input-group" style={{ width: '220px', marginBottom: 0 }}>
-              <label><FiBook /> Subject</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Subject</label>
               <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
                 <option value="">Choose Subject...</option>
                 {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -194,51 +220,54 @@ const AttendanceReports = () => {
             </div>
           )}
           {(activeTab === 'student-monthly' || activeTab === 'class-monthly' || activeTab === 'subject-monthly') && (
-            <div className="input-group" style={{ width: '180px', marginBottom: 0 }}>
-              <label><FiCalendar /> Select Month</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Select Month</label>
               <input type="month" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} />
             </div>
           )}
           {activeTab === 'class-daily' && (
-            <div className="input-group" style={{ width: '180px', marginBottom: 0 }}>
-              <label><FiCalendar /> Select Date</label>
+            <div className="input-group" style={{ marginBottom: 0 }}>
+              <label>Select Date</label>
               <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
             </div>
           )}
-          <button className="btn-primary" onClick={fetchReportData} disabled={loading}>{loading ? 'Generating...' : 'Generate Report'}</button>
+          <button className="btn-primary" style={{ padding: '0.8rem' }} onClick={fetchReportData} disabled={loading}>
+            {loading ? 'Generating...' : 'Generate Report'}
+          </button>
       </div>
 
       {reportData && (
-        <div className="card-base" style={{ flex: 1, padding: '2rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <div className="card-base" style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', background: 'transparent', border: 'none', boxShadow: 'none' }}>
           <PrintHeader title={activeTab.split('-').join(' ').toUpperCase() + " REPORT"} />
           
           <div style={{ flex: 1 }}>
             {activeTab === 'student-monthly' && (
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+              <div className="card-base" style={{ padding: '1.25rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
                   <div>
-                    <h3 style={{ fontSize: '1.2rem', color: '#1A237E' }}>{reportData.student?.name}</h3>
-                    <p style={{ color: '#475569' }}>Standard: {reportData.student?.standard}</p>
+                    <h3 style={{ fontSize: '1rem', color: '#1A237E', margin: 0 }}>{reportData.student?.name}</h3>
+                    <p style={{ color: '#64748B', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Standard: {reportData.student?.standard}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontWeight: 600 }}>Period: {selectedMonth}</p>
+                    <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>{new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</p>
                   </div>
                 </div>
                 {reportData.attendance.length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No attendance records found for this period.</p>
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No attendance records found.</p>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))', gap: '5px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))', gap: '4px' }}>
                     {reportData.attendance.map(a => (
                       <div key={a.date} style={{ 
-                        padding: '0.5rem', 
+                        padding: '0.4rem 0', 
                         textAlign: 'center', 
-                        borderRadius: '4px', 
-                        background: a.status === 'Present' ? '#10B981' : a.status === 'No Class' ? '#94A3B8' : '#EF4444', 
-                        color: 'white', 
-                        fontSize: '0.8rem' 
+                        borderRadius: '6px', 
+                        background: a.status === 'Present' ? '#10B981' : a.status === 'No Class' ? '#F1F5F9' : '#EF4444', 
+                        color: a.status === 'No Class' ? '#64748B' : 'white', 
+                        fontSize: '0.7rem',
+                        border: a.status === 'No Class' ? '1px solid var(--border-color)' : 'none'
                       }}>
                         <div style={{ fontWeight: 800 }}>{a.date.split('-')[2]}</div>
-                        <div>{a.status === 'Present' ? 'P' : a.status === 'No Class' ? 'N' : 'A'}</div>
+                        <div style={{ fontSize: '0.6rem' }}>{a.status === 'Present' ? 'P' : a.status === 'No Class' ? 'N' : 'A'}</div>
                       </div>
                     ))}
                   </div>
@@ -247,55 +276,99 @@ const AttendanceReports = () => {
             )}
 
             {activeTab === 'class-daily' && (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#1A237E', color: 'white' }}>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Student Name</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Role/ID</th>
-                    <th style={{ padding: '1rem', textAlign: 'right' }}>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <div className="card-base" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Desktop Table */}
+                <div className="desktop-only">
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#1A237E', color: 'white' }}>
+                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Student Name</th>
+                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>ID</th>
+                        <th style={{ padding: '0.75rem', textAlign: 'right' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(reportData) && reportData.map(s => (
+                        <tr key={s.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '0.75rem', fontWeight: 600 }}>{s.name}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>{s.id}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'right', color: s.status === 'Present' ? '#059669' : '#DC2626', fontWeight: 700 }}>{s.status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="mobile-only">
                   {Array.isArray(reportData) && reportData.map(s => (
-                    <tr key={s.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '1rem', fontWeight: 600 }}>{s.name}</td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>{s.id}</td>
-                      <td style={{ padding: '1rem', textAlign: 'right', color: s.status === 'Present' ? '#059669' : '#DC2626', fontWeight: 700 }}>{s.status}</td>
-                    </tr>
+                    <div key={s.id} style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{s.name}</div>
+                       <div style={{ 
+                         color: s.status === 'Present' ? '#059669' : (s.status === 'No Class' ? '#64748B' : '#DC2626'),
+                         fontWeight: 800,
+                         fontSize: '0.85rem'
+                       }}>{s.status}</div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+              </div>
             )}
 
             {(activeTab === 'class-monthly' || activeTab === 'subject-monthly') && (
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#1A237E', color: 'white' }}>
-                    <th style={{ padding: '1rem', textAlign: 'left' }}>Date</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Present</th>
-                    <th style={{ padding: '1rem', textAlign: 'center' }}>Absent</th>
-                    <th style={{ padding: '1rem', textAlign: 'right' }}>% Attendance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.isArray(reportData) && reportData.length === 0 ? (
-                    <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No attendance records found for this period.</td></tr>
-                  ) : Array.isArray(reportData) && reportData.map(d => {
+              <div className="card-base" style={{ padding: 0, overflow: 'hidden' }}>
+                {/* Desktop Table */}
+                <div className="desktop-only">
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#1A237E', color: 'white' }}>
+                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>Date</th>
+                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Present</th>
+                        <th style={{ padding: '0.75rem', textAlign: 'center' }}>Absent</th>
+                        <th style={{ padding: '0.75rem', textAlign: 'right' }}>% Attendance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Array.isArray(reportData) && reportData.length === 0 ? (
+                        <tr><td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No records found.</td></tr>
+                      ) : Array.isArray(reportData) && reportData.map(d => {
+                        const total = d.present + d.absent;
+                        const percentage = total > 0 ? ((d.present / total) * 100).toFixed(1) + '%' : 'N/A';
+                        return (
+                        <tr key={d.date} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '0.75rem' }}>
+                            {d.date}
+                            {d.noClass > 0 && <span style={{ fontSize: '0.7rem', color: '#64748B', marginLeft: '10px' }}>(No Class)</span>}
+                          </td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>{d.present}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center' }}>{d.absent}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'right', fontWeight: 700 }}>{percentage}</td>
+                        </tr>
+                      )})}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="mobile-only">
+                  {Array.isArray(reportData) && reportData.map(d => {
                     const total = d.present + d.absent;
-                    const percentage = total > 0 ? ((d.present / total) * 100).toFixed(1) + '%' : 'N/A';
+                    const percentage = total > 0 ? ((d.present / total) * 100).toFixed(0) + '%' : 'N/A';
                     return (
-                    <tr key={d.date} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                      <td style={{ padding: '1rem' }}>
-                        {d.date}
-                        {d.noClass > 0 && <span style={{ fontSize: '0.7rem', color: '#64748B', marginLeft: '10px' }}>(No Class)</span>}
-                      </td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>{d.present}</td>
-                      <td style={{ padding: '1rem', textAlign: 'center' }}>{d.absent}</td>
-                      <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700 }}>{percentage}</td>
-                    </tr>
-                  )})}
-                </tbody>
-              </table>
+                      <div key={d.date} style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                         <div>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>P: {d.present} | A: {d.absent}</div>
+                         </div>
+                         <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontWeight: 800, fontSize: '1rem', color: parseInt(percentage) > 75 ? '#059669' : '#DC2626' }}>{percentage}</div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Attendance</div>
+                         </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             )}
           </div>
 
@@ -307,6 +380,24 @@ const AttendanceReports = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          .print-header { display: block !important; }
+          .print-only { display: block !important; }
+          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
+          body { background: white !important; }
+          .content-area { padding: 0 !important; position: static !important; }
+          table { width: 100% !important; border: 1px solid #ddd !important; }
+          th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default AttendanceReports;
 
       <style>{`
         @media print {
