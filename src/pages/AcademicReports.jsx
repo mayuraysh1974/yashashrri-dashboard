@@ -655,9 +655,17 @@ const AcademicReports = () => {
           .no-print { display: none !important; }
           .print-only { display: block !important; }
           
+          /* Fix overflow clipping on report wrapper containers */
+          .report-content-area,
+          .student-report-wrapper,
+          .student-report-container {
+            overflow: visible !important;
+            height: auto !important;
+            position: static !important;
+            width: 100% !important;
+          }
+
           .app-layout { padding: 0 !important; }
-          .main-workspace { padding: 0 !important; }
-          .content-area { padding: 0 !important; position: static !important; }
           
           .student-report-container {
              padding: 0 !important;
