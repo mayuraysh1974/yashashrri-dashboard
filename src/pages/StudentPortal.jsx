@@ -329,15 +329,21 @@ const StudentPortal = () => {
                         <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#1E293B', lineHeight: '1.4' }}>{file.name}</h4>
                         <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 600 }}>Added: {file.date}</p>
                      </div>
-                     <a href={file.video_link || file.videoLink} target="_blank" rel="noreferrer" className="btn-primary" style={{ 
-                       textAlign: 'center', 
-                       textDecoration: 'none', 
-                       fontSize: '0.75rem', 
-                       padding: '0.6rem',
-                       backgroundColor: '#1A237E'
-                     }}>
+                      <a href={file.video_link || file.videoLink} target="_blank" rel="noreferrer" style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        backgroundColor: '#1A237E',
+                        color: 'white',
+                        padding: '0.75rem',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        textDecoration: 'none'
+                      }}>
                         <FiDownload /> Download Note
-                     </a>
+                      </a>
                   </div>
                 ))}
              </div>

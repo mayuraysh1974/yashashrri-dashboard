@@ -146,8 +146,8 @@ const AcademicReports = () => {
             name: test?.name || 'Unknown Test',
             score: actualScore,
             isAbsent: score === -1,
-            percentage: test ? Math.round((actualScore / test.total_marks) * 100) : 0,
-            minMarks: test ? Math.round(((test.min_marks || 0) / test.total_marks) * 100) : 0,
+            percentage: test && test.total_marks ? Math.round((actualScore / test.total_marks) * 100) : 0,
+            minMarks: test && test.total_marks ? Math.round(((test.min_marks || 0) / test.total_marks) * 100) : 0,
             date: test?.date || '',
             subject: Array.isArray(test?.subjects) ? test.subjects[0] : (test?.subject || 'N/A'),
             totalMarks: test?.total_marks || 0
@@ -159,7 +159,7 @@ const AcademicReports = () => {
       const passCount = progress.filter(p => !p.isAbsent && p.score >= (p.totalMarks * (p.minMarks / 100))).length;
       
       const avgPercentage = progress.length > 0 
-        ? progress.reduce((sum, p) => sum + p.percentage, 0) / progress.length 
+        ? progress.reduce((sum, p) => sum + (p.percentage || 0), 0) / progress.length 
         : 0;
 
       setStudentStats({ 
