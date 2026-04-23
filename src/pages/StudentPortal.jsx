@@ -353,8 +353,9 @@ const StudentPortal = () => {
              <div className="animate-in">
                 <div className="card-base" style={{ padding: '1.5rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(135deg, #1A237E, #0D47A1)', color: 'white', borderRadius: '16px', boxShadow: '0 8px 20px rgba(26, 35, 126, 0.2)' }}>
                    <div>
-                      <p style={{ margin: 0, fontSize: '0.7rem', opacity: 0.8, textTransform: 'uppercase', fontWeight: 800 }}>Account Balance</p>
-                      <h1 style={{ margin: '0.25rem 0', fontSize: '2rem' }}>₹{(student.balance || 0).toLocaleString()}</h1>
+                      <p style={{ margin: 0, fontSize: '0.7rem', opacity: 0.8, textTransform: 'uppercase', fontWeight: 800, color: 'white' }}>Account Balance</p>
+                      <div style={{ margin: '0.25rem 0', fontSize: '2rem', fontWeight: 800, color: '#FFFFFF' }}>₹{(student.balance || 0).toLocaleString()}</div>
+                      <p style={{ margin: 0, fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)' }}>Due as of today</p>
                    </div>
                    <Link to="/pay-fees" style={{ 
                      backgroundColor: '#D4AF37', 
