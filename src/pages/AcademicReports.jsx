@@ -378,7 +378,13 @@ const AcademicReports = () => {
           <div className="card-base" style={{ padding: '1rem' }}>
             <PrintHeader 
               title={selectedTestId === 'all' ? "Monthly Academic Performance Report" : "Specific Test Performance Report"} 
-              subTitle={`${selectedTestId === 'all' ? `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : `Test: ${reportData.tests.find(t => String(t.id) === String(selectedTestId))?.name} | Date: ${new Date(reportData.tests.find(t => String(t.id) === String(selectedTestId))?.date).toLocaleDateString()}`}`} 
+              subTitle={selectedTestId === 'all' ? 
+                `Subject: ${selectedSubject} | Period: ${new Date(selectedMonth + '-02').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}` : 
+                (() => {
+                  const t = reportData.tests.find(t => String(t.id) === String(selectedTestId));
+                  return t ? `Test: ${t.name} | Date: ${new Date(t.date).toLocaleDateString()}` : `Subject: ${selectedSubject}`;
+                })()
+              } 
             />
             
             {!loading && reportData.tests.length === 0 ? <div style={{ textAlign: 'center', padding: '4rem' }}><FiBook size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} /><p>No tests found for selected subject and month.</p></div> : (
@@ -441,11 +447,11 @@ const AcademicReports = () => {
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--primary-blue)', fontWeight: 700 }}>{perf?.avg}%</td>
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--success-green)', fontWeight: 700 }}>{perf?.passing}%</td>
                           </tr>
-                          <tr className={selectedTestId === 'all' ? "no-print" : ""}>
+                          <tr>
                             <td colSpan="6" style={{ padding: '0 1rem 1rem 1rem' }}>
-                               <div style={{ backgroundColor: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0.5rem', marginTop: '0.5rem' }}>
-                                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Student-wise Breakdown</div>
-                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem' }}>
+                               <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0.4rem', marginTop: '0.2rem' }}>
+                                  <div className="no-print" style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.3rem', textTransform: 'uppercase' }}>Student-wise Breakdown</div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.3rem' }}>
                                     {testResults.sort((a,b) => b.score - a.score).map(res => {
                                       const isAbsent = res.score === -1;
                                       const isTop = res.score === maxScore && maxScore > 0;
