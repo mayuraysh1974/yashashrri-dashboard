@@ -178,6 +178,15 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
+/* Responsive Visibility Utilities — applied globally to all pages */
+.desktop-only { display: block; }
+.mobile-only  { display: none !important; }
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: block !important; }
+}
+
 /* Modal Backdrops */
 .modal-overlay {
   position: fixed;
