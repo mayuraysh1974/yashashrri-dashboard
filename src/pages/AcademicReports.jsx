@@ -52,12 +52,18 @@ const AcademicReports = () => {
     setLoading(true);
     try {
       // Fetch tests for this subject and month
+      // Robust date range for the month
+      const startOfMonth = `${selectedMonth}-01`;
+      const dateObj = new Date(selectedMonth + '-01');
+      dateObj.setMonth(dateObj.getMonth() + 1);
+      const endOfMonth = dateObj.toISOString().slice(0, 10);
+
       const { data: tests } = await supabase
         .from('tests')
         .select('*')
         .contains('subjects', [selectedSubject])
-        .gte('date', `${selectedMonth}-01`)
-        .lte('date', `${selectedMonth}-31`)
+        .gte('date', startOfMonth)
+        .lt('date', endOfMonth)
         .order('date', { ascending: true });
 
       if (!tests || tests.length === 0) {
@@ -435,7 +441,7 @@ const AcademicReports = () => {
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--primary-blue)', fontWeight: 700 }}>{perf?.avg}%</td>
                             <td style={{ padding: '1rem', textAlign: 'right', color: 'var(--success-green)', fontWeight: 700 }}>{perf?.passing}%</td>
                           </tr>
-                          <tr className="no-print">
+                          <tr className={selectedTestId === 'all' ? "no-print" : ""}>
                             <td colSpan="6" style={{ padding: '0 1rem 1rem 1rem' }}>
                                <div style={{ backgroundColor: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '0.5rem', marginTop: '0.5rem' }}>
                                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Student-wise Breakdown</div>
@@ -684,18 +690,26 @@ const AcademicReports = () => {
           }
 
           .recharts-responsive-container { 
-            height: 220px !important; 
-            margin: 10px auto !important;
+            height: 180px !important; 
+            margin: 5px auto !important;
           }
 
           .stats-grid-compact {
              display: grid !important;
              grid-template-columns: repeat(3, 1fr) !important;
-             gap: 10px !important;
+             gap: 8px !important;
+             margin-bottom: 10px !important;
           }
 
-          .AcademicNote { font-size: 9px !important; line-height: 1.3 !important; }
-          .signatory-box { min-width: 150px; }
+          .chart-container-card {
+            padding: 8px !important;
+            margin-bottom: 10px !important;
+            min-height: auto !important;
+          }
+
+          .AcademicNote { font-size: 8px !important; line-height: 1.2 !important; margin-top: 5px !important; }
+          .signatory-box { min-width: 120px; }
+          .signatory-box div { font-size: 10px !important; }
         }
 
         /* Responsive refinements */

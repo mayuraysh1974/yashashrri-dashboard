@@ -43,14 +43,17 @@ const AttendanceReports = () => {
         if (!selectedStudent) { alert('Select a student'); setLoading(false); return; }
         const student = students.find(s => s.id === selectedStudent);
         // e.g. selectedMonth = "2026-03"
-        const from = selectedMonth + '-01';
-        const to = selectedMonth + '-31';
+        const from = `${selectedMonth}-01`;
+        const dateObj = new Date(selectedMonth + '-01');
+        dateObj.setMonth(dateObj.getMonth() + 1);
+        const to = dateObj.toISOString().slice(0, 10);
+
         const { data: att } = await supabase
           .from('student_attendance')
           .select('date, status')
           .eq('student_id', selectedStudent)
           .gte('date', from)
-          .lte('date', to)
+          .lt('date', to)
           .order('date');
         setReportData({ student, attendance: att || [] });
 
@@ -75,14 +78,17 @@ const AttendanceReports = () => {
         const { data: studs } = await supabase.from('students').select('id').eq('standard', selectedStandard);
         const studentIds = (studs || []).map(s => s.id);
         if (studentIds.length === 0) { setReportData([]); setLoading(false); return; }
-        const from = selectedMonth + '-01';
-        const to = selectedMonth + '-31';
+        const from = `${selectedMonth}-01`;
+        const dateObj = new Date(selectedMonth + '-01');
+        dateObj.setMonth(dateObj.getMonth() + 1);
+        const to = dateObj.toISOString().slice(0, 10);
+
         const { data: att } = await supabase
           .from('student_attendance')
           .select('date, status')
           .in('student_id', studentIds)
           .gte('date', from)
-          .lte('date', to);
+          .lt('date', to);
         // Group by date
         const dateMap = {};
         (att || []).forEach(a => {
@@ -95,14 +101,17 @@ const AttendanceReports = () => {
 
       } else if (activeTab === 'subject-monthly') {
         if (!selectedSubject) { alert('Select a subject'); setLoading(false); return; }
-        const from = selectedMonth + '-01';
-        const to = selectedMonth + '-31';
+        const from = `${selectedMonth}-01`;
+        const dateObj = new Date(selectedMonth + '-01');
+        dateObj.setMonth(dateObj.getMonth() + 1);
+        const to = dateObj.toISOString().slice(0, 10);
+
         const { data: att } = await supabase
           .from('student_subject_attendance')
           .select('date, status')
           .eq('subject_id', selectedSubject)
           .gte('date', from)
-          .lte('date', to);
+          .lt('date', to);
         const dateMap = {};
         (att || []).forEach(a => {
           if (!dateMap[a.date]) dateMap[a.date] = { date: a.date, present: 0, absent: 0, noClass: 0 };
