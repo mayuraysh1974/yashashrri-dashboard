@@ -305,24 +305,24 @@ const TeacherManagement = () => {
 
             <PrintHeader title="Faculty Financial Ledger" subTitle={`Ledger for: ${selectedTeacher.name} | ID: ${selectedTeacher.id} | Dept: ${selectedTeacher.subject}`} />
 
-            <div className="responsive-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '2.5rem' }}>
-              <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: '12px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total Share Earned</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>₹{financeData.summary.totalEarned.toLocaleString()}</div>
+            <div className="responsive-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', marginBottom: '1.5rem', gap: '0.75rem' }}>
+              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '12px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Share Earned</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>₹{financeData.summary.totalEarned.toLocaleString()}</div>
               </div>
-              <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: '12px' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Total Paid</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--success-green)' }}>₹{financeData.summary.totalPaid.toLocaleString()}</div>
+              <div style={{ background: 'var(--bg-main)', padding: '1rem', borderRadius: '12px' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Total Paid</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--success-green)' }}>₹{financeData.summary.totalPaid.toLocaleString()}</div>
               </div>
-              <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Balance Outstanding</span>
-                <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--danger-red)' }}>₹{financeData.summary.balance.toLocaleString()}</div>
+              <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Balance Outstanding</span>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--danger-red)' }}>₹{financeData.summary.balance.toLocaleString()}</div>
               </div>
             </div>
 
-            <div className="responsive-grid-2col">
+            <div className="responsive-grid-2col" style={{ gap: '1rem' }}>
               {/* Entitlement Form */}
-              <div className="card-base" style={{ padding: '1.5rem', backgroundColor: '#fcfcfc' }}>
+              <div className="card-base" style={{ padding: '1rem', backgroundColor: '#fcfcfc' }}>
                 <h3 className="no-print" style={{ fontSize: '1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiActivity /> Add Share Entitlement</h3>
                 <h3 className="print-only" style={{ display: 'none', marginBottom: '1rem' }}>Detailed Earnings History</h3>
                 
@@ -346,21 +346,21 @@ const TeacherManagement = () => {
                 
                 <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                      <thead style={{ backgroundColor: '#f8fafc' }}>
+                       <thead style={{ backgroundColor: '#f8fafc' }}>
                          <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.5rem' }}>Description</th>
-                            <th style={{ padding: '0.5rem', textAlign: 'right' }}>Amount</th>
+                            <th style={{ padding: '0.4rem 0.6rem' }}>Description</th>
+                            <th style={{ padding: '0.4rem 0.6rem', textAlign: 'right' }}>Amount</th>
                          </tr>
                       </thead>
                       <tbody>
                         {financeData.shares.map(s => (
-                            <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.5rem' }}>
+                             <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                <td style={{ padding: '0.4rem 0.6rem' }}>
                                    <div style={{ fontWeight: 600 }}>{s.description}</div>
-                                   <div style={{ fontSize: '0.7rem', color: '#64748B' }}>{s.date}</div>
+                                   <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{s.date}</div>
                                 </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 700 }}>₹{s.amount.toLocaleString()}</td>
-                            </tr>
+                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, whiteSpace: 'nowrap' }}>₹{s.amount.toLocaleString()}</td>
+                             </tr>
                         ))}
                       </tbody>
                     </table>
@@ -368,8 +368,8 @@ const TeacherManagement = () => {
               </div>
 
               {/* Payment Form */}
-              <div className="card-base" style={{ padding: '1.5rem', backgroundColor: '#fcfcfc' }}>
-                <h3 className="no-print" style={{ fontSize: '1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiDollarSign /> Record Payment</h3>
+              <div className="card-base" style={{ padding: '1rem', backgroundColor: '#fcfcfc' }}>
+                <h3 className="no-print" style={{ fontSize: '0.95rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FiDollarSign /> Record Payment</h3>
                 <h3 className="print-only" style={{ display: 'none', marginBottom: '1rem' }}>Recent Payments Record</h3>
                 
                 <div className="no-print" style={{ display: 'grid', gap: '1rem' }}>
@@ -405,18 +405,18 @@ const TeacherManagement = () => {
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                       <thead style={{ backgroundColor: '#f8fafc' }}>
                          <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.5rem' }}>Payment Info</th>
-                            <th style={{ padding: '0.5rem', textAlign: 'right' }}>Amount</th>
+                            <th style={{ padding: '0.4rem 0.6rem' }}>Payment Info</th>
+                            <th style={{ padding: '0.4rem 0.6rem', textAlign: 'right' }}>Amount</th>
                          </tr>
                       </thead>
                       <tbody>
                         {financeData.payments.map(p => (
                             <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.5rem' }}>
+                                <td style={{ padding: '0.4rem 0.6rem' }}>
                                    <div style={{ fontWeight: 600 }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
-                                   <div style={{ fontSize: '0.7rem', color: '#64748B' }}>{p.date}</div>
+                                   <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{p.date}</div>
                                 </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'right', fontWeight: 700, color: 'var(--success-green)' }}>- ₹{p.amount.toLocaleString()}</td>
+                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, color: 'var(--success-green)', whiteSpace: 'nowrap' }}>- ₹{p.amount.toLocaleString()}</td>
                             </tr>
                         ))}
                       </tbody>
@@ -450,8 +450,8 @@ const TeacherManagement = () => {
           th { -webkit-print-color-adjust: exact; }
           .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; }
         }
-        .responsive-grid { display: grid; gap: 1.5rem; }
-        .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .responsive-grid { display: grid; gap: 1rem; }
+        .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
       `}</style>
 
       {showModal && (
