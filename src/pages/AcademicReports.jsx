@@ -17,6 +17,7 @@ const AcademicReports = () => {
   const [selectedTestId, setSelectedTestId] = useState('all');
   const [selectedStandard, setSelectedStandard] = useState('');
   const [standards, setStandards] = useState([]);
+  const [printOrientation, setPrintOrientation] = useState('portrait'); // 'portrait' or 'landscape'
   
   const [reportData, setReportData] = useState({ tests: [], performance: [], results: [] });
   const [debugStatus, setDebugStatus] = useState('');
@@ -178,10 +179,8 @@ const AcademicReports = () => {
     }
   };
 
-  const handlePrint = () => {
-    // 1. Determine orientation based on data volume
-    // If it's a monthly report or a student with many tests, landscape is better.
-    const isLandscape = activeTab === 'monthly' || (studentStats.progress && studentStats.progress.length > 8);
+    // 1. Use the manually selected orientation
+    const isLandscape = printOrientation === 'landscape';
     
     // 2. Inject a dynamic style tag for the @page orientation
     const styleId = 'dynamic-print-style';
@@ -204,7 +203,7 @@ const AcademicReports = () => {
     // 3. Trigger print
     setTimeout(() => {
       window.print();
-    }, 100);
+    }, 150);
   };
 
   const PrintHeader = ({ title, subTitle, studentDetails }) => (
@@ -378,6 +377,34 @@ const AcademicReports = () => {
               </select>
             </>
           )}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0 0.5rem' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Print Mode:</span>
+            <div style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '0.2rem', borderRadius: '6px' }}>
+              <button 
+                onClick={() => setPrintOrientation('portrait')}
+                style={{ 
+                  padding: '0.3rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600,
+                  backgroundColor: printOrientation === 'portrait' ? 'white' : 'transparent',
+                  color: printOrientation === 'portrait' ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                  boxShadow: printOrientation === 'portrait' ? 'var(--shadow-sm)' : 'none'
+                }}
+              >
+                Portrait
+              </button>
+              <button 
+                onClick={() => setPrintOrientation('landscape')}
+                style={{ 
+                  padding: '0.3rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600,
+                  backgroundColor: printOrientation === 'landscape' ? 'white' : 'transparent',
+                  color: printOrientation === 'landscape' ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                  boxShadow: printOrientation === 'landscape' ? 'var(--shadow-sm)' : 'none'
+                }}
+              >
+                Landscape
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
