@@ -401,7 +401,6 @@ const AcademicReports = () => {
                 <option value="">Select Student...</option>
                 {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
-              </select>
             </>
           )}
         </div>
