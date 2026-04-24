@@ -21,7 +21,7 @@ const MobileMenu = () => {
     { path: '/attendance-reports', name: 'Attendance Reports', icon: <FiBarChart2 /> },
     { path: '/academic-calendar', name: 'Academic Calendar', icon: <FiCalendar /> },
     { path: '/alerts', name: 'Communication Logs', icon: <FiBell /> },
-    { path: '/colleges', name: 'College Master', icon: <FiFileText /> },
+    { path: '/colleges', name: 'School/College Master', icon: <FiFileText /> },
     { path: '/subjects', name: 'Subject Master', icon: <FiFileText /> },
     { path: '/standards', name: 'Standard Master', icon: <FiLayers /> },
     { path: '/fee-reports', name: 'Fee Reports', icon: <FiBarChart2 /> },
