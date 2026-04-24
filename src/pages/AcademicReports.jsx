@@ -266,9 +266,35 @@ const AcademicReports = () => {
           <h1 className="page-title">Academic Performance Reports</h1>
           <p className="page-subtitle">Detailed test analytics and student progress tracking</p>
         </div>
-        <button className="btn-secondary" onClick={() => window.print()}>
-          <FiPrinter /> Print / Export PDF
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--bg-main)', padding: '0.3rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <button 
+              onClick={() => setPrintOrientation('portrait')}
+              style={{ 
+                padding: '0.4rem 0.8rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                backgroundColor: printOrientation === 'portrait' ? 'white' : 'transparent',
+                color: printOrientation === 'portrait' ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                boxShadow: printOrientation === 'portrait' ? 'var(--shadow-sm)' : 'none'
+              }}
+            >
+              Portrait
+            </button>
+            <button 
+              onClick={() => setPrintOrientation('landscape')}
+              style={{ 
+                padding: '0.4rem 0.8rem', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 600,
+                backgroundColor: printOrientation === 'landscape' ? 'white' : 'transparent',
+                color: printOrientation === 'landscape' ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                boxShadow: printOrientation === 'landscape' ? 'var(--shadow-sm)' : 'none'
+              }}
+            >
+              Landscape
+            </button>
+          </div>
+          <button className="btn-secondary" onClick={handlePrint}>
+            <FiPrinter /> Print / Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="card-base no-print" style={{ 
@@ -375,36 +401,9 @@ const AcademicReports = () => {
                 <option value="">Select Student...</option>
                 {students.filter(s => s.standard === selectedStandard).map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
+              </select>
             </>
           )}
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0 0.5rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Print Mode:</span>
-            <div style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '0.2rem', borderRadius: '6px' }}>
-              <button 
-                onClick={() => setPrintOrientation('portrait')}
-                style={{ 
-                  padding: '0.3rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600,
-                  backgroundColor: printOrientation === 'portrait' ? 'white' : 'transparent',
-                  color: printOrientation === 'portrait' ? 'var(--primary-blue)' : 'var(--text-secondary)',
-                  boxShadow: printOrientation === 'portrait' ? 'var(--shadow-sm)' : 'none'
-                }}
-              >
-                Portrait
-              </button>
-              <button 
-                onClick={() => setPrintOrientation('landscape')}
-                style={{ 
-                  padding: '0.3rem 0.6rem', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600,
-                  backgroundColor: printOrientation === 'landscape' ? 'white' : 'transparent',
-                  color: printOrientation === 'landscape' ? 'var(--primary-blue)' : 'var(--text-secondary)',
-                  boxShadow: printOrientation === 'landscape' ? 'var(--shadow-sm)' : 'none'
-                }}
-              >
-                Landscape
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
