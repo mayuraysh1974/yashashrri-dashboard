@@ -385,9 +385,9 @@ const StudentPortal = () => {
                         <tbody>
                           {payments.length === 0 ? <tr><td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>No transaction history.</td></tr> : payments.map(p => (
                               <tr key={p.id} style={{ borderTop: '1px solid #E2E8F0', backgroundColor: 'white' }}>
-                                <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                                <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#64748B' }}>{p.payment_mode} {p.remarks ? `(${p.remarks})` : ''}</td>
-                                <td style={{ padding: '1rem', fontWeight: 700, color: p.amount_paid < 0 ? '#EF4444' : '#1A237E' }}>{p.amount_paid < 0 ? `- ₹${Math.abs(p.amount_paid).toLocaleString()}` : `₹${p.amount_paid.toLocaleString()}`}</td>
+                                <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</td>
+                                <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#64748B' }}>{p.payment_mode || '-'} {p.remarks ? `(${p.remarks})` : ''}</td>
+                                <td style={{ padding: '1rem', fontWeight: 700, color: (p.amount_paid || 0) < 0 ? '#EF4444' : '#1A237E' }}>{(p.amount_paid || 0) < 0 ? `- ₹${Math.abs(p.amount_paid || 0).toLocaleString()}` : `₹${(p.amount_paid || 0).toLocaleString()}`}</td>
                                 <td style={{ padding: '1rem', textAlign: 'right' }}><span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>Paid</span></td>
                               </tr>
                           ))}
@@ -400,8 +400,8 @@ const StudentPortal = () => {
                       {payments.length === 0 ? <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No records found.</p> : payments.map(p => (
                         <div key={p.id} className="card-base" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                            <div>
-                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: p.amount_paid < 0 ? '#EF4444' : '#1E293B' }}>{p.amount_paid < 0 ? `- ₹${Math.abs(p.amount_paid).toLocaleString()}` : `₹${p.amount_paid.toLocaleString()}`}</div>
-                              <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} • {p.payment_mode}</div>
+                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: (p.amount_paid || 0) < 0 ? '#EF4444' : '#1E293B' }}>{(p.amount_paid || 0) < 0 ? `- ₹${Math.abs(p.amount_paid || 0).toLocaleString()}` : `₹${(p.amount_paid || 0).toLocaleString()}`}</div>
+                              <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'} • {p.payment_mode || '-'}</div>
                            </div>
                            <span style={{ 
                              backgroundColor: '#ECFDF5', 
