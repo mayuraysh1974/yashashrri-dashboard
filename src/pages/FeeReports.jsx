@@ -133,7 +133,7 @@ const FeeReports = () => {
       <div style={{ fontSize: '11px', color: '#64748B', lineHeight: '1.6' }}>
         Main Br: "Shree Ekveera Prasad", Vaidya Colony, Nr. Axis bank ATM, Talegaon Dabhade, PUNE - 410506<br />
         Branch 2: Silverwinds, C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Talegaon Dabhade, PUNE - 410506<br />
-        Contact: +91 73874 20737 | Email: mayuraysh1974@gmail.com
+        Contact: +91 73874 20737 | https://yashashrri-dashboard.vercel.app
       </div>
       <hr style={{ border: 'none', borderTop: '2px solid #1A237E', margin: '20px 0' }} />
       <h2 style={{ fontSize: '16px', color: '#1A237E', margin: '10px 0', textTransform: 'uppercase' }}>{title}</h2>

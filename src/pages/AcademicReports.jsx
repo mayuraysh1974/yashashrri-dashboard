@@ -214,7 +214,7 @@ const AcademicReports = () => {
           <div style={{ fontSize: '16px', fontWeight: 800, color: '#1A237E', marginBottom: '4px' }}>YASHASHRRI CLASSES</div>
           <div>ESTD 1999 | Reg. No: MAH/PUNE/123/2010</div>
           <div>Talegaon Dabhade, Pune - 410506</div>
-          <div>Mob: +91 73874 20737 | www.yashashrri.com</div>
+          <div>Mob: +91 73874 20737 | https://yashashrri-dashboard.vercel.app</div>
         </div>
       </div>
       
