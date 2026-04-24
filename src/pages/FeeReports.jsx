@@ -13,6 +13,8 @@ const FeeReports = () => {
     start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0], 
     end: new Date().toISOString().split('T')[0] 
   });
+  const [stdFilter, setStdFilter] = useState('');
+  const [standards, setStandards] = useState([]);
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [financeData, setFinanceData] = useState({ teacher: {}, shares: [], payments: [], summary: { totalEarned: 0, totalPaid: 0, balance: 0 } });
@@ -114,6 +116,16 @@ const FeeReports = () => {
     window.print();
   };
 
+  const fetchStandards = async () => {
+    const { data } = await supabase.from('standards').select('*').order('standard');
+    setStandards(data || []);
+  };
+
+  // eslint-disable-next-line
+  useEffect(() => {
+    fetchStandards();
+  }, []);
+
   // eslint-disable-next-line
   useEffect(() => {
     if (activeTab === 'arrears') fetchArrears();
@@ -192,6 +204,14 @@ const FeeReports = () => {
 
         {activeTab !== 'arrears' && (
            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: '1rem' }}>
+              <select 
+                value={stdFilter} 
+                onChange={e => setStdFilter(e.target.value)} 
+                style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'white' }}
+              >
+                <option value="">All Classes</option>
+                {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+              </select>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>From:</span>
                  <input type="date" value={dateFilter.start} onChange={e => setDateFilter({...dateFilter, start: e.target.value})} style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
@@ -200,6 +220,19 @@ const FeeReports = () => {
                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>To:</span>
                  <input type="date" value={dateFilter.end} onChange={e => setDateFilter({...dateFilter, end: e.target.value})} style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
               </div>
+           </div>
+        )}
+
+        {activeTab === 'arrears' && (
+           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: '1rem' }}>
+              <select 
+                value={stdFilter} 
+                onChange={e => setStdFilter(e.target.value)} 
+                style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'white' }}
+              >
+                <option value="">All Classes</option>
+                {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+              </select>
            </div>
         )}
         
@@ -256,6 +289,7 @@ const FeeReports = () => {
                   </thead>
                   <tbody>
                     {arrears
+                      .filter(s => !stdFilter || s.standard === stdFilter)
                       .filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
                       .map((s) => (
                       <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -273,6 +307,7 @@ const FeeReports = () => {
               {/* Mobile Cards */}
               <div className="mobile-only">
                 {arrears
+                  .filter(s => !stdFilter || s.standard === stdFilter)
                   .filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
                   .map((s) => (
                   <div key={s.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
@@ -290,7 +325,7 @@ const FeeReports = () => {
               
               <div className="card-base" style={{ padding: '1rem', fontWeight: 800, backgroundColor: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between' }}>
                  <span>Filtered Total Outstanding:</span>
-                 <span style={{ color: 'var(--danger-red)' }}>₹{arrears.filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, s) => acc + s.balance, 0).toLocaleString()}</span>
+                 <span style={{ color: 'var(--danger-red)' }}>₹{arrears.filter(s => !stdFilter || s.standard === stdFilter).filter(s => (s.name || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, s) => acc + s.balance, 0).toLocaleString()}</span>
               </div>
             </div>
           )}
@@ -311,6 +346,7 @@ const FeeReports = () => {
                   </thead>
                   <tbody>
                     {collection.collections
+                      .filter(f => !stdFilter || f.standard === stdFilter)
                       .filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()))
                       .map((f) => (
                       <tr key={f.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -330,6 +366,7 @@ const FeeReports = () => {
               {/* Mobile Cards */}
               <div className="mobile-only">
                 {collection.collections
+                  .filter(f => !stdFilter || f.standard === stdFilter)
                   .filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase()))
                   .map((f) => (
                   <div key={f.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem' }}>
@@ -350,7 +387,7 @@ const FeeReports = () => {
               <div className="card-base" style={{ padding: '1rem', fontWeight: 800, backgroundColor: 'var(--bg-main)', display: 'flex', justifyContent: 'space-between' }}>
                  <span>Filtered Total Collection:</span>
                  <span style={{ color: 'var(--success-green)' }}>
-                   ₹{collection.collections.filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, f) => acc + f.amountPaid, 0).toLocaleString()}
+                   ₹{collection.collections.filter(f => !stdFilter || f.standard === stdFilter).filter(f => (f.studentName || '').toLowerCase().includes(searchQuery.toLowerCase())).reduce((acc, f) => acc + f.amountPaid, 0).toLocaleString()}
                  </span>
               </div>
             </div>
