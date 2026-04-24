@@ -72,9 +72,31 @@ const StudentPortal = () => {
     const sortedNotes = notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0));
     setLibrary(sortedNotes);
 
-    // Fetch Payments
-    const { data: payHistory } = await supabase.from('fees').select('*').eq('student_id', studentData.id).order('payment_date', { ascending: false });
-    setPayments(payHistory || []);
+    // Fetch Payments (Try fees first, which requires RLS permissions)
+    const { data: payHistory, error: feeErr } = await supabase.from('fees').select('*').eq('student_id', studentData.id).order('payment_date', { ascending: false });
+    
+    // Fetch Online Payments as a fallback (usually has public access)
+    const { data: onlineHistory } = await supabase.from('online_payments').select('*').eq('student_name', studentData.name).order('created_at', { ascending: false });
+
+    if (feeErr) {
+      console.error("Fee fetch error:", feeErr);
+      setError("Fee fetch error: " + feeErr.message);
+    }
+    
+    // Merge them if fees is empty (due to RLS blocking or no data)
+    let mergedPayments = payHistory || [];
+    if (mergedPayments.length === 0 && onlineHistory && onlineHistory.length > 0) {
+      mergedPayments = onlineHistory.map(op => ({
+         id: op.id || op.transaction_id,
+         payment_date: op.created_at,
+         payment_mode: 'Online (Portal)',
+         remarks: op.transaction_id,
+         amount_paid: op.amount,
+         status: op.status
+      }));
+    }
+    
+    setPayments(mergedPayments);
   };
 
   const handleLogin = async (e) => {
@@ -175,6 +197,12 @@ const StudentPortal = () => {
           <button onClick={logout} className="btn-secondary" style={{ color: '#EF4444', border: '1px solid #EF4444', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><FiLogOut /> Exit</button>
         </div>
       </nav>
+
+      {error && (
+        <div style={{ backgroundColor: '#FEE2E2', color: '#DC2626', padding: '1rem', textAlign: 'center', fontWeight: 'bold' }}>
+          DEBUG ERROR: {error}
+        </div>
+      )}
 
       {/* Mobile Tab Navigation */}
       <div className="mobile-only portal-mobile-tabs" style={{ 
