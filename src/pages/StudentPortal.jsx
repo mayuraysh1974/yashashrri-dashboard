@@ -73,7 +73,7 @@ const StudentPortal = () => {
     setLibrary(sortedNotes);
 
     // Fetch Payments
-    const { data: payHistory } = await supabase.from('online_payments').select('*').eq('student_name', studentData.name).order('created_at', { ascending: false });
+    const { data: payHistory } = await supabase.from('fees').select('*').eq('student_id', studentData.id).order('payment_date', { ascending: false });
     setPayments(payHistory || []);
   };
 
@@ -377,7 +377,7 @@ const StudentPortal = () => {
                         <thead style={{ backgroundColor: '#F8FAFC' }}>
                           <tr style={{ textAlign: 'left' }}>
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Date</th>
-                              <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Transaction ID</th>
+                              <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Mode / Remarks</th>
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Amount</th>
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B', textAlign: 'right' }}>Status</th>
                           </tr>
@@ -385,10 +385,10 @@ const StudentPortal = () => {
                         <tbody>
                           {payments.length === 0 ? <tr><td colSpan="4" style={{ padding: '3rem', textAlign: 'center', color: '#94A3B8' }}>No transaction history.</td></tr> : payments.map(p => (
                               <tr key={p.id} style={{ borderTop: '1px solid #E2E8F0', backgroundColor: 'white' }}>
-                                <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(p.created_at).toLocaleDateString()}</td>
-                                <td style={{ padding: '1rem', fontSize: '0.8rem', fontFamily: 'monospace', color: '#64748B' }}>{p.transaction_id}</td>
-                                <td style={{ padding: '1rem', fontWeight: 700, color: '#1A237E' }}>₹{p.amount.toLocaleString()}</td>
-                                <td style={{ padding: '1rem', textAlign: 'right' }}><span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>{p.status}</span></td>
+                                <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                                <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#64748B' }}>{p.payment_mode} {p.remarks ? `(${p.remarks})` : ''}</td>
+                                <td style={{ padding: '1rem', fontWeight: 700, color: p.amount_paid < 0 ? '#EF4444' : '#1A237E' }}>{p.amount_paid < 0 ? `- ₹${Math.abs(p.amount_paid).toLocaleString()}` : `₹${p.amount_paid.toLocaleString()}`}</td>
+                                <td style={{ padding: '1rem', textAlign: 'right' }}><span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>Paid</span></td>
                               </tr>
                           ))}
                         </tbody>
@@ -400,8 +400,8 @@ const StudentPortal = () => {
                       {payments.length === 0 ? <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No records found.</p> : payments.map(p => (
                         <div key={p.id} className="card-base" style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                            <div>
-                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>₹{p.amount.toLocaleString()}</div>
-                              <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{new Date(p.created_at).toLocaleDateString()} • {p.transaction_id.slice(0, 10)}...</div>
+                              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: p.amount_paid < 0 ? '#EF4444' : '#1E293B' }}>{p.amount_paid < 0 ? `- ₹${Math.abs(p.amount_paid).toLocaleString()}` : `₹${p.amount_paid.toLocaleString()}`}</div>
+                              <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} • {p.payment_mode}</div>
                            </div>
                            <span style={{ 
                              backgroundColor: '#ECFDF5', 
@@ -411,7 +411,7 @@ const StudentPortal = () => {
                              fontSize: '0.65rem', 
                              fontWeight: 800,
                              textTransform: 'uppercase'
-                           }}>{p.status}</span>
+                           }}>PAID</span>
                         </div>
                       ))}
                    </div>
