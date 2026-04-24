@@ -477,22 +477,22 @@ const FeeReports = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
               <div>
                 <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Earnings History</h3>
-                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', tableLayout: 'fixed' }}>
                        <thead style={{ backgroundColor: '#f8fafc' }}>
                          <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.4rem 0.6rem' }}>Description</th>
-                            <th style={{ padding: '0.4rem 0.6rem', textAlign: 'right' }}>Amount</th>
+                            <th style={{ padding: '0.4rem 0.6rem', width: '70%' }}>Description</th>
+                            <th style={{ padding: '0.4rem 0.6rem', width: '30%', textAlign: 'right' }}>Amount</th>
                          </tr>
                       </thead>
                       <tbody>
                         {financeData.shares.map(s => (
                              <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.4rem 0.6rem' }}>
+                                <td style={{ padding: '0.4rem 0.6rem', wordBreak: 'break-word', whiteSpace: 'normal' }}>
                                    <div style={{ fontWeight: 600 }}>{s.description}</div>
                                    <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{s.date}</div>
                                 </td>
-                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, whiteSpace: 'nowrap' }}>₹{s.amount.toLocaleString()}</td>
+                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, verticalAlign: 'top' }}>₹{s.amount.toLocaleString()}</td>
                              </tr>
                         ))}
                       </tbody>
@@ -502,22 +502,22 @@ const FeeReports = () => {
 
               <div>
                 <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Recent Payments Record</h3>
-                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', tableLayout: 'fixed' }}>
                       <thead style={{ backgroundColor: '#f8fafc' }}>
                          <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.4rem 0.6rem' }}>Payment Info</th>
-                            <th style={{ padding: '0.4rem 0.6rem', textAlign: 'right' }}>Amount</th>
+                            <th style={{ padding: '0.4rem 0.6rem', width: '70%' }}>Payment Info</th>
+                            <th style={{ padding: '0.4rem 0.6rem', width: '30%', textAlign: 'right' }}>Amount</th>
                          </tr>
                       </thead>
                       <tbody>
                         {financeData.payments.map(p => (
                              <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.4rem 0.6rem' }}>
+                                <td style={{ padding: '0.4rem 0.6rem', wordBreak: 'break-word', whiteSpace: 'normal' }}>
                                    <div style={{ fontWeight: 600 }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
                                    <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{p.date}</div>
                                 </td>
-                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, color: 'var(--success-green)', whiteSpace: 'nowrap' }}>- ₹{p.amount.toLocaleString()}</td>
+                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, color: 'var(--success-green)', verticalAlign: 'top' }}>- ₹{p.amount.toLocaleString()}</td>
                              </tr>
                         ))}
                       </tbody>
