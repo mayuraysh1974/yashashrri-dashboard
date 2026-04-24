@@ -344,26 +344,20 @@ const TeacherManagement = () => {
                     <button className="btn-primary" onClick={handleAddShare} style={{ marginTop: '0.5rem' }}>Add Entitlement</button>
                 </div>
                 
-                <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', tableLayout: 'fixed' }}>
-                       <thead style={{ backgroundColor: '#f8fafc' }}>
-                         <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.4rem 0.6rem', width: '70%' }}>Description</th>
-                            <th style={{ padding: '0.4rem 0.6rem', width: '30%', textAlign: 'right' }}>Amount</th>
-                         </tr>
-                      </thead>
-                      <tbody>
-                        {financeData.shares.map(s => (
-                             <tr key={s.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.4rem 0.6rem', wordBreak: 'break-word', whiteSpace: 'normal' }}>
-                                   <div style={{ fontWeight: 600 }}>{s.description}</div>
-                                   <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{s.date}</div>
-                                </td>
-                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, verticalAlign: 'top' }}>₹{s.amount.toLocaleString()}</td>
-                             </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0.8rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+                        <span>Description</span>
+                        <span>Amount</span>
+                    </div>
+                    {financeData.shares.map(s => (
+                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '1rem' }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{s.description}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{s.date}</div>
+                            </div>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1A237E', whiteSpace: 'nowrap' }}>₹{s.amount.toLocaleString()}</div>
+                        </div>
+                    ))}
                 </div>
               </div>
 
@@ -401,26 +395,20 @@ const TeacherManagement = () => {
                     <button className="btn-primary" onClick={handleAddPayment} style={{ marginTop: '0.5rem', backgroundColor: 'var(--success-green)' }}>Confirm Payment</button>
                 </div>
 
-                <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', tableLayout: 'fixed' }}>
-                      <thead style={{ backgroundColor: '#f8fafc' }}>
-                         <tr style={{ textAlign: 'left' }}>
-                            <th style={{ padding: '0.4rem 0.6rem', width: '70%' }}>Payment Info</th>
-                            <th style={{ padding: '0.4rem 0.6rem', width: '30%', textAlign: 'right' }}>Amount</th>
-                         </tr>
-                      </thead>
-                      <tbody>
-                        {financeData.payments.map(p => (
-                            <tr key={p.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '0.4rem 0.6rem' }}>
-                                   <div style={{ fontWeight: 600 }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
-                                   <div style={{ fontSize: '0.65rem', color: '#64748B' }}>{p.date}</div>
-                                </td>
-                                <td style={{ padding: '0.4rem 0.6rem', textAlign: 'right', fontWeight: 700, color: 'var(--success-green)', whiteSpace: 'nowrap' }}>- ₹{p.amount.toLocaleString()}</td>
-                            </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0.8rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
+                        <span>Payment Info</span>
+                        <span>Amount</span>
+                    </div>
+                    {financeData.payments.map(p => (
+                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '1rem' }}>
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
+                                <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{p.date}</div>
+                            </div>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--success-green)', whiteSpace: 'nowrap' }}>- ₹{p.amount.toLocaleString()}</div>
+                        </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -451,7 +439,7 @@ const TeacherManagement = () => {
           .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; }
         }
         .responsive-grid { display: grid; gap: 1rem; }
-        .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
       `}</style>
 
       {showModal && (
