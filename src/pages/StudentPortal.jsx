@@ -72,38 +72,42 @@ const StudentPortal = () => {
     const sortedNotes = notes.sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0));
     setLibrary(sortedNotes);
 
-    // DEBUG: Fetch one record to see structure
-    const { data: debugData } = await supabase.from('fees').select('*').limit(1);
-    console.log("DEBUG FEES STRUCTURE:", debugData);
-    if (debugData && debugData.length > 0) {
-      setError("Debug: found record with student_id: " + debugData[0].student_id + " vs searching for: " + studentData.id);
+    // Fetch Payments
+    const { data: payHistory, error: feeErr } = await supabase
+      .from('fees')
+      .select('*')
+      .eq('student_id', studentData.id)
+      .order('payment_date', { ascending: false });
+    
+    const { data: onlineHistory } = await supabase
+      .from('online_payments')
+      .select('*')
+      .eq('student_name', studentData.name)
+      .order('created_at', { ascending: false });
+
+    // Combine both sources to ensure nothing is missed
+    let merged = [...(payHistory || [])];
+    
+    // Add online payments if they don't already exist in fees (prevent duplicates)
+    if (onlineHistory) {
+      onlineHistory.forEach(op => {
+        const exists = merged.some(p => p.remarks === op.transaction_id || p.id === op.id);
+        if (!exists) {
+          merged.push({
+            id: op.id || op.transaction_id,
+            payment_date: op.created_at,
+            payment_mode: 'Online (Portal)',
+            remarks: op.transaction_id,
+            amount_paid: op.amount,
+            status: op.status
+          });
+        }
+      });
     }
 
-    // Fetch Payments (Try fees first, which requires RLS permissions)
-    const { data: payHistory, error: feeErr } = await supabase.from('fees').select('*').eq('student_id', studentData.id).order('payment_date', { ascending: false });
-    
-    // Fetch Online Payments as a fallback (usually has public access)
-    const { data: onlineHistory } = await supabase.from('online_payments').select('*').eq('student_name', studentData.name).order('created_at', { ascending: false });
-
-    if (feeErr) {
-      console.error("Fee fetch error:", feeErr);
-      setError("Fee fetch error: " + feeErr.message);
-    }
-    
-    // Merge them if fees is empty (due to RLS blocking or no data)
-    let mergedPayments = payHistory || [];
-    if (mergedPayments.length === 0 && onlineHistory && onlineHistory.length > 0) {
-      mergedPayments = onlineHistory.map(op => ({
-         id: op.id || op.transaction_id,
-         payment_date: op.created_at,
-         payment_mode: 'Online (Portal)',
-         remarks: op.transaction_id,
-         amount_paid: op.amount,
-         status: op.status
-      }));
-    }
-    
-    setPayments(mergedPayments);
+    // Final sort by date
+    merged.sort((a, b) => new Date(b.payment_date || 0) - new Date(a.payment_date || 0));
+    setPayments(merged);
   };
 
   const handleLogin = async (e) => {
