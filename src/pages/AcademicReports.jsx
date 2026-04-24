@@ -179,7 +179,32 @@ const AcademicReports = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    // 1. Determine orientation based on data volume
+    // If it's a monthly report or a student with many tests, landscape is better.
+    const isLandscape = activeTab === 'monthly' || (studentStats.progress && studentStats.progress.length > 8);
+    
+    // 2. Inject a dynamic style tag for the @page orientation
+    const styleId = 'dynamic-print-style';
+    let styleTag = document.getElementById(styleId);
+    if (!styleTag) {
+      styleTag = document.createElement('style');
+      styleTag.id = styleId;
+      document.head.appendChild(styleTag);
+    }
+    
+    styleTag.innerHTML = `
+      @media print {
+        @page { 
+          size: A4 ${isLandscape ? 'landscape' : 'portrait'}; 
+          margin: 10mm; 
+        }
+      }
+    `;
+    
+    // 3. Trigger print
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const PrintHeader = ({ title, subTitle, studentDetails }) => (
@@ -655,7 +680,9 @@ const AcademicReports = () => {
           .no-print { display: none !important; }
           .print-only { display: block !important; }
           
-          /* Fix overflow clipping on report wrapper containers */
+          /* Auto-fit and Scaling */
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          
           .report-content-area,
           .student-report-wrapper,
           .student-report-container {
@@ -663,6 +690,7 @@ const AcademicReports = () => {
             height: auto !important;
             position: static !important;
             width: 100% !important;
+            max-width: 100% !important;
           }
 
           .app-layout { padding: 0 !important; }
