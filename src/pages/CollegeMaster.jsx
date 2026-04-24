@@ -20,7 +20,7 @@ const CollegeMaster = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.name) return alert('College Name is required');
+    if (!formData.name) return alert('School/College Name is required');
     let error;
     if (editMode) {
       ({ error } = await supabase.from('colleges').update({ name: formData.name }).eq('id', formData.id));
@@ -28,7 +28,7 @@ const CollegeMaster = () => {
       ({ error } = await supabase.from('colleges').insert({ name: formData.name }));
     }
     if (error) {
-      alert('Failed to save college: ' + error.message);
+      alert('Failed to save record: ' + error.message);
     } else {
       setShowModal(false);
       setEditMode(false);
@@ -38,7 +38,7 @@ const CollegeMaster = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this college? It will clear the college link from all associated students.')) return;
+    if (!window.confirm('Delete this record? It will clear the institutional link from all associated students.')) return;
     const { error } = await supabase.from('colleges').delete().eq('id', id);
     if (!error) fetchColleges();
   };
@@ -47,11 +47,11 @@ const CollegeMaster = () => {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="page-header">
         <div>
-          <h1 className="page-title">College Master</h1>
-          <p className="page-subtitle">Define the colleges associated with your students</p>
+          <h1 className="page-title">School/College Master</h1>
+          <p className="page-subtitle">Define the educational institutions associated with your students</p>
         </div>
         <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: null, name: '' }); setShowModal(true); }}>
-          <FiPlus /> New College
+          <FiPlus /> New School/College
         </button>
       </div>
 
@@ -59,7 +59,7 @@ const CollegeMaster = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border-color)' }}>
-              <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>College Name</th>
+              <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>School/College Name</th>
               <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
             </tr>
           </thead>
@@ -88,18 +88,18 @@ const CollegeMaster = () => {
         <div className="modal-overlay">
           <div className="card-base" style={{ width: '100%', maxWidth: '500px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)', borderTop: '4px solid var(--accent-gold)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>{editMode ? 'Edit College' : 'Add College'}</h2>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>{editMode ? 'Edit School/College' : 'Add School/College'}</h2>
               <button onClick={() => setShowModal(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
             </div>
             
             <div className="input-group" style={{ marginBottom: '2rem' }}>
-              <label>College Name</label>
+              <label>School/College Name</label>
               <input type="text" placeholder="e.g. Fergusson College" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
               <button className="btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-              <button className="btn-primary" onClick={handleSave}>Save College</button>
+              <button className="btn-primary" onClick={handleSave}>Save Record</button>
             </div>
           </div>
         </div>

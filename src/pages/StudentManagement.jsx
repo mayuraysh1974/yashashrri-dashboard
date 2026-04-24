@@ -267,7 +267,7 @@ const StudentManagement = () => {
     });
 
   const exportToCSV = () => {
-    const headers = ['Student ID', 'Name', 'Standard', 'College Name', 'Parent Name', 'Parent Phone', 'Student Phone', 'Fees Paid', 'Balance', 'Status', 'Address'];
+    const headers = ['Student ID', 'Name', 'Standard', 'School/College Name', 'Parent Name', 'Parent Phone', 'Student Phone', 'Fees Paid', 'Balance', 'Status', 'Address'];
     const csvRows = [headers.join(',')];
     filteredStudents.forEach(s => {
       const row = [
@@ -320,7 +320,7 @@ const StudentManagement = () => {
         
         <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
           <select value={collegeFilter} onChange={(e) => setCollegeFilter(e.target.value)} style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-main)', fontSize: '0.8rem' }}>
-             <option value="">All Colleges</option>
+             <option value="">All Schools/Colleges</option>
              {colleges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
 
@@ -340,7 +340,7 @@ const StudentManagement = () => {
                 <th style={{ padding: '1rem' }}>Student Details</th>
                 <th style={{ padding: '1rem' }}>Parent Contact</th>
                 <th style={{ padding: '1rem' }}>Standard</th>
-                <th style={{ padding: '1rem' }}>College</th>
+                <th style={{ padding: '1rem' }}>School/College</th>
                 <th style={{ padding: '1rem', textAlign: 'right' }}>Balance</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
@@ -450,12 +450,12 @@ const StudentManagement = () => {
                       </select>
                     </div>
                     <div className="input-group">
-                      <label>College Name</label>
+                      <label>School/College Name</label>
                       <select 
                         value={formData.collegeId || ''} 
                         onChange={e => setFormData({...formData, collegeId: e.target.value})}
                       >
-                        <option value="">No College</option>
+                        <option value="">No School/College</option>
                         {colleges.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </div>
@@ -616,7 +616,7 @@ const StudentManagement = () => {
                     <h1 style={{ fontSize: '1.75rem', marginBottom: '0.4rem' }}>{showProfile.name}</h1>
                     <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                        <span><strong>Standard:</strong> {showProfile.standard}</span>
-                       <span><strong>College:</strong> {showProfile.collegeName || 'N/A'}</span>
+                       <span><strong>School/College:</strong> {showProfile.collegeName || 'N/A'}</span>
                        <span><strong>ID:</strong> {showProfile.id}</span>
                     </div>
                  </div>
