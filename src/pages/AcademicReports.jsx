@@ -178,7 +178,7 @@ const AcademicReports = () => {
       setLoading(false);
     }
   };
-
+  const handlePrint = () => {
     // 1. Use the manually selected orientation
     const isLandscape = printOrientation === 'landscape';
     
