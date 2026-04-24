@@ -194,8 +194,8 @@ const AcademicReports = () => {
     styleTag.innerHTML = `
       @media print {
         @page { 
-          size: A4 ${isLandscape ? 'landscape' : 'portrait'}; 
-          margin: 10mm; 
+          size: A4 ${isLandscape ? 'landscape' : 'portrait'} !important; 
+          margin: 10mm !important; 
         }
       }
     `;
@@ -688,10 +688,8 @@ const AcademicReports = () => {
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         @media print {
-          @page { 
-            size: A4 portrait; 
-            margin: 10mm; 
-          }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
           
           body, html { 
             background: white !important;
