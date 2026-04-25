@@ -38,10 +38,11 @@ const StudentPortal = () => {
   }, []);
 
   const fetchAllData = async (studentData) => {
-    // Fetch Enrolled Subjects with Entrance status
+    // Fetch Enrolled Subjects and All Subjects for robust matching
+    const { data: allSubjects } = await supabase.from('subjects').select('*');
     const { data: enrolled } = await supabase
       .from('student_subjects')
-      .select('subject_id, is_entrance, subjects(name)')
+      .select('subject_id, is_entrance')
       .eq('student_id', studentData.id);
     
         // Combine Results with Solution access logic
@@ -59,7 +60,8 @@ const StudentPortal = () => {
             let hasSolutionAccess = true;
             if (t.test_type === 'CET') {
               const hasEntranceOpted = enrolled?.some(es => {
-                const enrolledSubName = es.subjects?.name?.toLowerCase();
+                const subDetail = allSubjects?.find(s => s.id === es.subject_id);
+                const enrolledSubName = subDetail?.name?.toLowerCase();
                 if (!enrolledSubName) return false;
                 
                 return testSubjects.some(ts => {
