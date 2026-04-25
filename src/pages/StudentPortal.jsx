@@ -38,12 +38,13 @@ const StudentPortal = () => {
   }, []);
 
   const fetchAllData = async (studentData) => {
-    // Fetch Enrolled Subjects and All Subjects for robust matching
-    const { data: allSubjects } = await supabase.from('subjects').select('*');
+    // Fetch Enrolled Subjects
     const { data: enrolled } = await supabase
       .from('student_subjects')
-      .select('subject_id, is_entrance')
+      .select('is_entrance')
       .eq('student_id', studentData.id);
+    
+    const isEntranceStudent = enrolled?.some(es => es.is_entrance) || false;
     
         // Combine Results with Solution access logic
         const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
@@ -51,28 +52,15 @@ const StudentPortal = () => {
         
         if (tests) {
           setResults(tests.map(t => {
-            // Handle subjects (array or string)
-            const testSubjects = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
             const studentMark = marks?.find(m => m.test_id === t.id);
             const score = studentMark?.score || 'N/A';
             const isCompleted = studentMark !== undefined;
 
             let hasSolutionAccess = true;
             if (t.test_type === 'CET') {
-              const hasEntranceOpted = enrolled?.some(es => {
-                const subDetail = allSubjects?.find(s => s.id === es.subject_id);
-                const enrolledSubName = subDetail?.name?.toLowerCase();
-                if (!enrolledSubName) return false;
-                
-                return testSubjects.some(ts => {
-                  const testSubName = ts?.toLowerCase() || '';
-                  return testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName);
-                }) && es.is_entrance;
-              });
-              
-              // Access is granted if student is Entrance track OR if test is marked Completed (date passed or marks recorded)
+              // ACCESS GRANTED if they are an Entrance student AND (test is past OR marks are recorded)
               const isPast = new Date(t.date) < new Date();
-              hasSolutionAccess = (hasEntranceOpted && (isPast || isCompleted)) || false;
+              hasSolutionAccess = isEntranceStudent && (isPast || isCompleted);
             }
 
             return {
