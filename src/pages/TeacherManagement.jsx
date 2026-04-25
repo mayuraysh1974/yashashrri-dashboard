@@ -108,6 +108,39 @@ const TeacherManagement = () => {
     setShowFinanceModal(true);
   };
 
+  const handleLedgerPrint = () => {
+    // Temporarily unlock all scroll-constrained elements so print captures everything
+    const modal = document.getElementById('ledger-modal-card');
+    const scrollables = document.querySelectorAll('.scrollable-print-content');
+    const origModalMaxH = modal ? modal.style.maxHeight : null;
+    const origModalOvY = modal ? modal.style.overflowY : null;
+    const origStyles = [];
+
+    if (modal) {
+      modal.style.maxHeight = 'none';
+      modal.style.overflowY = 'visible';
+    }
+    scrollables.forEach(el => {
+      origStyles.push({ el, maxHeight: el.style.maxHeight, overflowY: el.style.overflowY });
+      el.style.maxHeight = 'none';
+      el.style.overflowY = 'visible';
+    });
+
+    window.print();
+
+    // Restore after print dialog closes
+    setTimeout(() => {
+      if (modal) {
+        modal.style.maxHeight = origModalMaxH;
+        modal.style.overflowY = origModalOvY;
+      }
+      origStyles.forEach(({ el, maxHeight, overflowY }) => {
+        el.style.maxHeight = maxHeight;
+        el.style.overflowY = overflowY;
+      });
+    }, 1000);
+  };
+
   const handleAddShare = async () => {
     if (!shareForm.amount || !shareForm.description) return alert('Amount and description required');
     const { error } = await supabase.from('teacher_shares').insert({
@@ -292,9 +325,9 @@ const TeacherManagement = () => {
       {/* Finance Ledger Modal */}
       {showFinanceModal && selectedTeacher && (
         <div className="modal-overlay">
-          <div className="card-base" style={{ width: '95%', maxWidth: '1000px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}>
+          <div id="ledger-modal-card" className="card-base" style={{ width: '95%', maxWidth: '1000px', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}>
             <div className="no-print" style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 50 }}>
-               <button className="btn-secondary" onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}><FiPrinter /> Print Ledger</button>
+               <button className="btn-secondary" onClick={handleLedgerPrint} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem' }}><FiPrinter /> Print Ledger</button>
                <button onClick={() => setShowFinanceModal(false)} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', cursor: 'pointer', boxShadow: 'var(--shadow-sm)' }}><FiX /></button>
             </div>
             
@@ -344,7 +377,7 @@ const TeacherManagement = () => {
                     <button className="btn-primary" onClick={handleAddShare} style={{ marginTop: '0.5rem' }}>Add Entitlement</button>
                 </div>
                 
-                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white' }}>
+                <div className="scrollable-print-content" style={{ border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white', maxHeight: '300px', overflowY: 'auto' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0.8rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
                         <span>Description</span>
                         <span>Amount</span>
@@ -395,7 +428,7 @@ const TeacherManagement = () => {
                     <button className="btn-primary" onClick={handleAddPayment} style={{ marginTop: '0.5rem', backgroundColor: 'var(--success-green)' }}>Confirm Payment</button>
                 </div>
 
-                <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white' }}>
+                <div className="scrollable-print-content" style={{ border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '1rem', backgroundColor: 'white', maxHeight: '300px', overflowY: 'auto' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.6rem 0.8rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-color)', fontSize: '0.75rem', fontWeight: 800, color: '#64748B', textTransform: 'uppercase' }}>
                         <span>Payment Info</span>
                         <span>Amount</span>
@@ -437,6 +470,7 @@ const TeacherManagement = () => {
           table { width: 100% !important; border: 1px solid #ddd !important; }
           th { -webkit-print-color-adjust: exact; }
           .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; height: auto !important; overflow: visible !important; }
+          .scrollable-print-content { maxHeight: none !important; height: auto !important; overflow: visible !important; }
         }
         .responsive-grid { display: grid; gap: 1rem; }
         .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
