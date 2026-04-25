@@ -182,14 +182,32 @@ const TestScheduler = () => {
 
       if (isCETTest) {
         // Must have entrance opted for ALL subjects of this test
-        return testSubjects.every(testSub => 
-          studentSubMatches.some(ss => ss.name === testSub && ss.isEntrance)
-        );
+        return testSubjects.every(testSub => {
+          const tSubLower = testSub?.toLowerCase();
+          return studentSubMatches.some(ss => {
+            const sSubLower = ss.name?.toLowerCase();
+            if (!sSubLower || !tSubLower) return false;
+            
+            // Smart match: direct, partial, or root-word overlap
+            const isMatch = tSubLower.includes(sSubLower) || sSubLower.includes(tSubLower) || (() => {
+              const sWords = sSubLower.split(/[\s,]+/).filter(w => w.length > 3);
+              const tWords = tSubLower.split(/[\s,]+/).filter(w => w.length > 3);
+              return sWords.some(sw => tWords.some(tw => tw.startsWith(sw.substring(0, 4)) || sw.startsWith(tw.substring(0, 4))));
+            })();
+
+            return isMatch && ss.isEntrance;
+          });
+        });
       } else {
         // Standard test: Must be enrolled in ANY of the subjects
-        return testSubjects.some(testSub => 
-          studentSubMatches.some(ss => ss.name === testSub)
-        );
+        return testSubjects.some(testSub => {
+          const tSubLower = testSub?.toLowerCase();
+          return studentSubMatches.some(ss => {
+            const sSubLower = ss.name?.toLowerCase();
+            if (!sSubLower || !tSubLower) return false;
+            return tSubLower.includes(sSubLower) || sSubLower.includes(tSubLower);
+          });
+        });
       }
     });
 
