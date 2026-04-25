@@ -239,8 +239,24 @@ const TestScheduler = () => {
           <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No tests scheduled yet. Click 'New Test' to create one.</p>
         ) : tests.map(test => {
           const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
+          const isCET = test.test_type === 'CET';
           return (
-            <div key={test.id} className="card-base" style={{ padding: '2rem', position: 'relative', display: 'flex', flexDirection: 'column', borderTop: `6px solid ${isPast ? '#94A3B8' : '#B8860B'}`, transition: 'transform 0.2s', cursor: 'default' }}>
+            <div 
+              key={test.id} 
+              className="card-base animate-in" 
+              style={{ 
+                padding: '2rem', 
+                position: 'relative', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                borderTop: isCET ? '6px solid #B8860B' : `6px solid ${isPast ? '#94A3B8' : '#1A237E'}`,
+                borderLeft: isCET ? '6px solid #B8860B' : 'none',
+                backgroundColor: isCET ? '#FFFDF5' : 'white',
+                boxShadow: isCET ? '0 8px 20px rgba(184, 134, 11, 0.12)' : 'var(--shadow-sm)',
+                transition: 'transform 0.2s', 
+                cursor: 'default' 
+              }}
+            >
               <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem' }}>
                  <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'white' }} onClick={() => sendTestAlert(test)} title="Send Alert">
                    <FiBell size={14} color="#1A237E" />
@@ -253,16 +269,31 @@ const TestScheduler = () => {
                  </button>
               </div>
               
-              <div style={{ marginBottom: '1.25rem' }}>
+              <div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : '#FFF9E6', color: isPast ? '#64748B' : '#B8860B' }}>
                       {isPast ? 'COMPLETED' : 'UPCOMING'}
                     </span>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: test.test_type === 'CET' ? '#E0F2FE' : '#F1F5F9', color: test.test_type === 'CET' ? '#0369A1' : '#64748B' }}>
-                      {test.test_type === 'CET' ? 'CET / Entrance' : 'Board Syllabus'}
+                    <span style={{ 
+                      fontSize: '0.65rem', 
+                      fontWeight: 900, 
+                      textTransform: 'uppercase', 
+                      padding: '0.25rem 0.6rem', 
+                      borderRadius: '4px', 
+                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : '#F1F5F9', 
+                      color: isCET ? 'white' : '#64748B',
+                      boxShadow: isCET ? '0 2px 4px rgba(184, 134, 11, 0.2)' : 'none'
+                    }}>
+                      {isCET ? 'CET / ENTRANCE' : 'BOARD SYLLABUS'}
                     </span>
                  </div>
-                 <h3 style={{ fontSize: '1.35rem', color: '#1A237E', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>{test.name}</h3>
+                 <h3 style={{ 
+                    fontSize: '1.35rem', 
+                    color: isCET ? '#78350F' : '#1A237E', 
+                    fontWeight: 800, 
+                    margin: 0, 
+                    lineHeight: 1.2 
+                  }}>{test.name}</h3>
                  <p style={{ color: '#64748B', fontWeight: 600, fontSize: '0.85rem', marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                    <FiCalendar color="#B8860B" /> {new Date(test.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                  </p>
@@ -297,9 +328,24 @@ const TestScheduler = () => {
                  <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }} onClick={() => navigate('/academic-reports')}>
                     <FiBarChart2 /> Report
                  </button>
-                 <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', background: '#1A237E', color: 'white', border: 'none', padding: '0.5rem' }} onClick={() => openResultEntry(test)}>
-                    <FiCheckCircle /> Record Marks
-                 </button>
+                  <button 
+                    className="btn-primary" 
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      gap: '0.4rem', 
+                      fontSize: '0.8rem', 
+                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : '#1A237E', 
+                      color: 'white', 
+                      border: 'none', 
+                      padding: '0.5rem',
+                      boxShadow: isCET ? '0 4px 10px rgba(184, 134, 11, 0.25)' : 'none'
+                    }} 
+                    onClick={() => openResultEntry(test)}
+                  >
+                     <FiCheckCircle /> Record Marks
+                  </button>
               </div>
             </div>
           );
