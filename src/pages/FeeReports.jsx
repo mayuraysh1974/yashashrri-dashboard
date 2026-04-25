@@ -471,11 +471,11 @@ const FeeReports = () => {
           .no-print { display: none !important; }
           .print-header { display: block !important; }
           .print-only { display: block !important; }
-          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; }
-          body { background: white !important; }
-          .app-layout { padding: 0 !important; }
-          .main-workspace { padding: 0 !important; }
-          .content-area { padding: 0 !important; position: static !important; }
+          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; height: auto !important; overflow: visible !important; }
+          body { background: white !important; height: auto !important; overflow: visible !important; }
+          .app-layout { padding: 0 !important; height: auto !important; overflow: visible !important; }
+          .main-workspace { padding: 0 !important; height: auto !important; overflow: visible !important; }
+          .content-area { padding: 0 !important; position: static !important; height: auto !important; overflow: visible !important; }
           table { width: 100% !important; border: 1px solid #ddd !important; }
           th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; }
           tfoot tr { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }

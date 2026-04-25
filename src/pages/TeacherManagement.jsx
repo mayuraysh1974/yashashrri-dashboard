@@ -429,14 +429,14 @@ const TeacherManagement = () => {
           .no-print { display: none !important; }
           .print-header { display: block !important; }
           .print-only { display: block !important; }
-          .card-base { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; margin: 0 !important; }
-          body { background: white !important; }
-          .app-layout { padding: 0 !important; }
-          .main-workspace { padding: 0 !important; }
-          .content-area { padding: 0 !important; position: static !important; }
+          .card-base { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; margin: 0 !important; height: auto !important; overflow: visible !important; }
+          body { background: white !important; height: auto !important; overflow: visible !important; }
+          .app-layout { padding: 0 !important; height: auto !important; overflow: visible !important; }
+          .main-workspace { padding: 0 !important; height: auto !important; overflow: visible !important; }
+          .content-area { padding: 0 !important; position: static !important; height: auto !important; overflow: visible !important; }
           table { width: 100% !important; border: 1px solid #ddd !important; }
           th { -webkit-print-color-adjust: exact; }
-          .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; }
+          .modal-overlay { position: static !important; padding: 0 !important; background: transparent !important; height: auto !important; overflow: visible !important; }
         }
         .responsive-grid { display: grid; gap: 1rem; }
         .responsive-grid-2col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }

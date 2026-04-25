@@ -426,9 +426,9 @@ const AttendanceReports = () => {
           .no-print { display: none !important; }
           .print-header { display: block !important; }
           .print-only { display: block !important; }
-          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; }
-          body { background: white !important; }
-          .content-area { padding: 0 !important; position: static !important; }
+          .card-base { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important; height: auto !important; overflow: visible !important; }
+          body { background: white !important; height: auto !important; overflow: visible !important; }
+          .content-area { padding: 0 !important; position: static !important; height: auto !important; overflow: visible !important; }
           table { width: 100% !important; border: 1px solid #ddd !important; }
           th { background-color: #1A237E !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
