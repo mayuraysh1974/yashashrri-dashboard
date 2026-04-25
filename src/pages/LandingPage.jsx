@@ -472,6 +472,19 @@ const LandingPage = ({ isAuthenticated }) => {
               </div>
             </div>
           </div>
+          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
+            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
+            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              "I Dhruv Ashish Taras, am pleased to share my positive experience with Yashashrri Classes. Being a part of this institute has truly helped me grow academically and build confidence in my studies. The teaching methods are clear, structured, and focused on concept understanding rather than just memorization. I would especially like to thank Mayuraysh Sir, whose dedication, guidance, and supportive nature made learning both effective and enjoyable. His way of explaining even difficult topics in a simple manner has been extremely helpful. Also the weekly tests that are conducted help students test their knowledge and confidence. I highly recommend Yashashrri Classes to any student looking for quality education and a motivating learning environment."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.75rem' }}>DT</div>
+              <div>
+                <h4 style={{ margin: 0, color: '#1A237E' }}>Dhruv Ashish Taras</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>Student</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
