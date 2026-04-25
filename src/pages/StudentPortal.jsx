@@ -58,9 +58,18 @@ const StudentPortal = () => {
             let hasSolutionAccess = true;
             if (t.test_type === 'CET') {
               // Check if student has is_entrance=true for ANY of the subjects in this test
-              const hasEntranceOpted = enrolled?.some(es => 
-                testSubjects.includes(es.subjects?.name) && es.is_entrance
-              );
+              // Using fuzzy matching to handle prefixes like "XII " or suffixes like " with entrance"
+              const hasEntranceOpted = enrolled?.some(es => {
+                const enrolledSubName = es.subjects?.name?.toLowerCase();
+                if (!enrolledSubName) return false;
+                
+                return testSubjects.some(ts => {
+                  const testSubName = ts?.toLowerCase();
+                  if (!testSubName) return false;
+                  // Match if either contains the other (e.g. "Maths" vs "XII Maths with entrance")
+                  return testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName);
+                }) && es.is_entrance;
+              });
               hasSolutionAccess = hasEntranceOpted || false;
             }
 
