@@ -64,7 +64,7 @@ const StudentManagement = () => {
   const fetchStudents = async () => {
     const { data } = await supabase
       .from('students')
-      .select('*, colleges(name), student_subjects(subject_id)')
+      .select('*, colleges(name), student_subjects(subject_id, is_entrance)')
       .order('name');
     
     if (data) {
@@ -518,7 +518,10 @@ const StudentManagement = () => {
                                  e.preventDefault();
                                  const newEnrolled = isSelected 
                                    ? formData.enrolledSubjects.filter(es => es.subject_id !== s.id)
-                                   : [...(formData.enrolledSubjects || []), { subject_id: s.id, is_entrance: false }];
+                                   : [...(formData.enrolledSubjects || []), { 
+                                       subject_id: s.id, 
+                                       is_entrance: s.name.toLowerCase().includes('entrance') 
+                                     }];
                                  setFormData({
                                    ...formData, 
                                    enrolledSubjects: newEnrolled, 
