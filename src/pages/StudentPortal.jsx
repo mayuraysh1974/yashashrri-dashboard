@@ -37,39 +37,24 @@ const StudentPortal = () => {
     }
   }, []);
 
-  const fetchAllData = async (studentData) => {
-    // Fetch Enrolled Subjects
-    const { data: enrolled } = await supabase
-      .from('student_subjects')
-      .select('is_entrance')
-      .eq('student_id', studentData.id);
+    // Fetch Results
+    const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
+    const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
     
-    const isEntranceStudent = enrolled?.some(es => es.is_entrance) || false;
-    
-        // Combine Results with Solution access logic
-        const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
-        const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
-        
-        if (tests) {
-          setResults(tests.map(t => {
-            const studentMark = marks?.find(m => m.test_id === t.id);
-            const score = studentMark?.score || 'N/A';
-            const isCompleted = studentMark !== undefined;
+    if (tests) {
+      setResults(tests.map(t => {
+        const studentMark = marks?.find(m => m.test_id === t.id);
+        const score = studentMark?.score || 'N/A';
+        const isCompleted = studentMark !== undefined;
+        const isPast = new Date(t.date) < new Date();
 
-            let hasSolutionAccess = true;
-            if (t.test_type === 'CET') {
-              // ACCESS GRANTED if they are an Entrance student AND (test is past OR marks are recorded)
-              const isPast = new Date(t.date) < new Date();
-              hasSolutionAccess = isEntranceStudent && (isPast || isCompleted);
-            }
-
-            return {
-              ...t,
-              score,
-              hasSolutionAccess
-            };
-          }));
-        }
+        return {
+          ...t,
+          score,
+          hasSolutionAccess: isPast || isCompleted
+        };
+      }));
+    }
 
     // Fetch Library (Notes)
     const { data: allNotes } = await supabase.from('library_resources').select('*');
@@ -373,11 +358,6 @@ const StudentPortal = () => {
                                }}>
                                   <FiDownload size={12} /> Key
                                </a>
-                            )}
-                            {test.solution_url && !test.hasSolutionAccess && test.test_type === 'CET' && (
-                              <div title="Solution restricted to Entrance students" style={{ color: '#94A3B8', fontSize: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.2rem', fontWeight: 600 }}>
-                                <FiLock size={10} /> CET Restricted
-                              </div>
                             )}
                           </div>
                        </div>

@@ -548,20 +548,6 @@ const TestScheduler = () => {
                       <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span>{res.studentName}</span>
-                          {activeTest?.test_type === 'CET' && res.isEntrance && (
-                            <span style={{ 
-                              fontSize: '0.6rem', 
-                              padding: '2px 8px', 
-                              borderRadius: '4px', 
-                              backgroundColor: '#F0F9FF', 
-                              color: '#0369A1',
-                              border: '1px solid #BAE6FD',
-                              fontWeight: 800,
-                              letterSpacing: '0.5px'
-                            }}>
-                              CET TRACK
-                            </span>
-                          )}
                         </div>
                       </td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>

@@ -554,22 +554,6 @@ const StudentManagement = () => {
                               <span style={{ fontSize: '0.7rem', opacity: isSelected ? 0.9 : 0.6 }}>₹{s.fees}</span>
                               {isSelected && <FiCheckCircle size={14} />}
                             </button>
-                            {isSelected && s.name.toLowerCase().includes('entrance') && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingLeft: '0.5rem' }}>
-                                <input 
-                                  type="checkbox" 
-                                  id={`ent-${s.id}`}
-                                  checked={enrolledSub.is_entrance} 
-                                  onChange={(e) => {
-                                    const newEnrolled = formData.enrolledSubjects.map(es => 
-                                      es.subject_id === s.id ? { ...es, is_entrance: e.target.checked } : es
-                                    );
-                                    setFormData({ ...formData, enrolledSubjects: newEnrolled });
-                                  }}
-                                />
-                                <label htmlFor={`ent-${s.id}`} style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary-blue)', margin: 0, cursor: 'pointer' }}>Include Entrance (CET)</label>
-                              </div>
-                            )}
                           </div>
                         );
                       })}
