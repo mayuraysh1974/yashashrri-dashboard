@@ -26,7 +26,8 @@ const StudentManagement = () => {
     id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, 
     status: 'Active', subjectIds: [], photo: null,
     parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1,
-    portal_enabled: true, portal_password: 'yash123'
+    portal_enabled: true, portal_password: 'yash123',
+    enrolledSubjects: [] // array of { subject_id, is_entrance }
   });
   const [performanceData, setPerformanceData] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -77,6 +78,7 @@ const StudentManagement = () => {
         collegeId: s.college_id || null,
         portal_enabled: s.portal_enabled ?? true,
         portal_password: s.portal_password || 'yash123',
+        enrolledSubjects: s.student_subjects ? s.student_subjects.map(ss => ({ subject_id: ss.subject_id, is_entrance: ss.is_entrance || false })) : [],
         subjectIds: s.student_subjects ? s.student_subjects.map(ss => ss.subject_id) : []
       }));
       setStudents(formatted);
@@ -166,10 +168,11 @@ const StudentManagement = () => {
       await supabase.from('student_subjects').delete().eq('student_id', formData.id);
       
       // 2. Insert new subject selections
-      if (formData.subjectIds && formData.subjectIds.length > 0) {
-        const subInserts = formData.subjectIds.map(sid => ({
+      if (formData.enrolledSubjects && formData.enrolledSubjects.length > 0) {
+        const subInserts = formData.enrolledSubjects.map(es => ({
           student_id: formData.id,
-          subject_id: sid
+          subject_id: es.subject_id,
+          is_entrance: es.is_entrance
         }));
         await supabase.from('student_subjects').insert(subInserts);
       }
@@ -244,9 +247,9 @@ const StudentManagement = () => {
     }
   };
 
-  const recalculateBalance = (subjectIds, concession, feesPaid) => {
-    const totalFees = subjectIds.reduce((sum, id) => {
-      const sub = subjects.find(x => x.id === id);
+  const recalculateBalance = (enrolledSubs, concession, feesPaid) => {
+    const totalFees = enrolledSubs.reduce((sum, es) => {
+      const sub = subjects.find(x => x.id === es.subject_id);
       return sum + (sub?.fees || 0);
     }, 0);
     return totalFees - (Number(concession) || 0) - (Number(feesPaid) || 0);
@@ -308,7 +311,7 @@ const StudentManagement = () => {
           <button className="btn-secondary" onClick={exportToCSV}><FiDownload /> Export CSV</button>
           <button className="btn-secondary" onClick={() => { setPrintMode('idcards'); setTimeout(() => window.print(), 50); }}><FiCreditCard /> Print ID Cards</button>
           <button className="btn-secondary" onClick={() => { setPrintMode('directory'); setTimeout(() => window.print(), 50); }}><FiPrinter /> Print Directory</button>
-          <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, status: 'Active', subjectIds: [], photo: null, parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1, portal_enabled: true, portal_password: 'yash123' }); setShowModal(true); }}>Add Student</button>
+          <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: '', name: '', standard: '', feesPaid: 0, balance: 0, concession: 0, status: 'Active', enrolledSubjects: [], photo: null, parentName: '', parentPhone: '', studentPhone: '', email: '', address: '', collegeId: '', installments: 1, portal_enabled: true, portal_password: 'yash123' }); setShowModal(true); }}>Add Student</button>
         </div>
       </div>
 
@@ -367,11 +370,11 @@ const StudentManagement = () => {
                   <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{s.collegeName || 'N/A'}</td>
                   <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 700, color: s.balance > 0 ? 'var(--danger-red)' : 'var(--success-green)' }}>₹{s.balance.toLocaleString()}</td>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
-                     <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
                         <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => setShowProfile(s)}><FiTrendingUp /></button>
-                        <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem' }} onClick={() => { setFormData({...s, enrolledSubjects: s.enrolledSubjects || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
                         <button className="btn-secondary" style={{ padding: '0.4rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
-                     </div>
+                      </div>
                   </td>
                 </tr>
               ))}
@@ -399,7 +402,7 @@ const StudentManagement = () => {
               
               <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
                 <button className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => setShowProfile(s)}><FiTrendingUp /> Profile</button>
-                <button className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => { setFormData({...s, subjectIds: s.subjectIds || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /> Edit</button>
+                <button className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem' }} onClick={() => { setFormData({...s, enrolledSubjects: s.enrolledSubjects || []}); setEditMode(true); setShowModal(true); }}><FiEdit2 /> Edit</button>
                 {s.parentPhone && (
                   <a href={`tel:${s.parentPhone}`} className="btn-secondary" style={{ flex: 1, fontSize: '0.75rem', padding: '0.5rem', justifyContent: 'center' }}><FiPhone /> Call</a>
                 )}
@@ -505,41 +508,59 @@ const StudentManagement = () => {
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
                       {subjects.filter(s => s.name.toLowerCase().includes(subjectSearch.toLowerCase())).map(s => {
-                        const isSelected = formData.subjectIds.includes(s.id);
+                        const enrolledSub = formData.enrolledSubjects?.find(es => es.subject_id === s.id);
+                        const isSelected = !!enrolledSub;
                         return (
-                          <button
-                            key={s.id}
-                            type="button"
-                            onClick={(e) => {
-                               e.preventDefault();
-                               const newIds = isSelected 
-                                 ? formData.subjectIds.filter(idx => idx !== s.id)
-                                 : [...formData.subjectIds, s.id];
-                               setFormData({
-                                 ...formData, 
-                                 subjectIds: newIds, 
-                                 balance: recalculateBalance(newIds, formData.concession, formData.feesPaid)
-                               });
-                            }}
-                            style={{
-                              padding: '0.4rem 0.8rem',
-                              borderRadius: '50px',
-                              border: `1px solid ${isSelected ? 'var(--primary-blue)' : 'var(--border-color)'}`,
-                              backgroundColor: isSelected ? 'var(--primary-blue)' : '#ffffff',
-                              color: isSelected ? '#ffffff' : 'var(--text-primary)',
-                              fontSize: '0.8rem',
-                              cursor: 'pointer',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.4rem',
-                              transition: 'all 0.2s',
-                              boxShadow: isSelected ? '0 2px 4px rgba(37,99,235,0.2)' : 'none'
-                            }}
-                          >
-                            <span style={{ fontWeight: isSelected ? 600 : 400 }}>{s.name}</span>
-                            <span style={{ fontSize: '0.7rem', opacity: isSelected ? 0.9 : 0.6 }}>₹{s.fees}</span>
-                            {isSelected && <FiCheckCircle size={14} />}
-                          </button>
+                          <div key={s.id} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                 e.preventDefault();
+                                 const newEnrolled = isSelected 
+                                   ? formData.enrolledSubjects.filter(es => es.subject_id !== s.id)
+                                   : [...(formData.enrolledSubjects || []), { subject_id: s.id, is_entrance: false }];
+                                 setFormData({
+                                   ...formData, 
+                                   enrolledSubjects: newEnrolled, 
+                                   balance: recalculateBalance(newEnrolled, formData.concession, formData.feesPaid)
+                                 });
+                              }}
+                              style={{
+                                padding: '0.4rem 0.8rem',
+                                borderRadius: '50px',
+                                border: `1px solid ${isSelected ? 'var(--primary-blue)' : 'var(--border-color)'}`,
+                                backgroundColor: isSelected ? 'var(--primary-blue)' : '#ffffff',
+                                color: isSelected ? '#ffffff' : 'var(--text-primary)',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                transition: 'all 0.2s',
+                                boxShadow: isSelected ? '0 2px 4px rgba(37,99,235,0.2)' : 'none'
+                              }}
+                            >
+                              <span style={{ fontWeight: isSelected ? 600 : 400 }}>{s.name}</span>
+                              <span style={{ fontSize: '0.7rem', opacity: isSelected ? 0.9 : 0.6 }}>₹{s.fees}</span>
+                              {isSelected && <FiCheckCircle size={14} />}
+                            </button>
+                            {isSelected && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingLeft: '0.5rem' }}>
+                                <input 
+                                  type="checkbox" 
+                                  id={`ent-${s.id}`}
+                                  checked={enrolledSub.is_entrance} 
+                                  onChange={(e) => {
+                                    const newEnrolled = formData.enrolledSubjects.map(es => 
+                                      es.subject_id === s.id ? { ...es, is_entrance: e.target.checked } : es
+                                    );
+                                    setFormData({ ...formData, enrolledSubjects: newEnrolled });
+                                  }}
+                                />
+                                <label htmlFor={`ent-${s.id}`} style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary-blue)', margin: 0, cursor: 'pointer' }}>Include Entrance (CET)</label>
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -552,7 +573,7 @@ const StudentManagement = () => {
                   
                   <div className="input-group">
                     <label>Applicable Concession (₹)</label>
-                    <input type="number" value={formData.concession} onChange={e => setFormData({...formData, concession: Number(e.target.value), balance: recalculateBalance(formData.subjectIds, e.target.value, formData.feesPaid)})} />
+                    <input type="number" value={formData.concession} onChange={e => setFormData({...formData, concession: Number(e.target.value), balance: recalculateBalance(formData.enrolledSubjects, e.target.value, formData.feesPaid)})} />
                   </div>
                   
                   <div className="input-group">

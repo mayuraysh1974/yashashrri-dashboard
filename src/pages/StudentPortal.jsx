@@ -38,14 +38,31 @@ const StudentPortal = () => {
   }, []);
 
   const fetchAllData = async (studentData) => {
-    // Fetch Results
+    // Fetch Enrolled Subjects with Entrance status
+    const { data: enrolled } = await supabase
+      .from('student_subjects')
+      .select('subject_id, is_entrance, subjects(name)')
+      .eq('student_id', studentData.id);
+    
+    // Combine Results with Solution access logic
     const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
     const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
     if (tests) {
-      setResults(tests.map(t => ({
-        ...t,
-        score: marks?.find(m => m.test_id === t.id)?.score || 'N/A'
-      })));
+      setResults(tests.map(t => {
+        const score = marks?.find(m => m.test_id === t.id)?.score || 'N/A';
+        // Logic: If test is CET, check if student has 'is_entrance' for this subject
+        let hasSolutionAccess = true;
+        if (t.test_type === 'CET') {
+          const studentSub = enrolled?.find(es => es.subjects?.name === t.subject);
+          hasSolutionAccess = studentSub?.is_entrance || false;
+        }
+
+        return {
+          ...t,
+          score,
+          hasSolutionAccess
+        };
+      }));
     }
 
     // Fetch Library (Notes)
@@ -314,12 +331,12 @@ const StudentPortal = () => {
 
            {activeTab === 'results' && (
              <div className="animate-in" style={{ display: 'grid', gap: '0.75rem' }}>
-                <h3 style={{ color: '#1A237E', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Academic Performance</h3>
-                {results.length === 0 ? <p style={{ textAlign: 'center', padding: '3rem', color: '#94A3B8' }}>No test records found yet.</p> : results.map(test => {
+                 <h3 style={{ color: '#1A237E', marginBottom: '0.5rem', fontSize: '1.1rem' }}>Academic Performance</h3>
+                 {results.length === 0 ? <p style={{ textAlign: 'center', padding: '3rem', color: '#94A3B8' }}>No test records found yet.</p> : results.map(test => {
                   const isTestPast = new Date().toISOString().split('T')[0] >= test.date;
                   const isAbsent = Number(test.score) === -1 || String(test.score).toLowerCase() === 'absent';
                   const isMarksEntered = test.score !== 'N/A' && test.score !== undefined && test.score !== null;
-                  const canViewSolution = isTestPast && isMarksEntered && !isAbsent;
+                  const canViewSolution = isTestPast && isMarksEntered && !isAbsent && test.hasSolutionAccess;
 
                   return (
                     <div key={test.id} className="card-base" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -334,22 +351,29 @@ const StudentPortal = () => {
                                 <span style={{ fontSize: '0.7rem', color: '#94A3B8', marginLeft: '2px', fontWeight: 500 }}>/{test.total_marks || test.totalMarks}</span>
                              </div>
                           </div>
-                          {test.solution_url && canViewSolution && (
-                             <a href={test.solution_url} target="_blank" rel="noreferrer" style={{ 
-                               backgroundColor: '#B8860B', 
-                               color: 'white', 
-                               padding: '0.4rem 0.8rem', 
-                               borderRadius: '6px', 
-                               fontSize: '0.7rem', 
-                               fontWeight: 700, 
-                               textDecoration: 'none',
-                               display: 'flex',
-                               alignItems: 'center',
-                               gap: '0.3rem'
-                             }}>
-                                <FiDownload size={12} /> Key
-                             </a>
-                          )}
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                            {test.solution_url && canViewSolution && (
+                               <a href={test.solution_url} target="_blank" rel="noreferrer" style={{ 
+                                 backgroundColor: '#B8860B', 
+                                 color: 'white', 
+                                 padding: '0.4rem 0.8rem', 
+                                 borderRadius: '6px', 
+                                 fontSize: '0.7rem', 
+                                 fontWeight: 700, 
+                                 textDecoration: 'none',
+                                 display: 'flex',
+                                 alignItems: 'center',
+                                 gap: '0.3rem'
+                               }}>
+                                  <FiDownload size={12} /> Key
+                               </a>
+                            )}
+                            {test.solution_url && !test.hasSolutionAccess && test.test_type === 'CET' && (
+                              <div title="Solution restricted to Entrance students" style={{ color: '#94A3B8', fontSize: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.2rem', fontWeight: 600 }}>
+                                <FiLock size={10} /> CET Restricted
+                              </div>
+                            )}
+                          </div>
                        </div>
                     </div>
                   );

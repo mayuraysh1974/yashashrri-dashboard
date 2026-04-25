@@ -12,7 +12,7 @@ const TestScheduler = () => {
   const [showModal, setShowModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [activeTest, setActiveTest] = useState(null);
-  const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] });
+  const [formData, setFormData] = useState({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0], test_type: 'Board' });
   const [resultSearch, setResultSearch] = useState('');
   const [subjectSearch, setSubjectSearch] = useState('');
   const [solutionFile, setSolutionFile] = useState(null);
@@ -79,7 +79,8 @@ const TestScheduler = () => {
       standard: formData.standard,
       total_marks: formData.totalMarks,
       min_marks: formData.minMarks,
-      date: formData.date
+      date: formData.date,
+      test_type: formData.test_type
     };
 
     if (solutionUrl) {
@@ -101,7 +102,7 @@ const TestScheduler = () => {
       setShowModal(false);
       setEditMode(false);
       setActiveTestId(null);
-      setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] });
+      setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0], test_type: 'Board' });
       setSolutionFile(null);
       fetchTests();
     } else {
@@ -129,7 +130,8 @@ const TestScheduler = () => {
       standard: test.standard || (test.standards ? test.standards[0] : ''),
       totalMarks: test.total_marks || test.totalMarks,
       minMarks: test.min_marks || 0,
-      date: test.date
+      date: test.date,
+      test_type: test.test_type || 'Board'
     });
     setEditMode(true);
     setShowModal(true);
@@ -225,7 +227,7 @@ const TestScheduler = () => {
           <h1 className="page-title">Test Scheduler & Alerts</h1>
           <p className="page-subtitle">Manage upcoming exams and notify students/parents of schedules</p>
         </div>
-        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0] }); setSolutionFile(null); setShowModal(true); }}>
+        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ name: '', subjects: [], standard: '', totalMarks: 50, minMarks: 18, date: new Date().toISOString().split('T')[0], test_type: 'Board' }); setSolutionFile(null); setShowModal(true); }}>
           <FiPlus /> New Test
         </button>
       </div>
@@ -255,6 +257,9 @@ const TestScheduler = () => {
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : '#FFF9E6', color: isPast ? '#64748B' : '#B8860B' }}>
                       {isPast ? 'COMPLETED' : 'UPCOMING'}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: test.test_type === 'CET' ? '#E0F2FE' : '#F1F5F9', color: test.test_type === 'CET' ? '#0369A1' : '#64748B' }}>
+                      {test.test_type === 'CET' ? 'CET / Entrance' : 'Board Syllabus'}
                     </span>
                  </div>
                  <h3 style={{ fontSize: '1.35rem', color: '#1A237E', fontWeight: 800, margin: 0, lineHeight: 1.2 }}>{test.name}</h3>
@@ -309,6 +314,26 @@ const TestScheduler = () => {
               <button onClick={() => { setShowModal(false); setEditMode(false); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><FiX size={24} /></button>
             </div>
             
+            <div className="input-group">
+              <label>Test Category</label>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button 
+                  type="button"
+                  onClick={() => setFormData({...formData, test_type: 'Board'})}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: formData.test_type === 'Board' ? '2px solid #1A237E' : '1px solid #CBD5E1', backgroundColor: formData.test_type === 'Board' ? '#F0F7FF' : 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  Board Syllabus
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setFormData({...formData, test_type: 'CET'})}
+                  style={{ flex: 1, padding: '0.6rem', borderRadius: '8px', border: formData.test_type === 'CET' ? '2px solid #B8860B' : '1px solid #CBD5E1', backgroundColor: formData.test_type === 'CET' ? '#FFF9E6' : 'white', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  CET / Entrance
+                </button>
+              </div>
+            </div>
+
             <div className="input-group">
               <label>Test Name</label>
               <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Unit Test 1" />
