@@ -15,6 +15,7 @@ html, body {
 }
 
 @media print {
+  @page { size: portrait; margin: 10mm; }
   /* Reset all overflow clipping so content is fully visible */
   .app-layout {
     display: block !important;

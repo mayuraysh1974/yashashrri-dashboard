@@ -28,6 +28,10 @@ const AcademicReports = () => {
 
   useEffect(() => {
     fetchInitialData();
+    return () => {
+      const styleTag = document.getElementById('dynamic-print-style');
+      if (styleTag) styleTag.remove();
+    };
   }, []);
 
   const fetchInitialData = async () => {
