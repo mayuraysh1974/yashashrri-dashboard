@@ -50,11 +50,8 @@ const StudentPortal = () => {
         
         if (tests) {
           setResults(tests.map(t => {
-            const score = marks?.find(m => m.test_id === t.id)?.score || 'N/A';
-            
             // Handle subjects (array or string)
             const testSubjects = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
-            
             const studentMark = marks?.find(m => m.test_id === t.id);
             const score = studentMark?.score || 'N/A';
             const isCompleted = studentMark !== undefined;
