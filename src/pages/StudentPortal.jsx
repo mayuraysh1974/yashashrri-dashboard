@@ -55,30 +55,25 @@ const StudentPortal = () => {
             // Handle subjects (array or string)
             const testSubjects = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
             
+            const studentMark = marks?.find(m => m.test_id === t.id);
+            const score = studentMark?.score || 'N/A';
+            const isCompleted = studentMark !== undefined;
+
             let hasSolutionAccess = true;
             if (t.test_type === 'CET') {
-              // Check if student has is_entrance=true for ANY of the subjects in this test
-              // Using enhanced smart matching to handle "Maths" vs "Mathematics"
               const hasEntranceOpted = enrolled?.some(es => {
                 const enrolledSubName = es.subjects?.name?.toLowerCase();
                 if (!enrolledSubName) return false;
                 
                 return testSubjects.some(ts => {
-                  const testSubName = ts?.toLowerCase();
-                  if (!testSubName) return false;
-                  
-                  // Use proven matching logic: check if enrolled subject name is contained within the test subject label
-                  const enrolledSubName = es.subjects?.name?.toLowerCase();
-                  if (!enrolledSubName) return false;
-
-                  return testSubjects.some(ts => {
-                    const testSubName = ts?.toLowerCase();
-                    if (!testSubName) return false;
-                    return testSubName.includes(enrolledSubName);
-                  }) && es.is_entrance;
+                  const testSubName = ts?.toLowerCase() || '';
+                  return testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName);
                 }) && es.is_entrance;
               });
-              hasSolutionAccess = hasEntranceOpted || false;
+              
+              // Access is granted if student is Entrance track OR if test is marked Completed (date passed or marks recorded)
+              const isPast = new Date(t.date) < new Date();
+              hasSolutionAccess = (hasEntranceOpted && (isPast || isCompleted)) || false;
             }
 
             return {
@@ -360,7 +355,7 @@ const StudentPortal = () => {
                   const isTestPast = new Date().toISOString().split('T')[0] >= test.date;
                   const isAbsent = Number(test.score) === -1 || String(test.score).toLowerCase() === 'absent';
                   const isMarksEntered = test.score !== 'N/A' && test.score !== undefined && test.score !== null;
-                  const canViewSolution = isTestPast && isMarksEntered && !isAbsent && test.hasSolutionAccess;
+                  const canViewSolution = isMarksEntered && !isAbsent && test.hasSolutionAccess;
 
                   return (
                     <div key={test.id} className="card-base" style={{ padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
