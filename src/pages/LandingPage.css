@@ -563,33 +563,49 @@
 
 .testimonials-slider {
   display: flex;
+  align-items: stretch;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   gap: 2rem;
-  padding: 1rem 5% 3rem 5%;
-  margin-top: 3rem;
+  padding: 1rem 5% 2rem 5%;
+  margin-top: 2rem;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  /* Hide scrollbar for cleaner look */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
 }
 
+/* Elegant Scrollbar for the slider */
 .testimonials-slider::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  height: 8px;
+}
+.testimonials-slider::-webkit-scrollbar-track {
+  background: #f1f5f9; 
+  border-radius: 4px;
+}
+.testimonials-slider::-webkit-scrollbar-thumb {
+  background: #B8860B; 
+  border-radius: 4px;
+}
+.testimonials-slider::-webkit-scrollbar-thumb:hover {
+  background: #1A237E; 
 }
 
 .testimonials-slider .testimonial-card {
-  flex: 0 0 350px;
+  flex: 0 0 380px; /* Slightly wider so it holds text better without getting too tall */
   scroll-snap-align: center;
   transition: all 0.3s ease;
   border: 1px solid #E2E8F0;
   max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.testimonials-slider .testimonial-card > div:last-child {
+  margin-top: auto; /* Pushes the profile info to the bottom evenly */
 }
 
 .testimonial-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
   border-color: #B8860B;
 }
 

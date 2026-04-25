@@ -344,45 +344,6 @@ const LandingPage = ({ isAuthenticated }) => {
         <div className="testimonials-slider">
           <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
             <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
-            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: '1.7' }}>
-              "The personalized attention at Yashashrri Classes is truly unique. My daughter's confidence in Mathematics grew significantly within just a few months."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>AM</div>
-              <div>
-                <h4 style={{ margin: 0, color: '#1A237E' }}>Anjali Maydeo</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>Parent of XII Student</p>
-              </div>
-            </div>
-          </div>
-          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
-            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
-            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: '1.7' }}>
-              "The digitized concepts and animations made complex physics topics so easy to visualize. It's not just rote learning here; it's true understanding."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>RS</div>
-              <div>
-                <h4 style={{ margin: 0, color: '#1A237E' }}>Rahul Shinde</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>Ex-Student, 2024 Batch</p>
-              </div>
-            </div>
-          </div>
-          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
-            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
-            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: '1.7' }}>
-              "Self-made assignments and notes provided by Yashashrri were my go-to resources during board exams. They cover everything perfectly."
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>VG</div>
-              <div>
-                <h4 style={{ margin: 0, color: '#1A237E' }}>Vaishnavi G.</h4>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>XII Student</p>
-              </div>
-            </div>
-          </div>
-          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
-            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
             <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.9' }}>
               "पालक म्हणून सांगायचे तर, गेल्या दोन वर्षात माझ्या पाल्यामध्ये झालेली प्रगती पाहून मी खूप समाधानी आहे. मयुरेश सर आणि उज्वला मॅडम, रश्मी मॅडम मुलांकडे वैयक्तिक लक्ष देतात, ज्यामुळे अभ्यासासोबतच त्यांची शिस्तही सुधारली आहे. तुमच्या मेहनतीबद्दल खूप खूप धन्यवाद!"
             </p>
