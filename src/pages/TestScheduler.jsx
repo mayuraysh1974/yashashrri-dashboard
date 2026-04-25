@@ -170,36 +170,38 @@ const TestScheduler = () => {
       .eq('standard', test.standard || (test.standards ? test.standards[0] : ''));
 
     const isCETTest = test.test_type === 'CET';
-    const testSubjects = Array.isArray(test.subjects) ? test.subjects : [test.subject];
+    const testSubjects = Array.isArray(test.subjects) ? test.subjects : (test.subject ? [test.subject] : []);
+    
+    const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
+    const existing = existingResults || [];
 
-    // 2. Filter students based on enrollment and entrance preference
-    const enrolledStudents = (stdStudents || []).filter(s => {
-      // Find matches for each test subject
+    // 2. Filter students based on enrollment/entrance preference OR if they have historical marks
+    const displayStudents = (stdStudents || []).filter(s => {
+      // Always show if they already have a result recorded
+      const hasExistingResult = existing.some(r => r.student_id === s.id);
+      if (hasExistingResult) return true;
+
+      // Otherwise apply the subject/entrance filter
       const studentSubMatches = (s.student_subjects || []).map(ss => {
         const sub = subjects.find(sub => sub.id === ss.subject_id);
         return sub ? { name: sub.name, isEntrance: ss.is_entrance } : null;
       }).filter(Boolean);
 
       if (isCETTest) {
-        // Must have entrance opted for ALL subjects of this test
         return testSubjects.every(testSub => {
           const tSubLower = testSub?.toLowerCase();
           return studentSubMatches.some(ss => {
             const sSubLower = ss.name?.toLowerCase();
             if (!sSubLower || !tSubLower) return false;
-            
-            // Smart match: direct, partial, or root-word overlap
             const isMatch = tSubLower.includes(sSubLower) || sSubLower.includes(tSubLower) || (() => {
               const sWords = sSubLower.split(/[\s,]+/).filter(w => w.length > 3);
               const tWords = tSubLower.split(/[\s,]+/).filter(w => w.length > 3);
               return sWords.some(sw => tWords.some(tw => tw.startsWith(sw.substring(0, 4)) || sw.startsWith(tw.substring(0, 4))));
             })();
-
             return isMatch && ss.isEntrance;
           });
         });
       } else {
-        // Standard test: Must be enrolled in ANY of the subjects
         return testSubjects.some(testSub => {
           const tSubLower = testSub?.toLowerCase();
           return studentSubMatches.some(ss => {
@@ -211,15 +213,19 @@ const TestScheduler = () => {
       }
     });
 
-    const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
-    const existing = existingResults || [];
-
-    const resultState = enrolledStudents.map(s => {
+    const resultState = displayStudents.map(s => {
       const found = existing.find(r => r.student_id === s.id);
+      // Check if they are actually marked as entrance for at least one of the test subjects
+      const isEntranceForTest = (s.student_subjects || []).some(ss => {
+        const sub = subjects.find(sub => sub.id === ss.subject_id);
+        return sub && testSubjects.some(ts => ts.toLowerCase().includes(sub.name.toLowerCase())) && ss.is_entrance;
+      });
+
       return { 
         studentId: s.id, 
         studentName: s.name, 
         standard: s.standard, 
+        isEntrance: isEntranceForTest,
         score: found ? (found.score === -1 ? 'Ab' : found.score) : '' 
       };
     });
@@ -535,7 +541,25 @@ const TestScheduler = () => {
                     const originalIndex = studentResults.findIndex(sr => sr.studentId === res.studentId);
                     return (
                      <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{res.studentName}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span>{res.studentName}</span>
+                          {activeTest?.test_type === 'CET' && (
+                            <span style={{ 
+                              fontSize: '0.6rem', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px', 
+                              backgroundColor: res.isEntrance ? '#ECFDF5' : '#FEF2F2', 
+                              color: res.isEntrance ? '#059669' : '#EF4444',
+                              border: `1px solid ${res.isEntrance ? '#10B981' : '#FECACA'}`,
+                              fontWeight: 700,
+                              textTransform: 'uppercase'
+                            }}>
+                              {res.isEntrance ? 'Entrance' : 'Track Not Set'}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                         <input 
                           type="text" 
