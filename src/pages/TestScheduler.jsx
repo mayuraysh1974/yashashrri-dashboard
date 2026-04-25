@@ -471,7 +471,7 @@ const TestScheduler = () => {
 
       {showResultModal && (
         <div className="modal-overlay">
-          <div className="card-base" style={{ width: '100%', maxWidth: '600px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)' }}>
+          <div className="card-base" style={{ width: '95%', maxWidth: '800px', padding: '1rem', backgroundColor: 'var(--bg-surface)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.2rem', color: 'var(--primary-blue)', margin: 0 }}>Record Marks: {activeTest?.name}</h2>
@@ -491,12 +491,12 @@ const TestScheduler = () => {
               />
             </div>
 
-            <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.25rem', backgroundColor: 'var(--bg-main)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+            <div style={{ maxHeight: '450px', overflowY: 'auto', overflowX: 'hidden', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0', backgroundColor: 'var(--bg-main)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', margin: 0 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
-                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', width: '70%' }}>Student Name</th>
-                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'right', width: '30%' }}>Score</th>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left', backgroundColor: '#F8FAFC' }}>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', width: '75%', color: '#1A237E' }}>Student Name</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', textAlign: 'right', width: '25%', color: '#1A237E' }}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -504,7 +504,7 @@ const TestScheduler = () => {
                     const originalIndex = studentResults.findIndex(sr => sr.studentId === res.studentId);
                     return (
                      <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                      <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', white-space: 'nowrap' }}>{res.studentName}</td>
+                      <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{res.studentName}</td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                         <input 
                           type="text" 
