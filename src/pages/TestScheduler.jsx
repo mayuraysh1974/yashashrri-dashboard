@@ -456,7 +456,20 @@ const TestScheduler = () => {
                   />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.5rem', backgroundColor: '#F8FAFC', borderRadius: '12px' }}>
-                  {subjects.filter(s => s.name.toLowerCase().includes(subjectSearch.toLowerCase())).map(s => {
+                  {subjects.filter(s => {
+                    const subName = s.name.toUpperCase();
+                    const searchVal = subjectSearch.toUpperCase();
+                    const stdVal = (formData.standard || '').toUpperCase();
+                    
+                    // If a standard is selected, filter subjects to those belonging to that standard
+                    // Use word boundary logic to prevent 'X' matching 'XII'
+                    const stdMatch = stdVal ? (
+                      subName.startsWith(stdVal + ' ') || 
+                      subName === stdVal
+                    ) : true;
+
+                    return stdMatch && subName.includes(searchVal);
+                  }).map(s => {
                     const isSelected = formData.subjects.includes(s.name);
                     return (
                       <button
