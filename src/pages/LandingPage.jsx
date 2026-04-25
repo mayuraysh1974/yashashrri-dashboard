@@ -341,7 +341,7 @@ const LandingPage = ({ isAuthenticated }) => {
           <h2>Voices of <span className="text-highlight">Success</span></h2>
           <p>Read what our students and parents have to say about their journey with us.</p>
         </div>
-        <div className="testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2.5rem', marginTop: '4rem' }}>
+        <div className="testimonials-slider">
           <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
             <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
             <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.1rem', lineHeight: '1.7' }}>

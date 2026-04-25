@@ -558,11 +558,33 @@
 /* Testimonials Section Styling */
 .testimonials-section {
   position: relative;
+  overflow: hidden;
 }
 
-.testimonial-card {
+.testimonials-slider {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 2rem;
+  padding: 1rem 5% 3rem 5%;
+  margin-top: 3rem;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar for cleaner look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.testimonials-slider::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.testimonials-slider .testimonial-card {
+  flex: 0 0 350px;
+  scroll-snap-align: center;
   transition: all 0.3s ease;
   border: 1px solid #E2E8F0;
+  max-width: 90vw;
 }
 
 .testimonial-card:hover {
@@ -576,12 +598,12 @@
   .section-header h2 {
     font-size: 2.5rem;
   }
-  .testimonials-grid {
-    grid-template-columns: 1fr !important;
-    padding: 0 1rem;
+  .testimonials-slider {
+    padding: 1rem 1rem 3rem 1rem;
+    gap: 1.5rem;
   }
-  .testimonial-card {
+  .testimonials-slider .testimonial-card {
+    flex: 0 0 85vw;
     padding: 2rem 1.5rem !important;
   }
 }
-
