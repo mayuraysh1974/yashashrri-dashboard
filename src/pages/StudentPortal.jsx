@@ -58,7 +58,7 @@ const StudentPortal = () => {
             let hasSolutionAccess = true;
             if (t.test_type === 'CET') {
               // Check if student has is_entrance=true for ANY of the subjects in this test
-              // Using fuzzy matching to handle prefixes like "XII " or suffixes like " with entrance"
+              // Using enhanced smart matching to handle "Maths" vs "Mathematics"
               const hasEntranceOpted = enrolled?.some(es => {
                 const enrolledSubName = es.subjects?.name?.toLowerCase();
                 if (!enrolledSubName) return false;
@@ -66,8 +66,15 @@ const StudentPortal = () => {
                 return testSubjects.some(ts => {
                   const testSubName = ts?.toLowerCase();
                   if (!testSubName) return false;
-                  // Match if either contains the other (e.g. "Maths" vs "XII Maths with entrance")
-                  return testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName);
+                  
+                  // 1. Direct contains check
+                  if (testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName)) return true;
+                  
+                  // 2. Word-level overlap (e.g. "Maths" vs "Mathematics")
+                  const enrolledWords = enrolledSubName.split(/[\s,]+/).filter(w => w.length > 3);
+                  const testWords = testSubName.split(/[\s,]+/).filter(w => w.length > 3);
+                  
+                  return enrolledWords.some(ew => testWords.some(tw => tw.startsWith(ew.substring(0, 4)) || ew.startsWith(tw.substring(0, 4))));
                 }) && es.is_entrance;
               });
               hasSolutionAccess = hasEntranceOpted || false;
