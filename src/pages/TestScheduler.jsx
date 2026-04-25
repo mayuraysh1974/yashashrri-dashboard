@@ -472,42 +472,43 @@ const TestScheduler = () => {
       {showResultModal && (
         <div className="modal-overlay">
           <div className="card-base" style={{ width: '100%', maxWidth: '600px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)' }}>
-             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
-                <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)' }}>Record Marks: {activeTest?.name}</h2>
-                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{activeTest?.standard || (activeTest?.standards ? activeTest.standards[0] : 'N/A')} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
+                <h2 style={{ fontSize: '1.2rem', color: 'var(--primary-blue)', margin: 0 }}>Record Marks: {activeTest?.name}</h2>
+                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{activeTest?.standard} | Max Score: {activeTest?.total_marks || activeTest?.totalMarks}</p>
               </div>
-              <div style={{ position: 'relative', flex: 1, marginRight: '1rem' }}>
-                <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input 
-                  type="text" 
-                  placeholder="Search student name..." 
-                  value={resultSearch}
-                  onChange={(e) => setResultSearch(e.target.value)}
-                  style={{ width: '100%', padding: '0.5rem 0.5rem 0.5rem 2.5rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.9rem' }}
-                />
-              </div>
-              <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><FiX size={24} /></button>
+              <button onClick={() => setShowResultModal(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.25rem' }}><FiX size={20} /></button>
+            </div>
+
+            <div style={{ position: 'relative', marginBottom: '1rem' }}>
+              <FiSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '0.8rem' }} />
+              <input 
+                type="text" 
+                placeholder="Quick search student..." 
+                value={resultSearch}
+                onChange={(e) => setResultSearch(e.target.value)}
+                style={{ width: '100%', padding: '0.4rem 0.4rem 0.4rem 2.2rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.8rem' }}
+              />
             </div>
 
             <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', backgroundColor: 'var(--bg-main)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
-                    <th style={{ padding: '0.75rem', fontSize: '0.85rem' }}>Student Name</th>
-                    <th style={{ padding: '0.75rem', fontSize: '0.85rem', textAlign: 'right' }}>Score Obtained</th>
+                    <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>Student Name</th>
+                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'right' }}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
                   {studentResults.filter(r => r.studentName.toLowerCase().includes(resultSearch.toLowerCase())).map((res) => {
                     const originalIndex = studentResults.findIndex(sr => sr.studentId === res.studentId);
                     return (
-                    <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                      <td style={{ padding: '0.75rem', fontSize: '0.9rem', fontWeight: 600 }}>{res.studentName}</td>
-                      <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                     <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                      <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>{res.studentName}</td>
+                      <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                         <input 
                           type="text" 
-                          placeholder="Score or Ab" 
+                          placeholder="Score" 
                           value={res.score === -1 ? 'Ab' : res.score} 
                           onChange={(e) => {
                              const newResults = [...studentResults];
@@ -515,11 +516,12 @@ const TestScheduler = () => {
                              setStudentResults(newResults);
                           }}
                           style={{ 
-                            width: '80px', 
-                            padding: '0.4rem', 
+                            width: '60px', 
+                            padding: '0.3rem', 
                             borderRadius: '6px', 
                             border: '1px solid #CBD5E1', 
                             textAlign: 'center',
+                            fontSize: '0.8rem',
                             backgroundColor: res.score !== '' && res.score !== 'Ab' && Number(res.score) < (activeTest?.min_marks || 0) ? '#FEE2E2' : 'white'
                           }}
                         />
