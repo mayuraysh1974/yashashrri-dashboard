@@ -510,9 +510,10 @@ const StudentManagement = () => {
                       {subjects.filter(s => {
                         const searchMatch = s.name.toLowerCase().includes(subjectSearch.toLowerCase());
                         if (!formData.standard) return searchMatch;
-                        // Only show subjects that match the selected standard (e.g. "XII" or "X")
+                        // Precision match for standard (e.g. "X" won't match "IX")
                         const stdClean = formData.standard.split(' ')[0].toLowerCase();
-                        return searchMatch && s.name.toLowerCase().includes(stdClean);
+                        const stdRegex = new RegExp(`\\b${stdClean}\\b`, 'i');
+                        return searchMatch && stdRegex.test(s.name);
                       }).map(s => {
                         const enrolledSub = formData.enrolledSubjects?.find(es => es.subject_id === s.id);
                         const isSelected = !!enrolledSub;

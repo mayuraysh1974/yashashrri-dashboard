@@ -29,8 +29,17 @@ const TestScheduler = () => {
   }, []);
 
   const fetchTests = async () => {
-    const { data } = await supabase.from('tests').select('*').order('date', { ascending: false });
-    setTests(data || []);
+    setLoading(true);
+    const { data: testsData } = await supabase.from('tests').select('*').order('date', { ascending: false });
+    // Check which tests have recorded marks
+    const { data: resultsData } = await supabase.from('test_results').select('test_id');
+    const testsWithMarks = new Set(resultsData?.map(r => r.test_id));
+    
+    const formatted = (testsData || []).map(t => ({
+      ...t,
+      has_marks: testsWithMarks.has(t.id)
+    }));
+    setTests(formatted);
     setLoading(false);
   };
 
@@ -309,7 +318,7 @@ const TestScheduler = () => {
               <div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                     <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : '#FFF9E6', color: isPast ? '#64748B' : '#B8860B' }}>
-                      {isPast ? 'COMPLETED' : 'UPCOMING'}
+                      {test.has_marks ? 'COMPLETED' : (isPast ? 'PAST' : 'UPCOMING')}
                     </span>
                     <span style={{ 
                       fontSize: '0.65rem', 
@@ -357,11 +366,6 @@ const TestScheduler = () => {
               </div>
 
               <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.5rem' }}>
-                 {test.solution_url && (
-                    <a href={test.solution_url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }}>
-                       <FiBook /> Solution
-                    </a>
-                 )}
                  <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }} onClick={() => navigate('/academic-reports')}>
                     <FiBarChart2 /> Report
                  </button>
@@ -547,15 +551,15 @@ const TestScheduler = () => {
                           {activeTest?.test_type === 'CET' && res.isEntrance && (
                             <span style={{ 
                               fontSize: '0.6rem', 
-                              padding: '2px 6px', 
+                              padding: '2px 8px', 
                               borderRadius: '4px', 
-                              backgroundColor: '#ECFDF5', 
-                              color: '#059669',
-                              border: '1px solid #10B981',
-                              fontWeight: 700,
-                              textTransform: 'uppercase'
+                              backgroundColor: '#F0F9FF', 
+                              color: '#0369A1',
+                              border: '1px solid #BAE6FD',
+                              fontWeight: 800,
+                              letterSpacing: '0.5px'
                             }}>
-                              Entrance
+                              CET TRACK
                             </span>
                           )}
                         </div>

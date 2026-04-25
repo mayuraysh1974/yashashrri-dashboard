@@ -67,20 +67,15 @@ const StudentPortal = () => {
                   const testSubName = ts?.toLowerCase();
                   if (!testSubName) return false;
                   
-                  // 1. Clean both names of noise
-                  const clean = (str) => str?.toLowerCase()
-                    .replace(/^(xii|x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/g, '') // Remove standard prefixes
-                    .replace(/with entrance|entrance|cet|jee|neet/g, '')   // Remove track suffixes
-                    .replace(/mathematics/g, 'maths')                      // Normalize maths
-                    .trim();
+                  // Use proven matching logic: check if enrolled subject name is contained within the test subject label
+                  const enrolledSubName = es.subjects?.name?.toLowerCase();
+                  if (!enrolledSubName) return false;
 
-                  const enrolledClean = clean(enrolledSubName);
-                  const testClean = clean(testSubName);
-                  
-                  if (!enrolledClean || !testClean) return false;
-                  
-                  // Match if one contains the other or they are close
-                  return testClean.includes(enrolledClean) || enrolledClean.includes(testClean);
+                  return testSubjects.some(ts => {
+                    const testSubName = ts?.toLowerCase();
+                    if (!testSubName) return false;
+                    return testSubName.includes(enrolledSubName);
+                  }) && es.is_entrance;
                 }) && es.is_entrance;
               });
               hasSolutionAccess = hasEntranceOpted || false;
