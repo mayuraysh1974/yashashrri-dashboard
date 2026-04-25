@@ -222,13 +222,24 @@ const AttendanceReports = () => {
         alignItems: 'flex-end' 
       }}>
           {activeTab === 'student-monthly' && (
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <label>Student</label>
-              <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}>
-                <option value="">Choose Student...</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-            </div>
+            <>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>Class Filter</label>
+                <select value={selectedStandard} onChange={e => { setSelectedStandard(e.target.value); setSelectedStudent(''); }}>
+                  <option value="">All Classes</option>
+                  {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+                </select>
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>Student</label>
+                <select value={selectedStudent} onChange={e => setSelectedStudent(e.target.value)}>
+                  <option value="">Choose Student...</option>
+                  {students.filter(s => !selectedStandard || s.standard === selectedStandard).map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
           {(activeTab === 'class-daily' || activeTab === 'class-monthly') && (
             <div className="input-group" style={{ marginBottom: 0 }}>
