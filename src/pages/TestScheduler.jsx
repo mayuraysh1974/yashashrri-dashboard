@@ -163,21 +163,34 @@ const TestScheduler = () => {
   const openResultEntry = async (test) => {
     setActiveTest(test);
     
-    // 1. Fetch all students for the standard
+    // 1. Fetch all students for the standard with their subject details
     const { data: stdStudents } = await supabase
       .from('students')
-      .select('*, student_subjects(subject_id)')
+      .select('*, student_subjects(subject_id, is_entrance)')
       .eq('standard', test.standard || (test.standards ? test.standards[0] : ''));
 
+    const isCETTest = test.test_type === 'CET';
     const testSubjects = Array.isArray(test.subjects) ? test.subjects : [test.subject];
 
-    // 2. Filter students who have opted for ANY of the test subjects
+    // 2. Filter students based on enrollment and entrance preference
     const enrolledStudents = (stdStudents || []).filter(s => {
-      const studentSubs = s.student_subjects?.map(ss => {
+      // Find matches for each test subject
+      const studentSubMatches = (s.student_subjects || []).map(ss => {
         const sub = subjects.find(sub => sub.id === ss.subject_id);
-        return sub ? sub.name : null;
-      }) || [];
-      return studentSubs.some(subName => testSubjects.includes(subName));
+        return sub ? { name: sub.name, isEntrance: ss.is_entrance } : null;
+      }).filter(Boolean);
+
+      if (isCETTest) {
+        // Must have entrance opted for ALL subjects of this test
+        return testSubjects.every(testSub => 
+          studentSubMatches.some(ss => ss.name === testSub && ss.isEntrance)
+        );
+      } else {
+        // Standard test: Must be enrolled in ANY of the subjects
+        return testSubjects.some(testSub => 
+          studentSubMatches.some(ss => ss.name === testSub)
+        );
+      }
     });
 
     const { data: existingResults } = await supabase.from('test_results').select('*').eq('test_id', test.id);
