@@ -44,26 +44,33 @@ const StudentPortal = () => {
       .select('subject_id, is_entrance, subjects(name)')
       .eq('student_id', studentData.id);
     
-    // Combine Results with Solution access logic
-    const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
-    const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
-    if (tests) {
-      setResults(tests.map(t => {
-        const score = marks?.find(m => m.test_id === t.id)?.score || 'N/A';
-        // Logic: If test is CET, check if student has 'is_entrance' for this subject
-        let hasSolutionAccess = true;
-        if (t.test_type === 'CET') {
-          const studentSub = enrolled?.find(es => es.subjects?.name === t.subject);
-          hasSolutionAccess = studentSub?.is_entrance || false;
-        }
+        // Combine Results with Solution access logic
+        const { data: tests } = await supabase.from('tests').select('*').eq('standard', studentData.standard).order('date', { ascending: false });
+        const { data: marks } = await supabase.from('test_results').select('*').eq('student_id', studentData.id);
+        
+        if (tests) {
+          setResults(tests.map(t => {
+            const score = marks?.find(m => m.test_id === t.id)?.score || 'N/A';
+            
+            // Handle subjects (array or string)
+            const testSubjects = Array.isArray(t.subjects) ? t.subjects : (t.subject ? [t.subject] : []);
+            
+            let hasSolutionAccess = true;
+            if (t.test_type === 'CET') {
+              // Check if student has is_entrance=true for ANY of the subjects in this test
+              const hasEntranceOpted = enrolled?.some(es => 
+                testSubjects.includes(es.subjects?.name) && es.is_entrance
+              );
+              hasSolutionAccess = hasEntranceOpted || false;
+            }
 
-        return {
-          ...t,
-          score,
-          hasSolutionAccess
-        };
-      }));
-    }
+            return {
+              ...t,
+              score,
+              hasSolutionAccess
+            };
+          }));
+        }
 
     // Fetch Library (Notes)
     const { data: allNotes } = await supabase.from('library_resources').select('*');
