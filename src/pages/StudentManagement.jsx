@@ -547,7 +547,7 @@ const StudentManagement = () => {
                               <span style={{ fontSize: '0.7rem', opacity: isSelected ? 0.9 : 0.6 }}>₹{s.fees}</span>
                               {isSelected && <FiCheckCircle size={14} />}
                             </button>
-                            {isSelected && (
+                            {isSelected && s.name.toLowerCase().includes('entrance') && (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', paddingLeft: '0.5rem' }}>
                                 <input 
                                   type="checkbox" 
