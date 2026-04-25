@@ -433,6 +433,19 @@ const LandingPage = ({ isAuthenticated }) => {
               </div>
             </div>
           </div>
+          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
+            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
+            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              "As a parent, I am very satisfied with the guidance provided by Yashashrri Classes. The teaching focused on clear concept understanding, and regular weekly tests kept my child consistent. During lockdown, my child struggled with basics from 7th and 8th — but after joining in 9th, there was a significant improvement in understanding, consistency, marks, and overall performance. We also appreciated that weekly test marks were shared in the group, keeping parents informed and connected. These classes have not only improved academic results but also boosted confidence and discipline. Truly appreciate the dedication of the teachers."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.75rem' }}>TC</div>
+              <div>
+                <h4 style={{ margin: 0, color: '#1A237E' }}>Parents of Tanishq Choudhary</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>Parent — Std IX & X Student</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
