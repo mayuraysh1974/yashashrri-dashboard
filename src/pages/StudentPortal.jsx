@@ -67,14 +67,20 @@ const StudentPortal = () => {
                   const testSubName = ts?.toLowerCase();
                   if (!testSubName) return false;
                   
-                  // 1. Direct contains check
-                  if (testSubName.includes(enrolledSubName) || enrolledSubName.includes(testSubName)) return true;
+                  // 1. Clean both names of noise
+                  const clean = (str) => str?.toLowerCase()
+                    .replace(/^(xii|x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/g, '') // Remove standard prefixes
+                    .replace(/with entrance|entrance|cet|jee|neet/g, '')   // Remove track suffixes
+                    .replace(/mathematics/g, 'maths')                      // Normalize maths
+                    .trim();
+
+                  const enrolledClean = clean(enrolledSubName);
+                  const testClean = clean(testSubName);
                   
-                  // 2. Word-level overlap (e.g. "Maths" vs "Mathematics")
-                  const enrolledWords = enrolledSubName.split(/[\s,]+/).filter(w => w.length > 3);
-                  const testWords = testSubName.split(/[\s,]+/).filter(w => w.length > 3);
+                  if (!enrolledClean || !testClean) return false;
                   
-                  return enrolledWords.some(ew => testWords.some(tw => tw.startsWith(ew.substring(0, 4)) || ew.startsWith(tw.substring(0, 4))));
+                  // Match if one contains the other or they are close
+                  return testClean.includes(enrolledClean) || enrolledClean.includes(testClean);
                 }) && es.is_entrance;
               });
               hasSolutionAccess = hasEntranceOpted || false;

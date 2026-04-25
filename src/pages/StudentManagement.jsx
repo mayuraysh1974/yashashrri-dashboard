@@ -507,7 +507,13 @@ const StudentManagement = () => {
                        </div>
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
-                      {subjects.filter(s => s.name.toLowerCase().includes(subjectSearch.toLowerCase())).map(s => {
+                      {subjects.filter(s => {
+                        const searchMatch = s.name.toLowerCase().includes(subjectSearch.toLowerCase());
+                        if (!formData.standard) return searchMatch;
+                        // Only show subjects that match the selected standard (e.g. "XII" or "X")
+                        const stdClean = formData.standard.split(' ')[0].toLowerCase();
+                        return searchMatch && s.name.toLowerCase().includes(stdClean);
+                      }).map(s => {
                         const enrolledSub = formData.enrolledSubjects?.find(es => es.subject_id === s.id);
                         const isSelected = !!enrolledSub;
                         return (
