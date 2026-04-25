@@ -257,19 +257,81 @@ const LandingPage = ({ isAuthenticated }) => {
       <section className="location-section" style={{ padding: '8rem 5%', background: '#F8FAFC' }}>
         <div className="section-header">
           <h2>Find <span className="text-highlight">Us</span></h2>
-          <p>Visit our main branch for career counseling.</p>
+          <p>We have two branches in Talegaon Dabhade, Pune. Visit us anytime!</p>
         </div>
-        <div style={{ width: '100%', height: '450px', borderRadius: '12px', overflow: 'hidden', border: '3px solid #B8860B', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
-          <iframe 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1889.360987178125!2d73.6828063!3d18.720747700000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1be0bbac2ab%3A0xafda9691d7bca1c4!2sYASHASHRRI%20CLASES!5e0!3m2!1sen!2sin!4v1712500000000!5m2!1sen!2sin" 
-            width="100%" 
-            height="100%" 
-            style={{ border: 0 }} 
-            allowFullScreen="" 
-            loading="lazy" 
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Main Branch Location"
-          ></iframe>
+
+        {/* Branch Tab Switcher */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', margin: '2.5rem 0 2rem 0', flexWrap: 'wrap' }}>
+          <button
+            id="branch-tab-main"
+            onClick={() => {
+              document.getElementById('map-main').style.display = 'block';
+              document.getElementById('map-branch2').style.display = 'none';
+              document.getElementById('branch-tab-main').style.background = '#1A237E';
+              document.getElementById('branch-tab-main').style.color = '#fff';
+              document.getElementById('branch-tab-2').style.background = 'transparent';
+              document.getElementById('branch-tab-2').style.color = '#1A237E';
+            }}
+            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: '#1A237E', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+          >
+            📍 Main Branch — Vaidya Colony
+          </button>
+          <button
+            id="branch-tab-2"
+            onClick={() => {
+              document.getElementById('map-main').style.display = 'none';
+              document.getElementById('map-branch2').style.display = 'block';
+              document.getElementById('branch-tab-2').style.background = '#1A237E';
+              document.getElementById('branch-tab-2').style.color = '#fff';
+              document.getElementById('branch-tab-main').style.background = 'transparent';
+              document.getElementById('branch-tab-main').style.color = '#1A237E';
+            }}
+            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: 'transparent', color: '#1A237E', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+          >
+            📍 Silverwinds Branch — Dnyaneshwar Nagar
+          </button>
+        </div>
+
+        {/* Branch Info Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem 1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
+            <div style={{ fontWeight: 800, color: '#1A237E', marginBottom: '0.4rem', fontSize: '1rem' }}>🏛️ Main Branch</div>
+            <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>"Shree Ekveera Prasad", Vaidya Colony, Nr. Axis Bank ATM, Talegaon Dabhade, Pune – 410506</p>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem 1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.04)' }}>
+            <div style={{ fontWeight: 800, color: '#1A237E', marginBottom: '0.4rem', fontSize: '1rem' }}>🏛️ Silverwinds Branch</div>
+            <p style={{ color: '#475569', fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Silverwinds, Talegaon Dabhade, Pune – 410506</p>
+          </div>
+        </div>
+
+        {/* Map Container */}
+        <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '3px solid #B8860B', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+          {/* Main Branch Map */}
+          <div id="map-main" style={{ width: '100%', height: '420px' }}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1889.360987178125!2d73.6828063!3d18.720747700000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1be0bbac2ab%3A0xafda9691d7bca1c4!2sYASHASHRRI%20CLASES!5e0!3m2!1sen!2sin!4v1712500000000!5m2!1sen!2sin"
+              width="100%"
+              height="100%"
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Main Branch Location"
+            ></iframe>
+          </div>
+          {/* Silverwinds Branch Map */}
+          <div id="map-branch2" style={{ width: '100%', height: '420px', display: 'none' }}>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3778.1!2d73.6805!3d18.7195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1c000000001%3A0x0!2sSilverwinds%2C%20Dnyaneshwar%20Nagar%2C%20Talegaon%20Dabhade!5e0!3m2!1sen!2sin!4v1712500000001!5m2!1sen!2sin"
+              width="100%"
+              height="100%"
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Silverwinds Branch Location"
+            ></iframe>
+          </div>
         </div>
       </section>
 
