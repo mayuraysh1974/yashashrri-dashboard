@@ -446,6 +446,32 @@ const LandingPage = ({ isAuthenticated }) => {
               </div>
             </div>
           </div>
+          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
+            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
+            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              "My experience at Yashashrri Classes played an important role in strengthening my understanding of Physics, Chemistry, and Maths. The teachers explained concepts clearly and were always ready to solve doubts, which boosted my confidence. Regular tests and practice sessions helped me stay consistent. The study environment was disciplined yet supportive. Sometimes the pace felt a bit fast, but overall it kept me focused and exam-ready. These classes not only improved my academic results but also developed better study habits and time management skills — truly useful for my future education and goals."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>AM</div>
+              <div>
+                <h4 style={{ margin: 0, color: '#1A237E' }}>Aniruddha Mahadik</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>First Year B.Tech Student</p>
+              </div>
+            </div>
+          </div>
+          <div className="testimonial-card" style={{ background: '#F8FAFC', padding: '3rem 2rem', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative' }}>
+            <div style={{ color: '#B8860B', fontSize: '3rem', position: 'absolute', top: '1rem', right: '2rem', opacity: 0.2 }}>"</div>
+            <p style={{ fontStyle: 'italic', color: '#475569', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+              "As parents, we are very satisfied with the 12th tuition classes. The teachers are highly knowledgeable, supportive, and explain concepts simply. Regular tests and doubt-solving sessions have improved our child's confidence and performance. The well-structured material and positive environment have been crucial for board exam prep. We truly appreciate the dedication of the faculty."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg, #1A237E, #B8860B)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0, fontSize: '0.75rem' }}>AM</div>
+              <div>
+                <h4 style={{ margin: 0, color: '#1A237E' }}>Aniruddha Mahadik's Parents</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B' }}>Parent — Std XII Student</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
