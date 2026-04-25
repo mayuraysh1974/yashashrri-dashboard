@@ -48,14 +48,34 @@ const AttendanceReports = () => {
         dateObj.setMonth(dateObj.getMonth() + 1);
         const to = dateObj.toISOString().slice(0, 10);
 
-        const { data: att } = await supabase
+        const { data: dailyAtt } = await supabase
           .from('student_attendance')
           .select('date, status')
           .eq('student_id', selectedStudent)
           .gte('date', from)
-          .lt('date', to)
-          .order('date');
-        setReportData({ student, attendance: att || [] });
+          .lt('date', to);
+        
+        const { data: subjectAtt } = await supabase
+          .from('student_subject_attendance')
+          .select('date, status')
+          .eq('student_id', selectedStudent)
+          .gte('date', from)
+          .lt('date', to);
+
+        // Merge logic: If "Present" in ANY record for that date, student is Present.
+        const mergedMap = {};
+        (dailyAtt || []).forEach(a => {
+           mergedMap[a.date] = a.status;
+        });
+        (subjectAtt || []).forEach(a => {
+           // If already marked Present, keep it. If this one is Present, upgrade it.
+           if (mergedMap[a.date] !== 'Present') {
+             mergedMap[a.date] = a.status;
+           }
+        });
+
+        const finalAtt = Object.entries(mergedMap).map(([date, status]) => ({ date, status })).sort((a, b) => a.date.localeCompare(b.date));
+        setReportData({ student, attendance: finalAtt });
 
       } else if (activeTab === 'class-daily') {
         if (!selectedStandard) { alert('Select a standard'); setLoading(false); return; }
