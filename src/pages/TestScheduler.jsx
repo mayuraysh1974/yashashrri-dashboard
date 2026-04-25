@@ -544,18 +544,18 @@ const TestScheduler = () => {
                       <td style={{ padding: '0.75rem 1rem', fontSize: '0.9rem', fontWeight: 600, color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span>{res.studentName}</span>
-                          {activeTest?.test_type === 'CET' && (
+                          {activeTest?.test_type === 'CET' && res.isEntrance && (
                             <span style={{ 
                               fontSize: '0.6rem', 
                               padding: '2px 6px', 
                               borderRadius: '4px', 
-                              backgroundColor: res.isEntrance ? '#ECFDF5' : '#FEF2F2', 
-                              color: res.isEntrance ? '#059669' : '#EF4444',
-                              border: `1px solid ${res.isEntrance ? '#10B981' : '#FECACA'}`,
+                              backgroundColor: '#ECFDF5', 
+                              color: '#059669',
+                              border: '1px solid #10B981',
                               fontWeight: 700,
                               textTransform: 'uppercase'
                             }}>
-                              {res.isEntrance ? 'Entrance' : 'Track Not Set'}
+                              Entrance
                             </span>
                           )}
                         </div>
