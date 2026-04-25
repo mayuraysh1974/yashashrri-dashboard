@@ -491,12 +491,12 @@ const TestScheduler = () => {
               />
             </div>
 
-            <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1rem', backgroundColor: 'var(--bg-main)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.25rem', backgroundColor: 'var(--bg-main)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-color)', textAlign: 'left' }}>
-                    <th style={{ padding: '0.5rem', fontSize: '0.8rem' }}>Student Name</th>
-                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'right' }}>Score</th>
+                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', width: '70%' }}>Student Name</th>
+                    <th style={{ padding: '0.5rem', fontSize: '0.8rem', textAlign: 'right', width: '30%' }}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -504,7 +504,7 @@ const TestScheduler = () => {
                     const originalIndex = studentResults.findIndex(sr => sr.studentId === res.studentId);
                     return (
                      <tr key={res.studentId} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                      <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>{res.studentName}</td>
+                      <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', white-space: 'nowrap' }}>{res.studentName}</td>
                       <td style={{ padding: '0.5rem', textAlign: 'right' }}>
                         <input 
                           type="text" 
