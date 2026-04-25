@@ -406,7 +406,7 @@ const TeacherManagement = () => {
                                 <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{p.date}</div>
                             </div>
-                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--success-green)', whiteSpace: 'nowrap' }}>- ₹{p.amount.toLocaleString()}</div>
+                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--success-green)', whiteSpace: 'nowrap' }}>₹{p.amount.toLocaleString()}</div>
                         </div>
                     ))}
                 </div>
