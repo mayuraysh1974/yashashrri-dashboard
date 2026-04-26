@@ -9,7 +9,15 @@ const DigitalLibrary = () => {
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadFiles, setUploadFiles] = useState([]);
-  const [formData, setFormData] = useState({ name: '', standard: '', videoLink: '' });
+  const [formData, setFormData] = useState({ name: '', standard: '', videoLink: '', category: 'General' });
+
+  const CATEGORIES = ['Animations', 'Videos', 'PDF Notes', 'Assignments', 'General'];
+
+  const parseResourceName = (name) => {
+    const match = (name || '').match(/^\[(.*?)\]\s*(.*)$/);
+    if (match) return { category: match[1], title: match[2] };
+    return { category: 'General', title: name || 'Untitled' };
+  };
 
   useEffect(() => {
     fetchResources();
@@ -51,10 +59,11 @@ const DigitalLibrary = () => {
           const { data: publicUrlData } = supabase.storage.from('library-files').getPublicUrl(filePath);
           const fileUrl = publicUrlData?.publicUrl || null;
 
-          const recordName = uploadFiles.length > 1 ? file.name : (formData.name || file.name);
+          const baseName = uploadFiles.length > 1 ? file.name : (formData.name || file.name);
+          const finalName = formData.category !== 'General' ? `[${formData.category}] ${baseName}` : baseName;
 
           const { error: insError } = await supabase.from('library_resources').insert({
-            name: recordName,
+            name: finalName,
             standard: formData.standard,
             video_link: fileUrl,
             type: 'file',
@@ -64,8 +73,9 @@ const DigitalLibrary = () => {
           if (insError) throw insError;
         }
       } else if (formData.videoLink) {
+        const finalName = formData.category !== 'General' ? `[${formData.category}] ${formData.name}` : formData.name;
         const { error } = await supabase.from('library_resources').insert({
-          name: formData.name,
+          name: finalName,
           standard: formData.standard,
           video_link: formData.videoLink,
           type: 'video',
@@ -76,7 +86,7 @@ const DigitalLibrary = () => {
 
       setShowModal(false);
       setUploadFiles([]);
-      setFormData({ name: '', standard: '', videoLink: '' });
+      setFormData({ name: '', standard: '', videoLink: '', category: 'General' });
       fetchResources();
     } catch (err) {
       alert('Error during upload: ' + err.message);
@@ -152,12 +162,17 @@ const DigitalLibrary = () => {
                     <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
                   ) : resources.length === 0 ? (
                     <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8' }}>No records.</td></tr>
-                  ) : resources.map((r, i) => (
+                  ) : resources.map((r, i) => {
+                    const parsed = parseResourceName(r.name);
+                    return (
                     <tr key={r.id || i} style={{ borderBottom: '1px solid #E2E8F0' }}>
                       <td style={{ padding: '0.75rem 1rem' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                           <FiFile color="#1A237E" size={18} />
-                          <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B' }}>{r.name}</span>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B' }}>{parsed.title}</span>
+                            {parsed.category !== 'General' && <span style={{ fontSize: '0.65rem', color: '#B8860B', fontWeight: 700 }}>📁 {parsed.category}</span>}
+                          </div>
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem 1rem', color: '#64748B', fontSize: '0.8rem', fontWeight: 700 }}>{r.standard}</td>
@@ -174,11 +189,16 @@ const DigitalLibrary = () => {
             </div>
 
             <div className="mobile-only" style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
-               {resources.map((r, i) => (
+               {resources.map((r, i) => {
+                  const parsed = parseResourceName(r.name);
+                  return (
                   <div key={r.id || i} className="card-base" style={{ padding: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>{r.name}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>Std: {r.standard} • {r.date}</div>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>{parsed.title}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>
+                           {parsed.category !== 'General' && <span style={{ color: '#B8860B', fontWeight: 700, marginRight: '4px' }}>📁 {parsed.category}</span>}
+                           Std: {r.standard} • {r.date}
+                        </div>
                      </div>
                      <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <a href={r.video_link || r.videoLink} target="_blank" rel="noopener noreferrer" style={{ color: '#B8860B', padding: '0.5rem' }}><FiEye size={18} /></a>
@@ -201,6 +221,15 @@ const DigitalLibrary = () => {
             </div>
             
             <div style={{ display: 'grid', gap: '1rem' }}>
+              <div className="input-group">
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Folder / Category</label>
+                <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }}>
+                  {CATEGORIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="input-group">
                 <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Title</label>
                 <input type="text" placeholder="e.g. Physics Ch 2 Notes" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }} />

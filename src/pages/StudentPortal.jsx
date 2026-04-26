@@ -20,6 +20,7 @@ const StudentPortal = () => {
   const [results, setResults] = useState([]);
   const [library, setLibrary] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [selectedFolder, setSelectedFolder] = useState(null);
 
   // Profile Edit States
   const [newPassword, setNewPassword] = useState('');
@@ -158,7 +159,24 @@ const StudentPortal = () => {
     setResults([]);
     setLibrary([]);
     setPayments([]);
+    setSelectedFolder(null);
   };
+
+  const parseResourceName = (name) => {
+    const match = (name || '').match(/^\[(.*?)\]\s*(.*)$/);
+    if (match) return { category: match[1], title: match[2] };
+    return { category: 'General', title: name || 'Untitled' };
+  };
+
+  const groupedLibrary = React.useMemo(() => {
+    const groups = {};
+    library.forEach(file => {
+      const parsed = parseResourceName(file.name);
+      if (!groups[parsed.category]) groups[parsed.category] = [];
+      groups[parsed.category].push({ ...file, parsedTitle: parsed.title });
+    });
+    return groups;
+  }, [library]);
 
 
   if (!student) {
@@ -369,33 +387,58 @@ const StudentPortal = () => {
            )}
 
            {activeTab === 'library' && (
-             <div className="animate-in" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
-                {library.length === 0 ? <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94A3B8' }}>No library resources assigned yet.</p> : library.map(file => (
-                  <div key={file.id} className="card-base" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                     <div style={{ padding: '1rem', backgroundColor: '#F8FAFC', borderRadius: '10px', textAlign: 'center' }}>
-                        <FiBookOpen size={30} color="#1A237E" />
-                     </div>
-                     <div style={{ flex: 1 }}>
-                        <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#1E293B', lineHeight: '1.4' }}>{file.name}</h4>
-                        <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 600 }}>Added: {file.date}</p>
-                     </div>
-                      <a href={file.video_link || file.videoLink} target="_blank" rel="noreferrer" style={{ 
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        backgroundColor: '#1A237E',
-                        color: 'white',
-                        padding: '0.75rem',
-                        borderRadius: '8px',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
-                        textDecoration: 'none'
-                      }}>
-                        <FiDownload /> Download Note
-                      </a>
-                  </div>
-                ))}
+             <div className="animate-in">
+               {!selectedFolder ? (
+                 <>
+                   <h3 style={{ color: '#1A237E', marginBottom: '1rem', fontSize: '1.1rem' }}>Resource Folders</h3>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: '1.25rem' }}>
+                     {Object.keys(groupedLibrary).length === 0 ? <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '4rem', color: '#94A3B8' }}>No library resources assigned yet.</p> : null}
+                     
+                     {Object.entries(groupedLibrary).map(([category, files]) => (
+                       <div key={category} className="card-base" onClick={() => setSelectedFolder(category)} style={{ padding: '1.5rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                         <div style={{ fontSize: '3rem' }}>📁</div>
+                         <h4 style={{ margin: 0, color: '#1A237E', fontSize: '1rem' }}>{category}</h4>
+                         <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>{files.length} items</p>
+                       </div>
+                     ))}
+                   </div>
+                 </>
+               ) : (
+                 <>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                     <button onClick={() => setSelectedFolder(null)} className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>← Back to Folders</button>
+                     <h3 style={{ color: '#1A237E', margin: 0, fontSize: '1.1rem' }}>📁 {selectedFolder}</h3>
+                   </div>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
+                      {groupedLibrary[selectedFolder]?.map(file => (
+                        <div key={file.id} className="card-base" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                           <div style={{ padding: '1rem', backgroundColor: '#F8FAFC', borderRadius: '10px', textAlign: 'center' }}>
+                              <FiBookOpen size={30} color="#1A237E" />
+                           </div>
+                           <div style={{ flex: 1 }}>
+                              <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#1E293B', lineHeight: '1.4' }}>{file.parsedTitle}</h4>
+                              <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 600 }}>Added: {file.date}</p>
+                           </div>
+                            <a href={file.video_link || file.videoLink} target="_blank" rel="noreferrer" style={{ 
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              backgroundColor: '#1A237E',
+                              color: 'white',
+                              padding: '0.75rem',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                              textDecoration: 'none'
+                            }}>
+                              <FiDownload /> Access Resource
+                            </a>
+                        </div>
+                      ))}
+                   </div>
+                 </>
+               )}
              </div>
            )}
 
