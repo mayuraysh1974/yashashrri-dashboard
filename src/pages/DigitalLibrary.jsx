@@ -10,6 +10,14 @@ const DigitalLibrary = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadFiles, setUploadFiles] = useState([]);
   const [formData, setFormData] = useState({ name: '', standard: '', videoLink: '', category: 'General' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [deletingAll, setDeletingAll] = useState(false);
+
+  const filteredResources = resources.filter(r => {
+    if (!searchTerm) return true;
+    const searchLower = searchTerm.toLowerCase();
+    return r.name?.toLowerCase().includes(searchLower) || r.video_link?.toLowerCase().includes(searchLower);
+  });
 
   const CATEGORIES = ['Animations', 'Videos', 'PDF Notes', 'Assignments', 'General'];
 
@@ -117,6 +125,25 @@ const DigitalLibrary = () => {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${filteredResources.length} filtered resources? This cannot be undone.`)) return;
+    setDeletingAll(true);
+    for (const resource of filteredResources) {
+      if (resource.video_link && resource.video_link.includes('supabase.co')) {
+        try {
+          const urlParts = resource.video_link.split('/');
+          const filePath = urlParts.slice(urlParts.indexOf('library-files') + 1).join('/');
+          if (filePath) await supabase.storage.from('library-files').remove([filePath]);
+        } catch (err) {
+          console.error('Failed to delete file from storage:', err);
+        }
+      }
+      await supabase.from('library_resources').delete().eq('id', resource.id);
+    }
+    setDeletingAll(false);
+    fetchResources();
+  };
+
   return (
     <div className="digital-library-container" style={{ height: '100%', display: 'flex', flexDirection: 'column', padding: '1.25rem' }}>
       <div className="page-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
@@ -143,8 +170,16 @@ const DigitalLibrary = () => {
         </div>
 
         <div className="card-base" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '1rem', borderBottom: '1px solid #E2E8F0', backgroundColor: '#F8FAFC' }}>
+          <div style={{ padding: '1rem', borderBottom: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ color: '#1A237E', fontSize: '1rem', margin: 0 }}>Recent Uploads</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', flex: 1, minWidth: '250px', justifyContent: 'flex-end' }}>
+              <input type="text" placeholder="Search title or extension (e.g. .html)" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem', flex: 1, maxWidth: '200px' }} />
+              {searchTerm && filteredResources.length > 0 && (
+                <button onClick={handleDeleteAll} disabled={deletingAll} style={{ backgroundColor: '#EF4444', color: 'white', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                   <FiTrash2 /> {deletingAll ? 'Deleting...' : `Delete All (${filteredResources.length})`}
+                </button>
+              )}
+            </div>
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -160,9 +195,9 @@ const DigitalLibrary = () => {
                 <tbody>
                   {loading ? (
                     <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</td></tr>
-                  ) : resources.length === 0 ? (
+                  ) : filteredResources.length === 0 ? (
                     <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#94A3B8' }}>No records.</td></tr>
-                  ) : resources.map((r, i) => {
+                  ) : filteredResources.map((r, i) => {
                     const parsed = parseResourceName(r.name);
                     return (
                     <tr key={r.id || i} style={{ borderBottom: '1px solid #E2E8F0' }}>
@@ -190,7 +225,7 @@ const DigitalLibrary = () => {
             </div>
 
             <div className="mobile-only" style={{ display: 'grid', gap: '0.75rem', padding: '1rem' }}>
-               {resources.map((r, i) => {
+               {filteredResources.map((r, i) => {
                   const parsed = parseResourceName(r.name);
                   return (
                   <div key={r.id || i} className="card-base" style={{ padding: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
@@ -208,7 +243,7 @@ const DigitalLibrary = () => {
                   </div>
                   );
                })}
-               {resources.length === 0 && !loading && <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No resources found.</p>}
+               {filteredResources.length === 0 && !loading && <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No resources found.</p>}
             </div>
           </div>
         </div>
