@@ -178,6 +178,23 @@ const StudentPortal = () => {
     return groups;
   }, [library]);
 
+  const handleResourceClick = async (e, url) => {
+    if (!url) return;
+    if (url.toLowerCase().endsWith('.html') || url.toLowerCase().includes('.html?')) {
+      e.preventDefault();
+      try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const newWindow = window.open('', '_blank');
+        newWindow.document.write(html);
+        newWindow.document.close();
+      } catch (err) {
+        console.error("Failed to load HTML", err);
+        window.open(url, '_blank');
+      }
+    }
+  };
+
 
   if (!student) {
     return (
@@ -419,7 +436,7 @@ const StudentPortal = () => {
                               <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.85rem', color: '#1E293B', lineHeight: '1.4' }}>{file.parsedTitle}</h4>
                               <p style={{ fontSize: '0.65rem', color: '#64748B', fontWeight: 600 }}>Added: {file.date}</p>
                            </div>
-                            <a href={file.video_link || file.videoLink} target="_blank" rel="noreferrer" style={{ 
+                            <a href={file.video_link || file.videoLink} onClick={(e) => handleResourceClick(e, file.video_link || file.videoLink)} target="_blank" rel="noreferrer" style={{ 
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
