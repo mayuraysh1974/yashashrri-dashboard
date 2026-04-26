@@ -183,7 +183,8 @@ const DigitalLibrary = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -205,7 +206,8 @@ const DigitalLibrary = () => {
                         <button onClick={() => handleDelete(r)} style={{ background: 'none', border: 'none', color: '#EF4444', padding: '0.5rem' }}><FiTrash2 size={18} /></button>
                      </div>
                   </div>
-               ))}
+                  );
+               })}
                {resources.length === 0 && !loading && <p style={{ textAlign: 'center', color: '#94A3B8', padding: '2rem' }}>No resources found.</p>}
             </div>
           </div>
