@@ -52,7 +52,7 @@ const DigitalLibrary = () => {
           
           const { error: storageError } = await supabase.storage
             .from('library-files')
-            .upload(filePath, file, { cacheControl: '3600', upsert: false });
+            .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: file.type });
           
           if (storageError) throw storageError;
 
@@ -248,8 +248,8 @@ const DigitalLibrary = () => {
               </div>
 
               <div className="input-group">
-                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>File Upload (PDF/Image)</label>
-                <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.png" onChange={e => setUploadFiles(Array.from(e.target.files))} style={{ width: '100%', fontSize: '0.8rem' }} />
+                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>File Upload (PDF/Image/HTML)</label>
+                <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.png,.html" onChange={e => setUploadFiles(Array.from(e.target.files))} style={{ width: '100%', fontSize: '0.8rem' }} />
               </div>
 
               <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.7rem', fontWeight: 800 }}>OR</div>
