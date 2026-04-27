@@ -28,6 +28,17 @@ const FeesPayment = () => {
     remarks: 'Dropped Subject Refund'
   });
 
+  const [chequeData, setChequeData] = useState({
+    bank: '',
+    branch: '',
+    chequeDate: new Date().toISOString().split('T')[0],
+    chequeNo: ''
+  });
+
+  const [showChequeModal, setShowChequeModal] = useState(false);
+  const [editingCheque, setEditingCheque] = useState(null);
+  const [chequeUpdateData, setChequeUpdateData] = useState({ depositDate: '', clearanceDate: '' });
+
   const fetchStudents = async () => {
     const { data: stuData } = await supabase.from('students').select('*, student_subjects(subject_id)').order('name');
     const { data: subData } = await supabase.from('subjects').select('id, name');
@@ -68,7 +79,8 @@ const FeesPayment = () => {
         studentId: f.student_id,
         amountPaid: f.amount_paid,
         paymentDate: f.payment_date,
-        paymentMode: f.payment_mode
+        paymentMode: f.payment_mode,
+        chequeDetails: f.cheque_details
       })));
     }
   };
@@ -111,13 +123,27 @@ const FeesPayment = () => {
     const amount = Number(formData.amountPaid);
 
     // 1. Record the receipt
-    const { error: feeErr } = await supabase.from('fees').insert({
+    const payload = {
       student_id: formData.studentId,
       amount_paid: amount,
       payment_date: formData.paymentDate,
       payment_mode: formData.paymentMode,
       remarks: formData.remarks
-    });
+    };
+
+    if (formData.paymentMode === 'Cheque') {
+      if (!chequeData.bank || !chequeData.chequeNo) return alert('Please provide Bank Name and Cheque Number.');
+      payload.cheque_details = {
+        bank: chequeData.bank,
+        branch: chequeData.branch,
+        chequeNo: chequeData.chequeNo,
+        chequeDate: chequeData.chequeDate,
+        depositDate: null,
+        clearanceDate: null
+      };
+    }
+
+    const { error: feeErr } = await supabase.from('fees').insert(payload);
 
     if (feeErr) return alert(feeErr.message);
 
@@ -145,9 +171,33 @@ const FeesPayment = () => {
       });
       setShowModal(false);
       setStudentSearch('');
+      setChequeData({ bank: '', branch: '', chequeDate: new Date().toISOString().split('T')[0], chequeNo: '' });
       fetchStudents();
       fetchHistory();
     }
+  };
+
+  const handleOpenChequeUpdate = (fee) => {
+    setEditingCheque(fee);
+    setChequeUpdateData({
+      depositDate: fee.chequeDetails?.depositDate || '',
+      clearanceDate: fee.chequeDetails?.clearanceDate || ''
+    });
+    setShowChequeModal(true);
+  };
+
+  const handleSaveChequeUpdate = async () => {
+    const newDetails = {
+      ...editingCheque.chequeDetails,
+      depositDate: chequeUpdateData.depositDate,
+      clearanceDate: chequeUpdateData.clearanceDate
+    };
+
+    const { error } = await supabase.from('fees').update({ cheque_details: newDetails }).eq('id', editingCheque.id);
+    if (error) return alert(error.message);
+    
+    setShowChequeModal(false);
+    fetchHistory();
   };
 
   const handleSaveRefund = async () => {
@@ -210,7 +260,8 @@ const FeesPayment = () => {
       newBalance: fee.currentBalance,
       totalPaid: fee.totalPaid,
       concession: fee.concession,
-      grossFees: (fee.currentBalance + fee.totalPaid + fee.concession)
+      grossFees: (fee.currentBalance + fee.totalPaid + fee.concession),
+      chequeDetails: fee.chequeDetails
     });
   };
 
@@ -335,8 +386,21 @@ const FeesPayment = () => {
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'center' }}>
                       <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.6rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px' }}>{fee.paymentMode}</span>
+                      {fee.paymentMode === 'Cheque' && fee.chequeDetails && (
+                        <div style={{ fontSize: '0.65rem', marginTop: '4px', color: 'var(--text-secondary)' }}>
+                          No: {fee.chequeDetails.chequeNo} <br/>
+                          <span style={{ color: fee.chequeDetails.clearanceDate ? 'var(--success-green)' : fee.chequeDetails.depositDate ? 'var(--primary-blue)' : 'var(--text-muted)', fontWeight: 600 }}>
+                             {fee.chequeDetails.clearanceDate ? 'Cleared' : fee.chequeDetails.depositDate ? 'Deposited' : 'Pending'}
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
+                      {fee.paymentMode === 'Cheque' && (
+                        <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
+                          Status
+                        </button>
+                      )}
                       <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', gap: '0.3rem' }} onClick={() => handleReprint(fee)}>
                         <FiPrinter size={12} /> Reprint
                       </button>
@@ -369,6 +433,9 @@ const FeesPayment = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem', marginTop: '0.25rem' }}>
+                  {fee.paymentMode === 'Cheque' && (
+                    <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem', color: 'var(--primary-blue)' }} onClick={() => handleOpenChequeUpdate(fee)}>Update Cheque</button>
+                  )}
                   <button className="btn-secondary" style={{ flex: 1, padding: '0.5rem', fontSize: '0.7rem' }} onClick={() => handleReprint(fee)}><FiPrinter /> Reprint Receipt</button>
                   <button className="btn-secondary" style={{ flex: 0.3, padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => handleDeleteFee(fee.id)}><FiTrash2 /></button>
                 </div>
@@ -477,6 +544,27 @@ const FeesPayment = () => {
               </select>
             </div>
 
+            {formData.paymentMode === 'Cheque' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem', backgroundColor: 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label>Bank Name</label>
+                  <input type="text" placeholder="e.g. SBI" value={chequeData.bank} onChange={e => setChequeData({...chequeData, bank: e.target.value})} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label>Branch</label>
+                  <input type="text" placeholder="e.g. Main Branch" value={chequeData.branch} onChange={e => setChequeData({...chequeData, branch: e.target.value})} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label>Cheque No.</label>
+                  <input type="text" placeholder="000123" value={chequeData.chequeNo} onChange={e => setChequeData({...chequeData, chequeNo: e.target.value})} />
+                </div>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                  <label>Cheque Date</label>
+                  <input type="date" value={chequeData.chequeDate} onChange={e => setChequeData({...chequeData, chequeDate: e.target.value})} />
+                </div>
+              </div>
+            )}
+
             <div className="input-group" style={{ marginBottom: '2rem' }}>
                 <label>Remarks</label>
                 <input type="text" value={formData.remarks} onChange={e => setFormData({...formData, remarks: e.target.value})} />
@@ -569,6 +657,39 @@ const FeesPayment = () => {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
               <button className="btn-secondary" onClick={() => { setShowRefundModal(false); setStudentSearch(''); }}>Cancel</button>
               <button className="btn-primary" style={{ backgroundColor: 'var(--danger-red)', border: 'none' }} onClick={handleSaveRefund}>Process Refund</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showChequeModal && editingCheque && (
+        <div className="modal-overlay no-print">
+          <div className="card-base" style={{ width: '100%', maxWidth: '400px', padding: '1.5rem', backgroundColor: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.25rem', color: 'var(--primary-blue)', margin: 0 }}>Update Cheque Status</h2>
+              <button onClick={() => setShowChequeModal(false)} style={{ background: 'transparent', color: 'var(--text-secondary)', fontSize: '1.25rem', cursor: 'pointer', border: 'none' }}><FiX /></button>
+            </div>
+
+            <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', marginBottom: '1.5rem' }}>
+               <div style={{ fontWeight: 600, color: 'var(--primary-blue)' }}>{editingCheque.studentName}</div>
+               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Amount: ₹{editingCheque.amountPaid.toLocaleString()}</div>
+               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bank: {editingCheque.chequeDetails?.bank} - {editingCheque.chequeDetails?.branch}</div>
+               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Chq No: {editingCheque.chequeDetails?.chequeNo} (Dt: {editingCheque.chequeDetails?.chequeDate})</div>
+            </div>
+
+            <div className="input-group">
+              <label>Date of Deposit</label>
+              <input type="date" value={chequeUpdateData.depositDate} onChange={e => setChequeUpdateData({...chequeUpdateData, depositDate: e.target.value})} />
+            </div>
+
+            <div className="input-group" style={{ marginBottom: '2rem' }}>
+              <label>Date of Clearance</label>
+              <input type="date" value={chequeUpdateData.clearanceDate} onChange={e => setChequeUpdateData({...chequeUpdateData, clearanceDate: e.target.value})} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+              <button className="btn-secondary" onClick={() => setShowChequeModal(false)}>Cancel</button>
+              <button className="btn-primary" onClick={handleSaveChequeUpdate}>Save Status</button>
             </div>
           </div>
         </div>
@@ -701,6 +822,12 @@ const FeesPayment = () => {
                    <td style={{ padding: '12px' }}>
                       <div style={{ fontWeight: 600 }}>{successReceipt.amountPaid < 0 ? 'Fee Refund (Credit Note)' : 'Tuition Fees / Monthly Installment'}</div>
                       <div style={{ fontSize: '12px', color: '#64748B' }}>{successReceipt.remarks}</div>
+                      {successReceipt.paymentMode === 'Cheque' && successReceipt.chequeDetails && (
+                        <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>
+                           <strong>Cheque Details:</strong> No: {successReceipt.chequeDetails.chequeNo}, Date: {successReceipt.chequeDetails.chequeDate}, Bank: {successReceipt.chequeDetails.bank} ({successReceipt.chequeDetails.branch})<br/>
+                           <em>Subject to realization of cheque.</em>
+                        </div>
+                      )}
                    </td>
                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600, color: successReceipt.amountPaid < 0 ? 'red' : 'black' }}>
                       {successReceipt.amountPaid < 0 ? `- ₹${Math.abs(successReceipt.amountPaid).toLocaleString()}` : `₹${Number(successReceipt.amountPaid).toLocaleString()}`}
