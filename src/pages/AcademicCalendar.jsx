@@ -5,9 +5,18 @@ import { supabase } from '../supabaseClient';
 const AcademicCalendar = () => {
     const [holidays, setHolidays] = useState([]);
     const [workingDays, setWorkingDays] = useState([]);
+    const [standards, setStandards] = useState([]);
+    const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [holidayForm, setHolidayForm] = useState({ date: '', description: '', type: 'Holiday' });
+    const [holidayForm, setHolidayForm] = useState({ 
+        startDate: '', 
+        endDate: '', 
+        description: '', 
+        type: 'Holiday',
+        targetStandard: 'All',
+        targetSubject: 'All'
+    });
     const [workingDayForm, setWorkingDayForm] = useState({ month: new Date().toISOString().slice(0, 7), days: 24 });
 
     useEffect(() => {
@@ -15,24 +24,53 @@ const AcademicCalendar = () => {
     }, []);
 
     const fetchData = async () => {
-        const [{ data: hData }, { data: wData }] = await Promise.all([
+        const [{ data: hData }, { data: wData }, { data: sData }, { data: subData }] = await Promise.all([
             supabase.from('holidays').select('*').order('date', { ascending: true }),
-            supabase.from('working_days').select('*').order('month', { ascending: true })
+            supabase.from('working_days').select('*').order('month', { ascending: true }),
+            supabase.from('standards').select('*').order('standard', { ascending: true }),
+            supabase.from('subjects').select('*').order('name', { ascending: true })
         ]);
         setHolidays(hData || []);
         setWorkingDays(wData || []);
+        setStandards(sData || []);
+        setSubjects(subData || []);
         setLoading(false);
     };
 
+    const getDatesInRange = (start, end) => {
+        const dates = [];
+        let curr = new Date(start);
+        const last = new Date(end || start);
+        while (curr <= last) {
+            dates.push(new Date(curr).toISOString().split('T')[0]);
+            curr.setDate(curr.getDate() + 1);
+        }
+        return dates;
+    };
+
     const handleAddHoliday = async () => {
-        if (!holidayForm.date || !holidayForm.description) return alert('Date and description are required');
-        const { error } = await supabase.from('holidays').insert({
-            date: holidayForm.date,
-            description: holidayForm.description,
+        if (!holidayForm.startDate || !holidayForm.description) return alert('Start Date and description are required');
+        
+        const dates = getDatesInRange(holidayForm.startDate, holidayForm.endDate || holidayForm.startDate);
+        
+        // Format description with tags
+        let finalDesc = holidayForm.description;
+        if (holidayForm.targetStandard !== 'All') finalDesc = `[Std: ${holidayForm.targetStandard}] ${finalDesc}`;
+        if (holidayForm.targetSubject !== 'All') finalDesc = `[Sub: ${holidayForm.targetSubject}] ${finalDesc}`;
+
+        const inserts = dates.map(d => ({
+            date: d,
+            description: finalDesc,
             type: holidayForm.type
-        });
+        }));
+
+        const { error } = await supabase.from('holidays').upsert(inserts, { onConflict: 'date,description' });
+        
         if (!error) {
-            setHolidayForm({ date: '', description: '', type: 'Holiday' });
+            setHolidayForm({ 
+                startDate: '', endDate: '', description: '', type: 'Holiday',
+                targetStandard: 'All', targetSubject: 'All'
+            });
             fetchData();
         } else {
             alert('Error: ' + error.message);
@@ -134,24 +172,48 @@ const AcademicCalendar = () => {
                     </h3>
                     
                     {/* Add Holiday Form */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem', backgroundColor: '#F8FAFC', padding: '1rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-                        <div className="input-group" style={{ marginBottom: 0 }}>
-                            <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Date</label>
-                            <input type="date" value={holidayForm.date} onChange={e => setHolidayForm({...holidayForm, date: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem', backgroundColor: '#F8FAFC', padding: '1.25rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                            <div className="input-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Start Date</label>
+                                <input type="date" value={holidayForm.startDate} onChange={e => setHolidayForm({...holidayForm, startDate: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }} />
+                            </div>
+                            <div className="input-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>End Date (Opt)</label>
+                                <input type="date" value={holidayForm.endDate} onChange={e => setHolidayForm({...holidayForm, endDate: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }} />
+                            </div>
+                            <div className="input-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Type</label>
+                                <select value={holidayForm.type} onChange={e => setHolidayForm({...holidayForm, type: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }}>
+                                    <option value="Holiday">Full Holiday</option>
+                                    <option value="No Class">No Class</option>
+                                    <option value="Half Day">Half Day</option>
+                                </select>
+                            </div>
                         </div>
-                        <div className="input-group" style={{ marginBottom: 0 }}>
-                            <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Type</label>
-                            <select value={holidayForm.type} onChange={e => setHolidayForm({...holidayForm, type: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }}>
-                                <option value="Holiday">Full Holiday</option>
-                                <option value="No Class">No Class</option>
-                                <option value="Half Day">Half Day</option>
-                            </select>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                            <div className="input-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>For Class / Standard</label>
+                                <select value={holidayForm.targetStandard} onChange={e => setHolidayForm({...holidayForm, targetStandard: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }}>
+                                    <option value="All">All Classes</option>
+                                    {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+                                </select>
+                            </div>
+                            <div className="input-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>For Subject</label>
+                                <select value={holidayForm.targetSubject} onChange={e => setHolidayForm({...holidayForm, targetSubject: e.target.value})} style={{ padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', width: '100%' }}>
+                                    <option value="All">All Subjects</option>
+                                    {subjects.map(sub => <option key={sub.id} value={sub.name}>{sub.name}</option>)}
+                                </select>
+                            </div>
                         </div>
-                        <div className="input-group" style={{ gridColumn: 'span 2', marginBottom: 0 }}>
-                            <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Description</label>
+
+                        <div className="input-group" style={{ marginBottom: 0 }}>
+                            <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Description / Reason</label>
                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input type="text" placeholder="e.g. Diwali Break" value={holidayForm.description} onChange={e => setHolidayForm({...holidayForm, description: e.target.value})} style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1' }} />
-                                <button className="btn-primary" onClick={handleAddHoliday} style={{ padding: '0.5rem 1rem' }}><FiPlus /></button>
+                                <input type="text" placeholder="e.g. Diwali Break / Exam Prep" value={holidayForm.description} onChange={e => setHolidayForm({...holidayForm, description: e.target.value})} style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1' }} />
+                                <button className="btn-primary" onClick={handleAddHoliday} style={{ padding: '0.5rem 1rem' }}><FiPlus /> Save Holiday(s)</button>
                             </div>
                         </div>
                     </div>
@@ -169,38 +231,64 @@ const AcademicCalendar = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {holidays.map(h => (
-                                        <tr key={h.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
-                                            <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{h.date}</td>
-                                            <td style={{ padding: '0.75rem', fontWeight: 600, fontSize: '0.85rem' }}>{h.description}</td>
-                                            <td style={{ padding: '0.75rem' }}>
-                                                <span style={{ 
-                                                    fontSize: '0.65rem', padding: '2px 8px', borderRadius: '12px',
-                                                    background: h.type === 'Holiday' ? '#FEE2E2' : h.type === 'Half Day' ? '#FEF3C7' : '#E0E7FF',
-                                                    color: h.type === 'Holiday' ? '#B91C1C' : h.type === 'Half Day' ? '#92400E' : '#3730A3',
-                                                    fontWeight: 800, textTransform: 'uppercase'
-                                                }}>{h.type}</span>
-                                            </td>
-                                            <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                                <button onClick={() => handleDeleteHoliday(h.id)} style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer' }}><FiTrash2 /></button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {holidays.map(h => {
+                                        // Parse tags
+                                        const stdMatch = h.description.match(/\[Std: (.*?)\]/);
+                                        const subMatch = h.description.match(/\[Sub: (.*?)\]/);
+                                        const cleanDesc = h.description.replace(/\[Std: .*?\]/g, '').replace(/\[Sub: .*?\]/g, '').trim();
+
+                                        return (
+                                            <tr key={h.id} style={{ borderBottom: '1px solid #E2E8F0' }}>
+                                                <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>{new Date(h.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{cleanDesc}</div>
+                                                    <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.25rem' }}>
+                                                        {stdMatch && <span style={{ fontSize: '0.65rem', background: '#E0F2FE', color: '#0369A1', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>{stdMatch[1]}</span>}
+                                                        {subMatch && <span style={{ fontSize: '0.65rem', background: '#F0FDF4', color: '#166534', padding: '1px 6px', borderRadius: '4px', fontWeight: 700 }}>{subMatch[1]}</span>}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    <span style={{ 
+                                                        fontSize: '0.65rem', padding: '2px 8px', borderRadius: '12px',
+                                                        background: h.type === 'Holiday' ? '#FEE2E2' : h.type === 'Half Day' ? '#FEF3C7' : '#E0E7FF',
+                                                        color: h.type === 'Holiday' ? '#B91C1C' : h.type === 'Half Day' ? '#92400E' : '#3730A3',
+                                                        fontWeight: 800, textTransform: 'uppercase'
+                                                    }}>{h.type}</span>
+                                                </td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                                    <button onClick={() => handleDeleteHoliday(h.id)} style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer' }}><FiTrash2 /></button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
 
                         {/* Mobile List View */}
                         <div className="mobile-only" style={{ display: 'grid', gap: '0.75rem' }}>
-                            {holidays.map(h => (
-                                <div key={h.id} className="card-base" style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
-                                    <div>
-                                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>{h.description}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>{h.date} • {h.type}</div>
+                            {holidays.map(h => {
+                                const stdMatch = h.description.match(/\[Std: (.*?)\]/);
+                                const subMatch = h.description.match(/\[Sub: (.*?)\]/);
+                                const cleanDesc = h.description.replace(/\[Std: .*?\]/g, '').replace(/\[Sub: .*?\]/g, '').trim();
+
+                                return (
+                                    <div key={h.id} className="card-base" style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F8FAFC' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E293B' }}>{cleanDesc}</div>
+                                            <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>
+                                                {h.date} • {h.type}
+                                                {(stdMatch || subMatch) && (
+                                                    <span style={{ marginLeft: '0.5rem', color: 'var(--primary-blue)', fontWeight: 600 }}>
+                                                        ({stdMatch ? stdMatch[1] : ''}{stdMatch && subMatch ? ' - ' : ''}{subMatch ? subMatch[1] : ''})
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button onClick={() => handleDeleteHoliday(h.id)} style={{ color: '#EF4444', background: 'none', border: 'none', padding: '0.5rem' }}><FiTrash2 /></button>
                                     </div>
-                                    <button onClick={() => handleDeleteHoliday(h.id)} style={{ color: '#EF4444', background: 'none', border: 'none', padding: '0.5rem' }}><FiTrash2 /></button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {holidays.length === 0 && !loading && (
