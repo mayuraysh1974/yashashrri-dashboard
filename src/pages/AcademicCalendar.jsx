@@ -17,6 +17,29 @@ const AcademicCalendar = () => {
         targetStandards: [],
         targetSubjects: []
     });
+
+    const toggleAllStandards = () => {
+        if (holidayForm.targetStandards.length === standards.length) {
+            setHolidayForm({...holidayForm, targetStandards: []});
+        } else {
+            setHolidaysForm({...holidayForm, targetStandards: standards.map(s => s.standard)});
+        }
+    };
+
+    // Correcting the state update in the helper
+    const handleToggleAllStandards = () => {
+        setHolidayForm(prev => ({
+            ...prev,
+            targetStandards: prev.targetStandards.length === standards.length ? [] : standards.map(s => s.standard)
+        }));
+    };
+
+    const handleToggleAllSubjects = () => {
+        setHolidayForm(prev => ({
+            ...prev,
+            targetSubjects: prev.targetSubjects.length === subjects.length ? [] : subjects.map(s => s.name)
+        }));
+    };
     const [workingDayForm, setWorkingDayForm] = useState({ month: new Date().toISOString().slice(0, 7), days: 24 });
 
     useEffect(() => {
@@ -196,52 +219,79 @@ const AcademicCalendar = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                             <div className="input-group" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Target Classes ({holidayForm.targetStandards.length || 'All'})</label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                                    <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B', margin: 0 }}>Target Classes</label>
+                                    <button onClick={handleToggleAllStandards} style={{ fontSize: '0.65rem', background: 'none', border: 'none', color: 'var(--primary-blue)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
+                                        {holidayForm.targetStandards.length === standards.length ? 'Clear All' : 'Select All'}
+                                    </button>
+                                </div>
                                 <div style={{ 
-                                    maxHeight: '120px', overflowY: 'auto', border: '1px solid #CBD5E1', 
-                                    borderRadius: '6px', padding: '0.5rem', backgroundColor: 'white' 
+                                    display: 'flex', flexWrap: 'wrap', gap: '0.4rem', maxHeight: '140px', overflowY: 'auto',
+                                    padding: '0.5rem', background: '#fff', borderRadius: '8px', border: '1px solid #CBD5E1'
                                 }}>
-                                    {standards.map(s => (
-                                        <label key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={holidayForm.targetStandards.includes(s.standard)}
-                                                onChange={e => {
-                                                    const newStds = e.target.checked 
-                                                        ? [...holidayForm.targetStandards, s.standard]
-                                                        : holidayForm.targetStandards.filter(item => item !== s.standard);
+                                    {standards.map(s => {
+                                        const isSelected = holidayForm.targetStandards.includes(s.standard);
+                                        return (
+                                            <div 
+                                                key={s.id}
+                                                onClick={() => {
+                                                    const newStds = isSelected 
+                                                        ? holidayForm.targetStandards.filter(i => i !== s.standard)
+                                                        : [...holidayForm.targetStandards, s.standard];
                                                     setHolidayForm({...holidayForm, targetStandards: newStds});
                                                 }}
-                                            />
-                                            {s.standard}
-                                        </label>
-                                    ))}
+                                                style={{ 
+                                                    padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600,
+                                                    cursor: 'pointer', transition: 'all 0.2s',
+                                                    backgroundColor: isSelected ? 'var(--primary-blue)' : '#F1F5F9',
+                                                    color: isSelected ? '#fff' : '#475569',
+                                                    border: `1px solid ${isSelected ? 'var(--primary-blue)' : '#E2E8F0'}`,
+                                                }}
+                                            >
+                                                {s.standard}
+                                            </div>
+                                        );
+                                    })}
                                     {standards.length === 0 && <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>No standards found</span>}
                                 </div>
                             </div>
+
                             <div className="input-group" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B' }}>Target Subjects ({holidayForm.targetSubjects.length || 'All'})</label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                                    <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B', margin: 0 }}>Target Subjects</label>
+                                    <button onClick={handleToggleAllSubjects} style={{ fontSize: '0.65rem', background: 'none', border: 'none', color: 'var(--primary-blue)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
+                                        {holidayForm.targetSubjects.length === subjects.length ? 'Clear All' : 'Select All'}
+                                    </button>
+                                </div>
                                 <div style={{ 
-                                    maxHeight: '120px', overflowY: 'auto', border: '1px solid #CBD5E1', 
-                                    borderRadius: '6px', padding: '0.5rem', backgroundColor: 'white' 
+                                    display: 'flex', flexWrap: 'wrap', gap: '0.4rem', maxHeight: '140px', overflowY: 'auto',
+                                    padding: '0.5rem', background: '#fff', borderRadius: '8px', border: '1px solid #CBD5E1'
                                 }}>
-                                    {subjects.map(sub => (
-                                        <label key={sub.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.2rem 0', cursor: 'pointer', fontSize: '0.85rem' }}>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={holidayForm.targetSubjects.includes(sub.name)}
-                                                onChange={e => {
-                                                    const newSubs = e.target.checked 
-                                                        ? [...holidayForm.targetSubjects, sub.name]
-                                                        : holidayForm.targetSubjects.filter(item => item !== sub.name);
+                                    {subjects.map(sub => {
+                                        const isSelected = holidayForm.targetSubjects.includes(sub.name);
+                                        return (
+                                            <div 
+                                                key={sub.id}
+                                                onClick={() => {
+                                                    const newSubs = isSelected 
+                                                        ? holidayForm.targetSubjects.filter(i => i !== sub.name)
+                                                        : [...holidayForm.targetSubjects, sub.name];
                                                     setHolidayForm({...holidayForm, targetSubjects: newSubs});
                                                 }}
-                                            />
-                                            {sub.name}
-                                        </label>
-                                    ))}
+                                                style={{ 
+                                                    padding: '0.35rem 0.75rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600,
+                                                    cursor: 'pointer', transition: 'all 0.2s',
+                                                    backgroundColor: isSelected ? 'var(--success-green)' : '#F1F5F9',
+                                                    color: isSelected ? '#fff' : '#475569',
+                                                    border: `1px solid ${isSelected ? 'var(--success-green)' : '#E2E8F0'}`,
+                                                }}
+                                            >
+                                                {sub.name}
+                                            </div>
+                                        );
+                                    })}
                                     {subjects.length === 0 && <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>No subjects found</span>}
                                 </div>
                             </div>
