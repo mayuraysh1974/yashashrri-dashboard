@@ -757,7 +757,7 @@ const StudentManagement = () => {
                <img src="/logo.png" alt="Yashashrri Logo" style={{ maxWidth: '450px', height: 'auto' }} onError={(e) => { e.target.style.display = 'none'; }} />
                <p style={{ margin: '1rem 0 0.2rem 0', fontSize: '0.75rem', color: '#333', lineHeight: '1.5', whiteSpace: 'nowrap' }}>
                  Main Br: "Shree Ekveera Prasad", Vaidya Colony, Nr. Axis bank ATM, Talegaon Dabhade, PUNE - 410506<br />
-                 Branch 2: Silverwinds, C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Talegaon Dabhade, PUNE - 410506
+                 Branch 1: Silverwinds, C2, Dnyaneshwar Nagar, Nr. Jijamata Chowk, Talegaon Dabhade, PUNE - 410506
                </p>
                <h3 style={{ marginTop: '1.5rem', textDecoration: 'underline', textTransform: 'uppercase', fontSize: '1.2rem' }}>Student Directory Report {searchTerm && `(Filtered: ${searchTerm})`}</h3>
             </div>
