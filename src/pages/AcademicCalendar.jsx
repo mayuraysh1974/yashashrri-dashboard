@@ -64,7 +64,7 @@ const AcademicCalendar = () => {
             type: holidayForm.type
         }));
 
-        const { error } = await supabase.from('holidays').upsert(inserts, { onConflict: 'date,description' });
+        const { error } = await supabase.from('holidays').insert(inserts);
         
         if (!error) {
             setHolidayForm({ 
@@ -114,7 +114,7 @@ const AcademicCalendar = () => {
             description: 'Sunday (Weekly Off)',
             type: 'Holiday'
         }));
-        await supabase.from('holidays').upsert(inserts, { onConflict: 'date' });
+        await supabase.from('holidays').insert(inserts);
         fetchData();
         alert(`Successfully marked ${sundays.length} Sundays as holidays.`);
     };
