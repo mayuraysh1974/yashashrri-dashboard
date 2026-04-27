@@ -35,10 +35,31 @@ const AcademicCalendar = () => {
     };
 
     const handleToggleAllSubjects = () => {
-        setHolidayForm(prev => ({
-            ...prev,
-            targetSubjects: prev.targetSubjects.length === subjects.length ? [] : subjects.map(s => s.name)
-        }));
+        const visibleSubjects = getFilteredSubjects();
+        const allVisibleSelected = visibleSubjects.every(s => holidayForm.targetSubjects.includes(s.name));
+        
+        setHolidayForm(prev => {
+            let newSubs;
+            if (allVisibleSelected) {
+                // If all visible are selected, remove them
+                const visibleNames = visibleSubjects.map(s => s.name);
+                newSubs = prev.targetSubjects.filter(name => !visibleNames.includes(name));
+            } else {
+                // Otherwise, add all visible (avoiding duplicates)
+                const visibleNames = visibleSubjects.map(s => s.name);
+                newSubs = Array.from(new Set([...prev.targetSubjects, ...visibleNames]));
+            }
+            return { ...prev, targetSubjects: newSubs };
+        });
+    };
+
+    const getFilteredSubjects = () => {
+        if (holidayForm.targetStandards.length === 0) return subjects;
+        return subjects.filter(sub => 
+            holidayForm.targetStandards.some(std => 
+                sub.name.startsWith(std + ' ') || sub.name.startsWith(std + '-') || sub.name === std
+            )
+        );
     };
     const [workingDayForm, setWorkingDayForm] = useState({ month: new Date().toISOString().slice(0, 7), days: 24 });
 
@@ -262,14 +283,14 @@ const AcademicCalendar = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                                     <label style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748B', margin: 0 }}>Target Subjects</label>
                                     <button onClick={handleToggleAllSubjects} style={{ fontSize: '0.65rem', background: 'none', border: 'none', color: 'var(--primary-blue)', cursor: 'pointer', fontWeight: 700, padding: 0 }}>
-                                        {holidayForm.targetSubjects.length === subjects.length ? 'Clear All' : 'Select All'}
+                                        {getFilteredSubjects().every(s => holidayForm.targetSubjects.includes(s.name)) && getFilteredSubjects().length > 0 ? 'Clear All' : 'Select All'}
                                     </button>
                                 </div>
                                 <div style={{ 
                                     display: 'flex', flexWrap: 'wrap', gap: '0.4rem', maxHeight: '140px', overflowY: 'auto',
                                     padding: '0.5rem', background: '#fff', borderRadius: '8px', border: '1px solid #CBD5E1'
                                 }}>
-                                    {subjects.map(sub => {
+                                    {getFilteredSubjects().map(sub => {
                                         const isSelected = holidayForm.targetSubjects.includes(sub.name);
                                         return (
                                             <div 
@@ -292,7 +313,11 @@ const AcademicCalendar = () => {
                                             </div>
                                         );
                                     })}
-                                    {subjects.length === 0 && <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>No subjects found</span>}
+                                    {getFilteredSubjects().length === 0 && (
+                                        <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>
+                                            {holidayForm.targetStandards.length > 0 ? 'No subjects found for selected classes' : 'No subjects found'}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
