@@ -37,7 +37,7 @@ const FeesPayment = () => {
 
   const [showChequeModal, setShowChequeModal] = useState(false);
   const [editingCheque, setEditingCheque] = useState(null);
-  const [chequeUpdateData, setChequeUpdateData] = useState({ depositDate: '', clearanceDate: '' });
+  const [chequeUpdateData, setChequeUpdateData] = useState({ bank: '', branch: '', chequeNo: '', chequeDate: '', depositDate: '', clearanceDate: '' });
 
   const fetchStudents = async () => {
     const { data: stuData } = await supabase.from('students').select('*, student_subjects(subject_id)').order('name');
@@ -180,6 +180,10 @@ const FeesPayment = () => {
   const handleOpenChequeUpdate = (fee) => {
     setEditingCheque(fee);
     setChequeUpdateData({
+      bank: fee.chequeDetails?.bank || '',
+      branch: fee.chequeDetails?.branch || '',
+      chequeNo: fee.chequeDetails?.chequeNo || '',
+      chequeDate: fee.chequeDetails?.chequeDate || '',
       depositDate: fee.chequeDetails?.depositDate || '',
       clearanceDate: fee.chequeDetails?.clearanceDate || ''
     });
@@ -188,7 +192,10 @@ const FeesPayment = () => {
 
   const handleSaveChequeUpdate = async () => {
     const newDetails = {
-      ...editingCheque.chequeDetails,
+      bank: chequeUpdateData.bank,
+      branch: chequeUpdateData.branch,
+      chequeNo: chequeUpdateData.chequeNo,
+      chequeDate: chequeUpdateData.chequeDate,
       depositDate: chequeUpdateData.depositDate,
       clearanceDate: chequeUpdateData.clearanceDate
     };
@@ -673,18 +680,36 @@ const FeesPayment = () => {
             <div style={{ padding: '1rem', backgroundColor: 'var(--bg-main)', borderRadius: '8px', marginBottom: '1.5rem' }}>
                <div style={{ fontWeight: 600, color: 'var(--primary-blue)' }}>{editingCheque.studentName}</div>
                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>Amount: ₹{editingCheque.amountPaid.toLocaleString()}</div>
-               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Bank: {editingCheque.chequeDetails?.bank} - {editingCheque.chequeDetails?.branch}</div>
-               <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Chq No: {editingCheque.chequeDetails?.chequeNo} (Dt: {editingCheque.chequeDetails?.chequeDate})</div>
             </div>
 
-            <div className="input-group">
-              <label>Date of Deposit</label>
-              <input type="date" value={chequeUpdateData.depositDate} onChange={e => setChequeUpdateData({...chequeUpdateData, depositDate: e.target.value})} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Bank Name</label>
+                 <input type="text" value={chequeUpdateData.bank} onChange={e => setChequeUpdateData({...chequeUpdateData, bank: e.target.value})} />
+               </div>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Branch</label>
+                 <input type="text" value={chequeUpdateData.branch} onChange={e => setChequeUpdateData({...chequeUpdateData, branch: e.target.value})} />
+               </div>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Cheque No.</label>
+                 <input type="text" value={chequeUpdateData.chequeNo} onChange={e => setChequeUpdateData({...chequeUpdateData, chequeNo: e.target.value})} />
+               </div>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Cheque Date</label>
+                 <input type="date" value={chequeUpdateData.chequeDate} onChange={e => setChequeUpdateData({...chequeUpdateData, chequeDate: e.target.value})} />
+               </div>
             </div>
 
-            <div className="input-group" style={{ marginBottom: '2rem' }}>
-              <label>Date of Clearance</label>
-              <input type="date" value={chequeUpdateData.clearanceDate} onChange={e => setChequeUpdateData({...chequeUpdateData, clearanceDate: e.target.value})} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '2rem' }}>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Date of Deposit</label>
+                 <input type="date" value={chequeUpdateData.depositDate} onChange={e => setChequeUpdateData({...chequeUpdateData, depositDate: e.target.value})} />
+               </div>
+               <div className="input-group" style={{ marginBottom: 0 }}>
+                 <label>Date of Clearance</label>
+                 <input type="date" value={chequeUpdateData.clearanceDate} onChange={e => setChequeUpdateData({...chequeUpdateData, clearanceDate: e.target.value})} />
+               </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
