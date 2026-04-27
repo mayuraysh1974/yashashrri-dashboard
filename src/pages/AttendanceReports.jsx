@@ -62,17 +62,20 @@ const AttendanceReports = () => {
           .gte('date', from)
           .lt('date', to);
 
-        // Merge logic: If "Present" in ANY record for that date, student is Present.
+        // Merge logic with Priority: Present > Absent > No Class > Holiday
         const mergedMap = {};
-        (dailyAtt || []).forEach(a => {
-           mergedMap[a.date] = a.status;
-        });
-        (subjectAtt || []).forEach(a => {
-           // If already marked Present, keep it. If this one is Present, upgrade it.
-           if (mergedMap[a.date] !== 'Present') {
-             mergedMap[a.date] = a.status;
-           }
-        });
+        const priority = { 'Present': 3, 'Absent': 2, 'No Class': 1, 'Holiday': 1, 'Late': 2 };
+
+        const processRecord = (rec) => {
+            const currentStatus = mergedMap[rec.date];
+            const newStatus = rec.status;
+            if (!currentStatus || (priority[newStatus] || 0) > (priority[currentStatus] || 0)) {
+                mergedMap[rec.date] = newStatus;
+            }
+        };
+
+        (dailyAtt || []).forEach(processRecord);
+        (subjectAtt || []).forEach(processRecord);
 
         const finalAtt = Object.entries(mergedMap).map(([date, status]) => ({ date, status })).sort((a, b) => a.date.localeCompare(b.date));
         setReportData({ student, attendance: finalAtt });
