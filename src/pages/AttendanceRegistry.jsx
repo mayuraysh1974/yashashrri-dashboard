@@ -13,26 +13,55 @@ const AttendanceRegistry = () => {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [mode, setMode] = useState('Daily'); 
   const [loading, setLoading] = useState(true);
+  const [holidays, setHolidays] = useState([]);
+  const [currentHoliday, setCurrentHoliday] = useState(null);
 
   useEffect(() => {
     fetchInitialData();
   }, []);
 
   useEffect(() => {
-    if (selectedDate) fetchAttendanceRecord();
-  }, [selectedDate, selectedStandard, selectedSubject, mode]);
+    if (selectedDate) {
+      fetchAttendanceRecord();
+      checkHolidayStatus();
+    }
+  }, [selectedDate, selectedStandard, selectedSubject, mode, holidays]);
 
   const fetchInitialData = async () => {
-    const [stdRes, stuRes, subRes] = await Promise.all([
+    const [stdRes, stuRes, subRes, holRes] = await Promise.all([
       supabase.from('standards').select('*'),
       supabase.from('students').select('*, student_subjects(subject_id)'),
-      supabase.from('subjects').select('*')
+      supabase.from('subjects').select('*'),
+      supabase.from('holidays').select('*')
     ]);
     
     if (stdRes.data) setStandards(stdRes.data);
     if (stuRes.data) setStudents(stuRes.data);
     if (subRes.data) setSubjects(subRes.data);
+    if (holRes.data) setHolidays(holRes.data);
     setLoading(false);
+  };
+
+  const checkHolidayStatus = () => {
+    if (!selectedDate) {
+        setCurrentHoliday(null);
+        return;
+    }
+
+    const dateHols = holidays.filter(h => h.date === selectedDate);
+    if (dateHols.length === 0) {
+        setCurrentHoliday(null);
+        return;
+    }
+
+    // Find holiday matching current context
+    const matchingHol = dateHols.find(h => {
+        const stdMatch = !selectedStandard || h.description.includes(`[Std: ${selectedStandard}]`) || !h.description.includes('[Std: ');
+        const subMatch = mode !== 'Subject' || !selectedSubject || h.description.includes(`[Sub: ${subjects.find(s => s.id == selectedSubject)?.name}]`) || !h.description.includes('[Sub: ');
+        return stdMatch && subMatch;
+    });
+
+    setCurrentHoliday(matchingHol || null);
   };
 
   const fetchAttendanceRecord = async () => {
@@ -267,6 +296,43 @@ const AttendanceRegistry = () => {
           )}
         </div>
       </div>
+      
+      {/* Holiday Warning Banner */}
+      {currentHoliday && (
+        <div style={{ 
+          margin: '0 0 1rem 0', padding: '1rem', borderRadius: '12px', 
+          backgroundColor: currentHoliday.type === 'Holiday' ? '#FEE2E2' : '#FEF3C7',
+          border: `1px solid ${currentHoliday.type === 'Holiday' ? '#FCA5A5' : '#FCD34D'}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '8px' }}>
+                <FiCalendar size={20} color={currentHoliday.type === 'Holiday' ? '#B91C1C' : '#92400E'} />
+            </div>
+            <div>
+              <div style={{ fontWeight: 800, color: currentHoliday.type === 'Holiday' ? '#991B1B' : '#854D0E', fontSize: '0.85rem' }}>
+                CALENDAR EVENT: {currentHoliday.type.toUpperCase()}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: currentHoliday.type === 'Holiday' ? '#B91C1C' : '#92400E', fontWeight: 600 }}>
+                {currentHoliday.description.replace(/\[.*?\]/g, '').trim()}
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={() => {
+                const newAtt = mode === 'Daily' ? {...dailyAttendance} : {...subjectAttendance};
+                displayedStudents.forEach(s => newAtt[s.id] = 'Holiday');
+                if (mode === 'Daily') setDailyAttendance(newAtt);
+                else setSubjectAttendance(newAtt);
+            }}
+            className="btn-secondary" 
+            style={{ fontSize: '0.7rem', padding: '0.4rem 0.8rem', background: 'white', border: 'none', color: '#1E293B' }}
+          >
+            Mark all 'Holiday'
+          </button>
+        </div>
+      )}
 
       <div className="card-base" style={{ flex: 1, overflow: 'auto', padding: 0 }}>
         {/* Desktop Table View */}
