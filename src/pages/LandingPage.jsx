@@ -322,7 +322,7 @@ const LandingPage = ({ isAuthenticated }) => {
           {/* Silverwinds Branch Map */}
           <div id="map-branch2" style={{ width: '100%', height: '420px', display: 'block' }}>
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3778.1!2d73.6805!3d18.7195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1c000000001%3A0x0!2sSilverwinds%2C%20Dnyaneshwar%20Nagar%2C%20Talegaon%20Dabhade!5e0!3m2!1sen!2sin!4v1712500000001!5m2!1sen!2sin"
+              src="https://maps.google.com/maps?q=Silver+Winds+C,+Dnyaneshwar+Nagar,+Talegaon+Dabhade,+Pune&t=&z=16&ie=UTF8&iwloc=&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0, display: 'block' }}
