@@ -272,7 +272,7 @@ const LandingPage = ({ isAuthenticated }) => {
               document.getElementById('branch-tab-2').style.background = 'transparent';
               document.getElementById('branch-tab-2').style.color = '#1A237E';
             }}
-            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: '#1A237E', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: 'transparent', color: '#1A237E', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
           >
             📍 Main Branch — Vaidya Colony
           </button>
@@ -286,7 +286,7 @@ const LandingPage = ({ isAuthenticated }) => {
               document.getElementById('branch-tab-main').style.background = 'transparent';
               document.getElementById('branch-tab-main').style.color = '#1A237E';
             }}
-            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: 'transparent', color: '#1A237E', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
+            style={{ padding: '0.7rem 2rem', borderRadius: '8px', border: '2px solid #1A237E', background: '#1A237E', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', transition: 'all 0.2s' }}
           >
             📍 Silverwinds Branch — Dnyaneshwar Nagar
           </button>
@@ -307,7 +307,7 @@ const LandingPage = ({ isAuthenticated }) => {
         {/* Map Container */}
         <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', border: '3px solid #B8860B', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
           {/* Main Branch Map */}
-          <div id="map-main" style={{ width: '100%', height: '420px' }}>
+          <div id="map-main" style={{ width: '100%', height: '420px', display: 'none' }}>
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1889.360987178125!2d73.6828063!3d18.720747700000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1be0bbac2ab%3A0xafda9691d7bca1c4!2sYASHASHRRI%20CLASES!5e0!3m2!1sen!2sin!4v1712500000000!5m2!1sen!2sin"
               width="100%"
@@ -320,7 +320,7 @@ const LandingPage = ({ isAuthenticated }) => {
             ></iframe>
           </div>
           {/* Silverwinds Branch Map */}
-          <div id="map-branch2" style={{ width: '100%', height: '420px', display: 'none' }}>
+          <div id="map-branch2" style={{ width: '100%', height: '420px', display: 'block' }}>
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3778.1!2d73.6805!3d18.7195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2b1c000000001%3A0x0!2sSilverwinds%2C%20Dnyaneshwar%20Nagar%2C%20Talegaon%20Dabhade!5e0!3m2!1sen!2sin!4v1712500000001!5m2!1sen!2sin"
               width="100%"
