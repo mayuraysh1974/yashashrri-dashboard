@@ -21,6 +21,69 @@ const TestScheduler = () => {
   const [activeTestId, setActiveTestId] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
 
+  const getClassColors = (standard) => {
+    const std = (standard || '').toUpperCase();
+    if (std.includes('XII')) return { 
+        primary: '#1A237E', 
+        border: '#1A237E', 
+        bg: '#F8FAFC', 
+        light: '#E8EAF6', 
+        accent: '#3F51B5'
+    };
+    if (std.includes('XI')) return { 
+        primary: '#065F46', 
+        border: '#059669', 
+        bg: '#F0FDF4', 
+        light: '#DCFCE7', 
+        accent: '#10B981'
+    };
+    if (std.includes('X')) return { 
+        primary: '#991B1B', 
+        border: '#DC2626', 
+        bg: '#FEF2F2', 
+        light: '#FEE2E2', 
+        accent: '#EF4444'
+    };
+    if (std.includes('IX')) return { 
+        primary: '#5B21B6', 
+        border: '#7C3AED', 
+        bg: '#F5F3FF', 
+        light: '#EDE9FE', 
+        accent: '#8B5CF6'
+    };
+    if (std.includes('FE')) return { 
+        primary: '#0369A1', 
+        border: '#0284C7', 
+        bg: '#F0F9FF', 
+        light: '#E0F2FE', 
+        accent: '#0EA5E9'
+    };
+    return { 
+        primary: '#1A237E', 
+        border: '#1A237E', 
+        bg: '#F8FAFC', 
+        light: '#F1F5F9', 
+        accent: '#64748B'
+    };
+  };
+    if (std.includes('FE')) return { 
+        primary: '#075985', 
+        border: '#0284C7', 
+        bg: '#F0F9FF', 
+        light: '#E0F2FE', 
+        accent: '#0EA5E9',
+        text: '#0C4A6E'
+    };
+    return { 
+        primary: '#1A237E', 
+        border: '#1A237E', 
+        bg: '#F8FAFC', 
+        light: '#F1F5F9', 
+        accent: '#64748B',
+        text: '#1E293B'
+    };
+  };
+
   // Fetch initial data
   useEffect(() => {
     fetchTests();
@@ -286,6 +349,7 @@ const TestScheduler = () => {
         ) : tests.map(test => {
           const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
           const isCET = test.test_type === 'CET';
+          const classColors = getClassColors(test.standard || (Array.isArray(test.standards) ? test.standards[0] : ''));
           return (
             <div 
               key={test.id} 
@@ -295,20 +359,21 @@ const TestScheduler = () => {
                 position: 'relative', 
                 display: 'flex', 
                 flexDirection: 'column', 
-                borderTop: isCET ? '6px solid #B8860B' : `6px solid ${isPast ? '#94A3B8' : '#1A237E'}`,
-                borderLeft: isCET ? '6px solid #B8860B' : 'none',
-                backgroundColor: isCET ? '#FFFDF5' : 'white',
+                borderTop: isCET ? '6px solid #B8860B' : `6px solid ${isPast ? '#94A3B8' : classColors.border}`,
+                borderLeft: isCET ? '6px solid #B8860B' : `1px solid ${classColors.light}`,
+                backgroundColor: isCET ? '#FFFDF5' : classColors.bg,
                 boxShadow: isCET ? '0 8px 20px rgba(184, 134, 11, 0.12)' : 'var(--shadow-sm)',
-                transition: 'transform 0.2s', 
-                cursor: 'default' 
+                transition: 'all 0.3s ease', 
+                cursor: 'default',
+                borderRadius: '16px'
               }}
             >
               <div style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', display: 'flex', gap: '0.5rem' }}>
                  <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'white' }} onClick={() => sendTestAlert(test)} title="Send Alert">
-                   <FiBell size={14} color="#1A237E" />
+                   <FiBell size={14} color={classColors.primary} />
                  </button>
                  <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #E2E8F0', background: 'white' }} onClick={() => openEditModal(test)} title="Edit Test">
-                   <FiEdit2 size={14} color="#1A237E" />
+                   <FiEdit2 size={14} color={classColors.primary} />
                  </button>
                  <button className="btn-secondary" style={{ padding: '0.45rem', borderRadius: '8px', border: '1px solid #FEE2E2', background: 'white', color: '#EF4444' }} onClick={() => handleDeleteTest(test.id)} title="Delete Test">
                    <FiTrash2 size={14} />
@@ -317,7 +382,7 @@ const TestScheduler = () => {
               
               <div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : '#FFF9E6', color: isPast ? '#64748B' : '#B8860B' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', padding: '0.25rem 0.6rem', borderRadius: '4px', backgroundColor: isPast ? '#F1F5F9' : (isCET ? '#FFF9E6' : classColors.light), color: isPast ? '#64748B' : (isCET ? '#B8860B' : classColors.primary) }}>
                       {test.has_marks ? 'COMPLETED' : (isPast ? 'PAST' : 'UPCOMING')}
                     </span>
                     <span style={{ 
@@ -326,47 +391,47 @@ const TestScheduler = () => {
                       textTransform: 'uppercase', 
                       padding: '0.25rem 0.6rem', 
                       borderRadius: '4px', 
-                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : '#F1F5F9', 
-                      color: isCET ? 'white' : '#64748B',
+                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : classColors.light, 
+                      color: isCET ? 'white' : classColors.accent,
                       boxShadow: isCET ? '0 2px 4px rgba(184, 134, 11, 0.2)' : 'none'
                     }}>
                       {isCET ? 'CET / ENTRANCE' : 'BOARD SYLLABUS'}
                     </span>
                  </div>
                  <h3 style={{ 
-                    fontSize: '1.35rem', 
-                    color: isCET ? '#78350F' : '#1A237E', 
+                    fontSize: '1.4rem', 
+                    color: isCET ? '#78350F' : classColors.primary, 
                     fontWeight: 800, 
                     margin: 0, 
                     lineHeight: 1.2 
                   }}>{test.name}</h3>
                  <p style={{ color: '#64748B', fontWeight: 600, fontSize: '0.85rem', marginTop: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                   <FiCalendar color="#B8860B" /> {new Date(test.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    <FiCalendar color={isCET ? "#B8860B" : classColors.primary} /> {new Date(test.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                  </p>
               </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', backgroundColor: '#F8FAFC', padding: '1rem', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', backgroundColor: isCET ? 'rgba(184, 134, 11, 0.05)' : 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: '12px', marginTop: '1rem' }}>
                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
-                    <FiBook size={12} color="#64748B" />
+                    <FiBook size={12} color={classColors.primary} />
                     {(Array.isArray(test.subjects) ? test.subjects : [test.subject]).map(sub => (
-                       <span key={sub} style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A237E' }}>{sub}</span>
+                       <span key={sub} style={{ fontSize: '0.75rem', fontWeight: 700, color: classColors.primary }}>{sub}</span>
                     ))}
                  </div>
                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600, color: '#64748B' }}>
-                    <FiUsers size={12} /> {test.standard || (Array.isArray(test.standards) ? test.standards[0] : 'N/A')}
+                    <FiUsers size={12} color={classColors.primary} /> <span style={{ color: classColors.primary, fontWeight: 700 }}>{test.standard || (Array.isArray(test.standards) ? test.standards[0] : 'N/A')}</span>
                  </div>
-                 <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Max Score: <span style={{ color: '#1A237E', fontWeight: 800 }}>{test.total_marks || test.totalMarks}</span></div>
+                 <div style={{ fontSize: '0.85rem', color: '#64748B', fontWeight: 600 }}>Max Score: <span style={{ color: classColors.primary, fontWeight: 800 }}>{test.total_marks || test.totalMarks}</span></div>
                  {test.solution_url && (
                     <div style={{ marginTop: '0.4rem' }}>
-                       <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: '#B8860B', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                       <a href={test.solution_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.8rem', color: isCET ? '#B8860B' : classColors.primary, textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                           <FiBook /> View Solution PDF
                        </a>
                     </div>
                  )}
               </div>
-
+ 
               <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: '1.5rem', marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.5rem' }}>
-                 <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem' }} onClick={() => navigate('/academic-reports')}>
+                 <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.5rem', border: `1px solid ${classColors.primary}`, color: classColors.primary }} onClick={() => navigate('/academic-reports')}>
                     <FiBarChart2 /> Report
                  </button>
                   <button 
@@ -377,11 +442,13 @@ const TestScheduler = () => {
                       justifyContent: 'center', 
                       gap: '0.4rem', 
                       fontSize: '0.8rem', 
-                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : '#1A237E', 
+                      background: isCET ? 'linear-gradient(135deg, #B8860B 0%, #D4AF37 100%)' : classColors.primary, 
                       color: 'white', 
                       border: 'none', 
                       padding: '0.5rem',
-                      boxShadow: isCET ? '0 4px 10px rgba(184, 134, 11, 0.25)' : 'none'
+                      boxShadow: isCET ? '0 4px 10px rgba(184, 134, 11, 0.25)' : `0 4px 10px ${classColors.primary}33`,
+                      borderRadius: '8px',
+                      fontWeight: 700
                     }} 
                     onClick={() => openResultEntry(test)}
                   >
