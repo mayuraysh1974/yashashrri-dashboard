@@ -66,23 +66,6 @@ const TestScheduler = () => {
         accent: '#64748B'
     };
   };
-    if (std.includes('FE')) return { 
-        primary: '#075985', 
-        border: '#0284C7', 
-        bg: '#F0F9FF', 
-        light: '#E0F2FE', 
-        accent: '#0EA5E9',
-        text: '#0C4A6E'
-    };
-    return { 
-        primary: '#1A237E', 
-        border: '#1A237E', 
-        bg: '#F8FAFC', 
-        light: '#F1F5F9', 
-        accent: '#64748B',
-        text: '#1E293B'
-    };
-  };
 
   // Fetch initial data
   useEffect(() => {
