@@ -23,6 +23,13 @@ const TestScheduler = () => {
 
   const getClassColors = (standard) => {
     const std = (standard || '').toUpperCase();
+    if (std.includes('CBSE XII')) return { 
+        primary: '#0F766E', 
+        border: '#0D9488', 
+        bg: '#F0FDFA', 
+        light: '#CCFBF1', 
+        accent: '#14B8A6'
+    };
     if (std.includes('XII')) return { 
         primary: '#1A237E', 
         border: '#1A237E', 
