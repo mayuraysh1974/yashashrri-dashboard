@@ -21,9 +21,12 @@ const TestScheduler = () => {
   const [activeTestId, setActiveTestId] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
 
-  const getClassColors = (standard) => {
-    const std = (standard || '').toUpperCase();
-    if (std.includes('CBSE XII')) return { 
+  const getClassColors = (test) => {
+    const std = (test.standard || '').toUpperCase();
+    const subs = (Array.isArray(test.subjects) ? test.subjects : [test.subject || '']).map(s => s.toUpperCase());
+    const isCBSE = std.includes('CBSE') || subs.some(s => s.includes('CBSE'));
+
+    if (isCBSE && std.includes('XII')) return { 
         primary: '#0F766E', 
         border: '#0D9488', 
         bg: '#F0FDFA', 
@@ -339,7 +342,7 @@ const TestScheduler = () => {
         ) : tests.map(test => {
           const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
           const isCET = test.test_type === 'CET';
-          const classColors = getClassColors(test.standard || (Array.isArray(test.standards) ? test.standards[0] : ''));
+          const classColors = getClassColors(test);
           return (
             <div 
               key={test.id} 
