@@ -35,9 +35,20 @@ const Reports = () => {
       const monthlyRevenue = [];
       for (let i = 5; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthStr = d.toISOString().slice(0, 7); // e.g. "2026-03"
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
         const label = d.toLocaleString('default', { month: 'short' });
-        const { data: mFees } = await supabase.from('fees').select('amount_paid, payment_date').ilike('payment_date', `${monthStr}%`);
+        
+        const startDate = `${year}-${month}-01`;
+        const nextMonthDate = new Date(year, d.getMonth() + 1, 1);
+        const endDate = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+        const { data: mFees } = await supabase
+          .from('fees')
+          .select('amount_paid')
+          .gte('payment_date', startDate)
+          .lt('payment_date', endDate);
+
         const collected = (mFees || []).reduce((s, f) => s + (f.amount_paid || 0), 0);
         monthlyRevenue.push({ name: label, collected, expected: 0 });
       }
