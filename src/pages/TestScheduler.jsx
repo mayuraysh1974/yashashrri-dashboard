@@ -432,7 +432,7 @@ const TestScheduler = () => {
           const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
           const isCompleted = test.has_marks;
           
-          const matchesClass = (test.standard || '').toLowerCase().includes(searchClass.toLowerCase());
+          const matchesClass = !searchClass || (new RegExp(`\\b${searchClass.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(test.standard || ''));
           const subs = Array.isArray(test.subjects) ? test.subjects : [test.subject];
           const matchesSubject = subs.some(s => (s || '').toLowerCase().includes(searchSubject.toLowerCase()));
           
