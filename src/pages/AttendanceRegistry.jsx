@@ -27,6 +27,21 @@ const AttendanceRegistry = () => {
     }
   }, [selectedDate, selectedStandard, selectedSubject, mode, holidays]);
 
+  // Clear subject if it's no longer valid for the selected standard
+  useEffect(() => {
+    if (selectedStandard && selectedSubject) {
+      const sub = subjects.find(s => s.id == selectedSubject);
+      if (sub) {
+        const stdVal = selectedStandard.toUpperCase();
+        const subName = sub.name.toUpperCase();
+        const isMatch = subName.startsWith(stdVal + ' ') || subName === stdVal;
+        if (!isMatch) {
+          setSelectedSubject('');
+        }
+      }
+    }
+  }, [selectedStandard, selectedSubject, subjects]);
+
   const fetchInitialData = async () => {
     const [stdRes, stuRes, subRes, holRes] = await Promise.all([
       supabase.from('standards').select('*'),
@@ -101,6 +116,14 @@ const AttendanceRegistry = () => {
   };
 
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Get subjects filtered by standard
+  const filteredSubjects = subjects.filter(s => {
+    if (!selectedStandard) return true;
+    const stdVal = selectedStandard.toUpperCase();
+    const subName = s.name.toUpperCase();
+    return subName.startsWith(stdVal + ' ') || subName === stdVal;
+  });
 
   // Logic to determine what list to show
   let displayedStudents = students;
@@ -269,7 +292,7 @@ const AttendanceRegistry = () => {
               <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiBook /> Subject</label>
               <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
                 <option value="">Choose Subject...</option>
-                {subjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                {filteredSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
           )}
