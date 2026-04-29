@@ -374,7 +374,7 @@ const FeesPayment = () => {
                   <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Date</th>
                   <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Amount</th>
                   <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Mode</th>
-                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Action</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -403,12 +403,14 @@ const FeesPayment = () => {
                       )}
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
-                        {fee.paymentMode === 'Cheque' && (
-                          <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)', whiteSpace: 'nowrap' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
-                            Status
-                          </button>
-                        )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
+                        <div style={{ width: '70px', display: 'flex', justifyContent: 'flex-end' }}>
+                          {fee.paymentMode === 'Cheque' && (
+                            <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)', whiteSpace: 'nowrap' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
+                              Status
+                            </button>
+                          )}
+                        </div>
                         <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }} onClick={() => handleReprint(fee)}>
                           <FiPrinter size={12} /> Reprint
                         </button>
