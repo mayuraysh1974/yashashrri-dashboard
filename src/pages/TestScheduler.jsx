@@ -20,6 +20,9 @@ const TestScheduler = () => {
   const [editMode, setEditMode] = useState(false);
   const [activeTestId, setActiveTestId] = useState(null);
   const [studentResults, setStudentResults] = useState([]);
+  const [searchClass, setSearchClass] = useState('');
+  const [searchSubject, setSearchSubject] = useState('');
+  const [searchStatus, setSearchStatus] = useState('All');
 
   const addToCalendar = (test) => {
     const dateStr = test.date.replace(/-/g, '');
@@ -385,12 +388,61 @@ const TestScheduler = () => {
         </div>
       </div>
 
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', padding: '1rem', backgroundColor: '#F8FAFC', borderRadius: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 200px', position: 'relative' }}>
+          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+          <input 
+            type="text" 
+            placeholder="Filter by Class (Standard)..." 
+            value={searchClass} 
+            onChange={(e) => setSearchClass(e.target.value)}
+            style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.5rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.9rem' }}
+          />
+        </div>
+        <div style={{ flex: '1 1 200px', position: 'relative' }}>
+          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+          <input 
+            type="text" 
+            placeholder="Filter by Subject..." 
+            value={searchSubject} 
+            onChange={(e) => setSearchSubject(e.target.value)}
+            style={{ width: '100%', padding: '0.6rem 0.6rem 0.6rem 2.5rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.9rem' }}
+          />
+        </div>
+        <div style={{ flex: '0 0 220px' }}>
+          <select 
+            value={searchStatus} 
+            onChange={(e) => setSearchStatus(e.target.value)}
+            style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: 'white', fontSize: '0.9rem', fontWeight: 600, color: '#1A237E' }}
+          >
+            <option value="All">All Tests</option>
+            <option value="Upcoming">Upcoming Tests</option>
+            <option value="Past">Past (No Marks)</option>
+            <option value="Completed">Completed (Marks Recorded)</option>
+          </select>
+        </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '2rem' }}>
         {loading ? (
              <p>Loading scheduled tests...</p>
         ) : tests.length === 0 ? (
           <p style={{ color: 'var(--text-muted)', gridColumn: '1/-1', textAlign: 'center', padding: '3rem' }}>No tests scheduled yet. Click 'New Test' to create one.</p>
-        ) : tests.map(test => {
+        ) : tests.filter(test => {
+          const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
+          const isCompleted = test.has_marks;
+          
+          const matchesClass = (test.standard || '').toLowerCase().includes(searchClass.toLowerCase());
+          const subs = Array.isArray(test.subjects) ? test.subjects : [test.subject];
+          const matchesSubject = subs.some(s => (s || '').toLowerCase().includes(searchSubject.toLowerCase()));
+          
+          let matchesStatus = true;
+          if (searchStatus === 'Upcoming') matchesStatus = !isPast && !isCompleted;
+          if (searchStatus === 'Past') matchesStatus = isPast && !isCompleted;
+          if (searchStatus === 'Completed') matchesStatus = isCompleted;
+          
+          return matchesClass && matchesSubject && matchesStatus;
+        }).map(test => {
           const isPast = new Date(test.date) < new Date().setHours(0,0,0,0);
           const isCET = test.test_type === 'CET';
           const classColors = getClassColors(test);
