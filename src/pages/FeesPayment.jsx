@@ -401,6 +401,7 @@ const FeesPayment = () => {
                           </span>
                         </div>
                       )}
+                    </td>
                     <td style={{ padding: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
                         {fee.paymentMode === 'Cheque' && (
