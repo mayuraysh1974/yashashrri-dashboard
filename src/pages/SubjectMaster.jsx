@@ -7,11 +7,18 @@ const SubjectMaster = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({ id: null, name: '', fees: '' });
+  const [standards, setStandards] = useState([]);
+  const [formData, setFormData] = useState({ id: null, name: '', fees: '', standard: '' });
 
   useEffect(() => {
     fetchSubjects();
+    fetchStandards();
   }, []);
+
+  const fetchStandards = async () => {
+    const { data } = await supabase.from('standards').select('*').order('standard');
+    if (data) setStandards(data);
+  };
 
   const fetchSubjects = async () => {
     const { data, error } = await supabase.from('subjects').select('*').order('name', { ascending: true });
@@ -20,8 +27,11 @@ const SubjectMaster = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.name || formData.fees === '') return alert('Name and Fees are required');
-    const payload = { name: formData.name, fees: Number(formData.fees) };
+    const payload = { 
+      name: formData.name, 
+      fees: Number(formData.fees), 
+      standard: formData.standard 
+    };
     let error;
     if (editMode) {
       ({ error } = await supabase.from('subjects').update(payload).eq('id', formData.id));
@@ -33,7 +43,7 @@ const SubjectMaster = () => {
     } else {
       setShowModal(false);
       setEditMode(false);
-      setFormData({ id: null, name: '', fees: '' });
+      setFormData({ id: null, name: '', fees: '', standard: '' });
       fetchSubjects();
     }
   };
@@ -51,7 +61,7 @@ const SubjectMaster = () => {
           <h1 className="page-title">Subject Master</h1>
           <p className="page-subtitle">Manage subjects and their individual fee structures</p>
         </div>
-        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: null, name: '', fees: '' }); setShowModal(true); }}>
+        <button className="btn-primary" onClick={() => { setEditMode(false); setFormData({ id: null, name: '', fees: '', standard: '' }); setShowModal(true); }}>
           <FiPlus /> New Subject
         </button>
       </div>
@@ -63,6 +73,7 @@ const SubjectMaster = () => {
             <thead>
               <tr style={{ backgroundColor: 'var(--bg-main)', borderBottom: '2px solid var(--border-color)' }}>
                 <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>Subject Name</th>
+                <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>Linked Class</th>
                 <th style={{ padding: '1rem', color: 'var(--primary-blue)', fontWeight: 600 }}>Standard Fees (₹)</th>
                 <th style={{ padding: '1rem', textAlign: 'center' }}>Actions</th>
               </tr>
@@ -71,6 +82,9 @@ const SubjectMaster = () => {
               {subjects.map((s) => (
                 <tr key={s.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1rem', fontWeight: 600 }}>{s.name}</td>
+                  <td style={{ padding: '1rem' }}>
+                    <span style={{ padding: '0.25rem 0.5rem', backgroundColor: 'var(--bg-main)', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>{s.standard || 'Unlinked'}</span>
+                  </td>
                   <td style={{ padding: '1rem', color: 'var(--success-green)', fontWeight: 600 }}>₹{s.fees.toLocaleString()}</td>
                   <td style={{ padding: '1rem', textAlign: 'center' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
@@ -88,10 +102,13 @@ const SubjectMaster = () => {
         <div className="mobile-only">
            {subjects.map((s) => (
              <div key={s.id} className="card-base" style={{ padding: '1rem', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-               <div>
-                 <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{s.name}</div>
-                 <div style={{ fontSize: '0.85rem', color: 'var(--success-green)', fontWeight: 700 }}>₹{s.fees.toLocaleString()}</div>
-               </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{s.name}</div>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+                    <span style={{ fontSize: '0.75rem', backgroundColor: '#F1F5F9', padding: '2px 6px', borderRadius: '4px' }}>{s.standard || 'No Class'}</span>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--success-green)', fontWeight: 700 }}>₹{s.fees.toLocaleString()}</span>
+                  </div>
+                </div>
                <div style={{ display: 'flex', gap: '0.5rem' }}>
                  <button className="btn-secondary" style={{ padding: '0.5rem' }} onClick={() => { setFormData(s); setEditMode(true); setShowModal(true); }}><FiEdit2 /></button>
                  <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--danger-red)' }} onClick={() => handleDelete(s.id)}><FiTrash2 /></button>
@@ -114,6 +131,14 @@ const SubjectMaster = () => {
             <div className="input-group">
               <label>Subject Name</label>
               <input type="text" placeholder="e.g. Mathematics" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+            </div>
+
+            <div className="input-group">
+              <label>Linked Class (Standard)</label>
+              <select value={formData.standard || ''} onChange={e => setFormData({...formData, standard: e.target.value})}>
+                <option value="">Select Class...</option>
+                {standards.map(st => <option key={st.id} value={st.standard}>{st.standard}</option>)}
+              </select>
             </div>
 
             <div className="input-group" style={{ marginBottom: '2rem' }}>
