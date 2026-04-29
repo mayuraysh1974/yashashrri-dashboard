@@ -374,7 +374,7 @@ const FeesPayment = () => {
                   <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem' }}>Date</th>
                   <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Amount</th>
                   <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Mode</th>
-                  <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem' }}>Action</th>
+                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -401,8 +401,8 @@ const FeesPayment = () => {
                           </span>
                         </div>
                       )}
-                                        <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
                         {fee.paymentMode === 'Cheque' && (
                           <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)', whiteSpace: 'nowrap' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
                             Status
