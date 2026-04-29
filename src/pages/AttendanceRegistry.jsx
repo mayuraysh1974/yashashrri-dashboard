@@ -178,28 +178,28 @@ const AttendanceRegistry = () => {
     }
 
     // --- Smart Sync Logic ---
-    // If we marked students Absent for the day, also mark them Absent for all their subjects
+    // If we marked students Absent/No Class/Holiday for the day, sync to all subjects
     if (mode === 'Daily') {
-      const absenteeRecords = [];
+      const syncRecords = [];
       displayedStudents.forEach(student => {
         const status = dailyAttendance[student.id] || 'Absent';
-        if (status === 'Absent') {
+        if (status === 'Absent' || status === 'No Class' || status === 'Holiday') {
           // Add a record for every subject this student is enrolled in
           student.student_subjects?.forEach(sub => {
-            absenteeRecords.push({
+            syncRecords.push({
               student_id: student.id,
               subject_id: sub.subject_id,
               date: selectedDate,
-              status: 'Absent'
+              status: status
             });
           });
         }
       });
 
-      if (absenteeRecords.length > 0) {
+      if (syncRecords.length > 0) {
         await supabase
           .from('student_subject_attendance')
-          .upsert(absenteeRecords, { onConflict: 'student_id, subject_id, date' });
+          .upsert(syncRecords, { onConflict: 'student_id, subject_id, date' });
       }
     }
 
@@ -310,13 +310,24 @@ const AttendanceRegistry = () => {
         
         <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
           <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiUserCheck /> Mark All Present</button>
-          {mode === 'Subject' && (
-            <button className="btn-secondary" onClick={() => {
-              const newAtt = { ...subjectAttendance };
-              displayedStudents.forEach(s => newAtt[s.id] = 'No Class');
-              setSubjectAttendance(newAtt);
-            }} disabled={!selectedSubject} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiXCircle /> No Class Today</button>
-          )}
+          <button 
+            className="btn-secondary" 
+            onClick={() => {
+              if (mode === 'Subject') {
+                const newAtt = { ...subjectAttendance };
+                displayedStudents.forEach(s => newAtt[s.id] = 'No Class');
+                setSubjectAttendance(newAtt);
+              } else {
+                const newAtt = { ...dailyAttendance };
+                displayedStudents.forEach(s => newAtt[s.id] = 'No Class');
+                setDailyAttendance(newAtt);
+              }
+            }} 
+            disabled={mode === 'Subject' && !selectedSubject} 
+            style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}
+          >
+            <FiXCircle /> No Class Today
+          </button>
         </div>
       </div>
       
