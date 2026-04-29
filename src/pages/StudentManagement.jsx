@@ -510,9 +510,16 @@ const StudentManagement = () => {
                       {subjects.filter(s => {
                         const searchMatch = s.name.toLowerCase().includes(subjectSearch.toLowerCase());
                         if (!formData.standard) return searchMatch;
-                        // Precision match for standard (e.g. "X" won't match "IX")
-                        const stdClean = formData.standard.split(' ')[0].toLowerCase();
-                        const stdRegex = new RegExp(`\\b${stdClean}\\b`, 'i');
+                        
+                        const std = formData.standard.toLowerCase();
+                        const subName = s.name.toLowerCase();
+                        
+                        // 1. Direct match for the full standard (e.g., "FE Sem 2" in "FE Sem 2 Maths")
+                        if (subName.includes(std)) return searchMatch;
+                        
+                        // 2. Word boundary match for the first word (for "X", "XII", "IX", etc.)
+                        const stdFirstWord = std.split(' ')[0];
+                        const stdRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
                         return searchMatch && stdRegex.test(s.name);
                       }).map(s => {
                         const enrolledSub = formData.enrolledSubjects?.find(es => es.subject_id === s.id);
