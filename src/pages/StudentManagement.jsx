@@ -508,19 +508,29 @@ const StudentManagement = () => {
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', maxHeight: '150px', overflowY: 'auto', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
                       {subjects.filter(s => {
-                        const searchMatch = s.name.toLowerCase().includes(subjectSearch.toLowerCase());
-                        if (!formData.standard) return searchMatch;
+                        const q = subjectSearch.toLowerCase();
+                        const searchMatch = s.name.toLowerCase().includes(q);
+                        if (!searchMatch) return false;
+
+                        // If user is searching explicitly, show matching results regardless of class
+                        if (q) return true;
+
+                        if (!formData.standard) return true;
                         
                         const std = formData.standard.toLowerCase();
                         const subName = s.name.toLowerCase();
+                        const subStd = (s.standard || '').toLowerCase();
                         
-                        // 1. Direct match for the full standard (e.g., "FE Sem 2" in "FE Sem 2 Maths")
-                        if (subName.includes(std)) return searchMatch;
+                        // 1. Direct match by the 'standard' column (most reliable)
+                        if (subStd === std) return true;
+
+                        // 2. Direct match for the full standard name within the subject name
+                        if (subName.includes(std)) return true;
                         
-                        // 2. Word boundary match for the first word (for "X", "XII", "IX", etc.)
+                        // 3. Word boundary match for the first word (fallback for Roman numerals)
                         const stdFirstWord = std.split(' ')[0];
                         const stdRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-                        return searchMatch && stdRegex.test(s.name);
+                        return stdRegex.test(subName);
                       }).map(s => {
                         const enrolledSub = formData.enrolledSubjects?.find(es => es.subject_id === s.id);
                         const isSelected = !!enrolledSub;
