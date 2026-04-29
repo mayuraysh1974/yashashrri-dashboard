@@ -32,9 +32,14 @@ const AttendanceRegistry = () => {
     if (selectedStandard && selectedSubject) {
       const sub = subjects.find(s => s.id == selectedSubject);
       if (sub) {
-        const stdVal = selectedStandard.toUpperCase();
-        const subName = sub.name.toUpperCase();
-        const isMatch = subName.startsWith(stdVal + ' ') || subName === stdVal;
+        const std = selectedStandard.toLowerCase();
+        const subName = sub.name.toLowerCase();
+        const subStd = (sub.standard || '').toLowerCase();
+        
+        const isMatch = subStd === std || 
+                        subName.includes(std) || 
+                        new RegExp(`\\b${std.split(' ')[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(subName);
+                        
         if (!isMatch) {
           setSelectedSubject('');
         }
@@ -120,9 +125,21 @@ const AttendanceRegistry = () => {
   // Get subjects filtered by standard
   const filteredSubjects = subjects.filter(s => {
     if (!selectedStandard) return true;
-    const stdVal = selectedStandard.toUpperCase();
-    const subName = s.name.toUpperCase();
-    return subName.startsWith(stdVal + ' ') || subName === stdVal;
+    
+    const std = selectedStandard.toLowerCase();
+    const subName = (s.name || '').toLowerCase();
+    const subStd = (s.standard || '').toLowerCase();
+
+    // 1. Direct match by the 'standard' column (most reliable)
+    if (subStd === std) return true;
+
+    // 2. Direct match for the full standard name within the subject name
+    if (subName.includes(std)) return true;
+    
+    // 3. Word boundary match for the first word (fallback for Roman numerals)
+    const stdFirstWord = std.split(' ')[0];
+    const stdRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    return stdRegex.test(subName);
   });
 
   // Logic to determine what list to show
