@@ -401,19 +401,20 @@ const FeesPayment = () => {
                           </span>
                         </div>
                       )}
-                    </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                      {fee.paymentMode === 'Cheque' && (
-                        <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
-                          Status
+                                        <td style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', minHeight: '38px' }}>
+                        {fee.paymentMode === 'Cheque' && (
+                          <button className="btn-secondary" style={{ padding: '0.4rem', fontSize: '0.8rem', color: 'var(--primary-blue)', whiteSpace: 'nowrap' }} onClick={() => handleOpenChequeUpdate(fee)} title="Update Cheque Status">
+                            Status
+                          </button>
+                        )}
+                        <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }} onClick={() => handleReprint(fee)}>
+                          <FiPrinter size={12} /> Reprint
                         </button>
-                      )}
-                      <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', gap: '0.3rem' }} onClick={() => handleReprint(fee)}>
-                        <FiPrinter size={12} /> Reprint
-                      </button>
-                      <button className="btn-secondary" style={{ padding: '0.4rem 0.6rem', color: 'var(--danger-red)', borderColor: '#fecaca' }} onClick={() => handleDeleteFee(fee.id)} title="Delete Record">
-                        <FiTrash2 size={12} />
-                      </button>
+                        <button className="btn-secondary" style={{ padding: '0.4rem 0.6rem', color: 'var(--danger-red)', borderColor: '#fecaca', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleDeleteFee(fee.id)} title="Delete Record">
+                          <FiTrash2 size={12} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
