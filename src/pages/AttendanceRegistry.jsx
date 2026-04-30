@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { FiCheckCircle, FiXCircle, FiCalendar, FiFilter, FiSave, FiSend, FiBook, FiUserCheck } from 'react-icons/fi';
+import { FiCheckCircle, FiXCircle, FiCalendar, FiFilter, FiSave, FiSend, FiBook, FiUserCheck, FiTrendingUp, FiRefreshCw } from 'react-icons/fi';
 
 const AttendanceRegistry = () => {
   const [students, setStudents] = useState([]);
@@ -289,7 +289,7 @@ const AttendanceRegistry = () => {
               >Subject</button>
           </div>
           <button className="btn-secondary" onClick={fetchInitialData} style={{ padding: '0 15px', height: '42px' }} title="Refresh student data">
-            <FiTrendingUp style={{ transform: 'rotate(90deg)' }} /> Refresh
+            <FiRefreshCw /> Refresh
           </button>
           <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)', padding: '0 15px', height: '42px' }}><FiSend /> Notify</button>
           <button className="btn-primary" onClick={handleSave} style={{ padding: '0 15px', height: '42px' }}><FiSave /> Save</button>
