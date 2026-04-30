@@ -133,13 +133,14 @@ const AttendanceRegistry = () => {
     // 1. Direct match by the 'standard' column (most reliable)
     if (subStd === std) return true;
 
-    // 2. Direct match for the full standard name within the subject name
-    if (subName.includes(std)) return true;
+    // 2. Strict word-boundary match for the full standard name (e.g., "X" won't match "IX" or "XII")
+    const fullStdRegex = new RegExp(`\\b${std.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    if (fullStdRegex.test(subName)) return true;
     
-    // 3. Word boundary match for the first word (fallback for Roman numerals)
+    // 3. Fallback: Word boundary match for the first word (helps with specific branch names)
     const stdFirstWord = std.split(' ')[0];
-    const stdRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-    return stdRegex.test(subName);
+    const firstWordRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+    return firstWordRegex.test(subName);
   });
 
   // Logic to determine what list to show
