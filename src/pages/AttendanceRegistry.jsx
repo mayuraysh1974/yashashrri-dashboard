@@ -149,9 +149,10 @@ const AttendanceRegistry = () => {
     displayedStudents = displayedStudents.filter(s => s.standard === selectedStandard);
   }
   if (mode === 'Subject' && selectedSubject) {
-    displayedStudents = displayedStudents.filter(s => 
-      s.student_subjects?.some(sub => Number(sub.subject_id) === Number(selectedSubject))
-    );
+    displayedStudents = displayedStudents.filter(s => {
+      const enrollment = s.student_subjects || [];
+      return enrollment.some(sub => Number(sub.subject_id) === Number(selectedSubject));
+    });
   }
 
   // Apply search filtering
@@ -287,6 +288,9 @@ const AttendanceRegistry = () => {
                 style={{ padding: '0 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Subject' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Subject' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem' }}
               >Subject</button>
           </div>
+          <button className="btn-secondary" onClick={fetchInitialData} style={{ padding: '0 15px', height: '42px' }} title="Refresh student data">
+            <FiTrendingUp style={{ transform: 'rotate(90deg)' }} /> Refresh
+          </button>
           <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)', padding: '0 15px', height: '42px' }}><FiSend /> Notify</button>
           <button className="btn-primary" onClick={handleSave} style={{ padding: '0 15px', height: '42px' }}><FiSave /> Save</button>
         </div>
@@ -407,7 +411,12 @@ const AttendanceRegistry = () => {
                   <tr key={student.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                     <td style={{ padding: '1rem' }}>
                        <div style={{ fontWeight: 600 }}>{student.name}</div>
-                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
+                       <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                         <span>ID: {student.id} | {student.standard}</span>
+                         <span style={{ backgroundColor: '#F1F5F9', padding: '1px 6px', borderRadius: '4px', fontSize: '0.65rem' }}>
+                           {student.student_subjects?.length || 0} Sub(s)
+                         </span>
+                       </div>
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'right' }}>
                        <div style={{ display: 'inline-flex', gap: '0.5rem' }}>
