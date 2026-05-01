@@ -259,43 +259,32 @@ const StudentPortal = () => {
         </div>
       )}
 
-      {/* Mobile Tab Navigation */}
+      {/* Mobile Tab Navigation - KFC Style */}
       <div className="mobile-only portal-mobile-tabs" style={{ 
         position: 'sticky', 
         top: '80px', 
         zIndex: 90, 
         backgroundColor: 'white', 
-        borderBottom: '1px solid #E2E8F0',
-        padding: '0.5rem',
+        borderBottom: '1px solid #F1F5F9',
+        padding: '12px 20px',
         display: 'flex',
         overflowX: 'auto',
-        gap: '0.5rem',
-        WebkitOverflowScrolling: 'touch'
+        gap: '12px',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none'
       }}>
           {[
-            { id: 'dashboard', icon: <FiGrid />, label: 'Home' },
-            { id: 'results', icon: <FiFileText />, label: 'Tests' },
-            { id: 'library', icon: <FiBookOpen />, label: 'Vault' },
-            { id: 'payments', icon: <FiCreditCard />, label: 'Fees' },
-            { id: 'profile', icon: <FiUser />, label: 'Profile' }
+            { id: 'dashboard', icon: <FiGrid />, label: 'HOME' },
+            { id: 'results', icon: <FiFileText />, label: 'TESTS' },
+            { id: 'library', icon: <FiBookOpen />, label: 'VAULT' },
+            { id: 'payments', icon: <FiCreditCard />, label: 'FEES' },
+            { id: 'profile', icon: <FiUser />, label: 'PROFILE' }
           ].map(tab => (
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              style={{ 
-                flex: '0 0 auto',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                border: 'none',
-                background: activeTab === tab.id ? '#1A237E' : '#F1F5F9',
-                color: activeTab === tab.id ? 'white' : '#64748B',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                transition: 'all 0.2s'
-              }}
+              className={`app-chip ${activeTab === tab.id ? 'active' : ''}`}
+              style={{ border: 'none', cursor: 'pointer' }}
             >
               {tab.icon} {tab.label}
             </button>
