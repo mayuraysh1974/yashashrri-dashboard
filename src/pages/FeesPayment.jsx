@@ -349,9 +349,9 @@ const FeesPayment = () => {
       </div>
 
       <div className="card-base no-print" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', background: 'transparent', border: 'none', boxShadow: 'none' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 0.5rem' }}>
-          <h3 style={{ color: 'var(--primary-blue)', margin: 0, fontSize: '1.1rem' }}>Payment History</h3>
-          <div className="search-bar" style={{ backgroundColor: 'white', border: '1px solid var(--border-color)', minWidth: '150px', maxWidth: '250px' }}>
+        <div className="fees-history-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '0 0.5rem', gap: '10px' }}>
+          <h3 className="mobile-hide-subtitle" style={{ color: 'var(--primary-blue)', margin: 0, fontSize: '1.1rem' }}>Payment History</h3>
+          <div className="search-bar fees-search-compact" style={{ backgroundColor: 'white', border: '1px solid var(--border-color)', flex: 1, maxWidth: '250px' }}>
             <FiSearch style={{ color: 'var(--text-secondary)' }} />
             <input 
               type="text" 

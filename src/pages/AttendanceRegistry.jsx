@@ -380,41 +380,40 @@ const AttendanceRegistry = () => {
       `}</style>
 
       <div className="card-base animate-in filter-card-compact">
-        <div className="filter-grid-compact" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
-          <div className="input-group" style={{ marginBottom: 0 }}>
-            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiCalendar /> Date</label>
-            <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }} />
+        <div className="mobile-filter-grid">
+          <div className="input-group">
+            <label><FiCalendar /> Date</label>
+            <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} />
           </div>
-          <div className="input-group" style={{ marginBottom: 0 }}>
-            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiFilter /> Class</label>
-            <select value={selectedStandard} onChange={e => setSelectedStandard(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
+          <div className="input-group">
+            <label><FiFilter /> Class</label>
+            <select value={selectedStandard} onChange={e => setSelectedStandard(e.target.value)}>
               <option value="">All Classes</option>
               {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
             </select>
           </div>
           {mode === 'Subject' && (
-            <div className="input-group search-full-width" style={{ marginBottom: 0 }}>
-              <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiBook /> Subject</label>
-              <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
+            <div className="input-group search-full-width">
+              <label><FiBook /> Subject</label>
+              <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
                 <option value="">Choose Subject...</option>
                 {filteredSubjects.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
           )}
-          <div className="input-group search-full-width" style={{ marginBottom: 0 }}>
-            <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiUserCheck /> Search</label>
+          <div className="input-group search-full-width">
+            <label><FiUserCheck /> Search</label>
             <input 
               type="text" 
               placeholder="Name or ID..." 
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
-              style={{ height: '40px', fontSize: '0.9rem' }}
             />
           </div>
         </div>
         
         <div className="attendance-utility-btns" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-          <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiUserCheck /> Mark All Present</button>
+          <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ flex: 1 }}><FiUserCheck /> Mark All Present</button>
           <button 
             className="btn-secondary" 
             onClick={() => {
@@ -429,7 +428,7 @@ const AttendanceRegistry = () => {
               }
             }} 
             disabled={mode === 'Subject' && !selectedSubject} 
-            style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}
+            style={{ flex: 1 }}
           >
             <FiXCircle /> No Class Today
           </button>
