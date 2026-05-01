@@ -2,7 +2,7 @@ import React from 'react';
 
 const MetricCard = ({ title, value, subtitle, icon, color = "var(--primary-blue)" }) => {
   return (
-    <div className="card" style={{ borderTopColor: color }}>
+    <div className="card app-card-mobile" style={{ borderTopColor: color }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <h3 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>{title}</h3>
@@ -13,6 +13,19 @@ const MetricCard = ({ title, value, subtitle, icon, color = "var(--primary-blue)
           {icon}
         </div>
       </div>
+      <style>{`
+        @media (max-width: 768px) {
+           .app-card-mobile {
+              flex: 0 0 240px;
+              scroll-snap-align: start;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+              border-radius: 20px;
+              border: 1px solid #F1F5F9;
+              padding: 20px !important;
+              background: white;
+           }
+        }
+      `}</style>
     </div>
   );
 };

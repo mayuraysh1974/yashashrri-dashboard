@@ -56,11 +56,14 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="dashboard-metrics-grid">
-        <MetricCard title="Total Students" value={metrics.totalStudents} subtitle="Active Students" icon={<FiUsers size={24} />} />
-        <MetricCard title="Fees Collected" value={`₹${(metrics.feesCollected || 0).toLocaleString()}`} subtitle="In Total" icon={<FiDollarSign size={24} />} color="var(--success-green)" />
-        <MetricCard title="Fee Alerts" value={metrics.defaulters} subtitle="Active Defaulters" icon={<FiAlertCircle size={24} />} color="var(--danger-red)" />
-        <MetricCard title="Teachers" value={`${metrics.presentTeachers} / ${metrics.totalTeachers}`} subtitle="Total Faculty Count" icon={<FiUserCheck size={24} />} />
+      <div style={{ marginBottom: '2rem' }}>
+        <h2 className="app-section-title mobile-only">Instant Insights</h2>
+        <div className="dashboard-metrics-grid app-horizontal-scroll-mobile">
+          <MetricCard title="Total Students" value={metrics.totalStudents} subtitle="Active Students" icon={<FiUsers size={24} />} />
+          <MetricCard title="Fees Collected" value={`₹${(metrics.feesCollected || 0).toLocaleString()}`} subtitle="In Total" icon={<FiDollarSign size={24} />} color="var(--success-green)" />
+          <MetricCard title="Fee Alerts" value={metrics.defaulters} subtitle="Active Defaulters" icon={<FiAlertCircle size={24} />} color="var(--danger-red)" />
+          <MetricCard title="Teachers" value={`${metrics.presentTeachers} / ${metrics.totalTeachers}`} subtitle="Total Faculty Count" icon={<FiUserCheck size={24} />} />
+        </div>
       </div>
 
       <style>{`
@@ -72,9 +75,19 @@ const Dashboard = () => {
         }
 
         @media (max-width: 768px) {
-          .dashboard-metrics-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+          .app-horizontal-scroll-mobile {
+            display: flex;
+            overflow-x: auto;
+            gap: 16px;
+            padding: 10px 4px 20px 4px;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+          }
+          .app-horizontal-scroll-mobile::-webkit-scrollbar {
+            display: none;
           }
         }
       `}</style>
