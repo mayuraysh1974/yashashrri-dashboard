@@ -271,33 +271,116 @@ const AttendanceRegistry = () => {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="page-header animate-in">
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} className="attendance-page-container">
+      <div className="page-header animate-in attendance-compact-header">
         <div>
           <h1 className="page-title">{mode === 'Daily' ? 'Daily Attendance' : 'Subject-wise Attendance'}</h1>
           <p className="page-subtitle">Academic registry and lecture-level tracking</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <div className="mode-toggle-compact" style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-color)', height: '42px' }}>
+        <div className="attendance-action-group">
+          <div className="mode-toggle-compact" style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-color)', height: '36px' }}>
               <button 
                 onClick={() => setMode('Daily')}
-                style={{ padding: '0 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Daily' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Daily' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem' }}
+                style={{ padding: '0 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Daily' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Daily' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.7rem' }}
               >Daily</button>
               <button 
                 onClick={() => setMode('Subject')}
-                style={{ padding: '0 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Subject' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Subject' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.75rem' }}
+                style={{ padding: '0 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', background: mode === 'Subject' ? 'var(--primary-blue)' : 'transparent', color: mode === 'Subject' ? 'white' : 'var(--text-secondary)', fontWeight: 700, fontSize: '0.7rem' }}
               >Subject</button>
           </div>
-          <button className="btn-secondary" onClick={fetchInitialData} style={{ padding: '0 15px', height: '42px' }} title="Refresh student data">
-            <FiRefreshCw /> Refresh
-          </button>
-          <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)', padding: '0 15px', height: '42px' }}><FiSend /> Notify</button>
-          <button className="btn-primary" onClick={handleSave} style={{ padding: '0 15px', height: '42px' }}><FiSave /> Save</button>
+          <div className="attendance-main-actions">
+            <button className="btn-secondary" onClick={fetchInitialData} title="Refresh student data">
+              <FiRefreshCw /> Refresh
+            </button>
+            <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)' }}><FiSend /> Notify</button>
+          </div>
+          <button className="btn-primary attendance-save-btn" onClick={handleSave}><FiSave /> Save Attendance</button>
         </div>
       </div>
 
-      <div className="card-base animate-in" style={{ padding: '1rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .attendance-page-container {
+             padding: 10px !important;
+          }
+          .attendance-compact-header {
+             padding: 0.5rem 0 !important;
+             margin-bottom: 0.75rem !important;
+             gap: 0.75rem !important;
+          }
+          .attendance-compact-header .page-title {
+             font-size: 1.25rem !important;
+          }
+          .attendance-compact-header .page-subtitle {
+             font-size: 0.7rem !important;
+             margin-bottom: 0 !important;
+          }
+          .attendance-action-group {
+             width: 100%;
+             display: flex;
+             flex-direction: column;
+             gap: 8px;
+          }
+          .attendance-main-actions {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 8px;
+          }
+          .attendance-main-actions button {
+             height: 36px !important;
+             font-size: 0.75rem !important;
+             padding: 0 !important;
+          }
+          .attendance-save-btn {
+             width: 100% !important;
+             height: 38px !important;
+             font-size: 0.85rem !important;
+             background-color: var(--accent-gold) !important;
+          }
+          .filter-card-compact {
+             padding: 0.75rem !important;
+             margin-bottom: 0.75rem !important;
+          }
+          .filter-grid-compact {
+             grid-template-columns: 1fr 1fr !important;
+             gap: 8px !important;
+          }
+          .filter-grid-compact .input-group label {
+             font-size: 0.6rem !important;
+          }
+          .filter-grid-compact input, .filter-grid-compact select {
+             height: 34px !important;
+             font-size: 0.8rem !important;
+             padding: 0 8px !important;
+          }
+          .search-full-width {
+             grid-column: span 2 !important;
+          }
+          .attendance-utility-btns {
+             margin-top: 8px !important;
+             gap: 8px !important;
+          }
+          .attendance-utility-btns button {
+             height: 32px !important;
+             font-size: 0.7rem !important;
+             padding: 0 !important;
+          }
+          .holiday-banner-compact {
+             padding: 0.5rem !important;
+             margin-bottom: 0.75rem !important;
+          }
+          .holiday-banner-compact h2, .holiday-banner-compact div {
+             font-size: 0.7rem !important;
+          }
+          .holiday-banner-compact button {
+             padding: 4px 8px !important;
+             font-size: 0.65rem !important;
+          }
+        }
+      `}</style>
+
+      <div className="card-base animate-in filter-card-compact">
+        <div className="filter-grid-compact" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
           <div className="input-group" style={{ marginBottom: 0 }}>
             <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiCalendar /> Date</label>
             <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }} />
@@ -310,7 +393,7 @@ const AttendanceRegistry = () => {
             </select>
           </div>
           {mode === 'Subject' && (
-            <div className="input-group" style={{ marginBottom: 0 }}>
+            <div className="input-group search-full-width" style={{ marginBottom: 0 }}>
               <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiBook /> Subject</label>
               <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)} style={{ height: '40px', fontSize: '0.9rem' }}>
                 <option value="">Choose Subject...</option>
@@ -318,7 +401,7 @@ const AttendanceRegistry = () => {
               </select>
             </div>
           )}
-          <div className="input-group" style={{ marginBottom: 0, gridColumn: mode === 'Subject' ? 'span 1' : 'span 1' }}>
+          <div className="input-group search-full-width" style={{ marginBottom: 0 }}>
             <label style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}><FiUserCheck /> Search</label>
             <input 
               type="text" 
@@ -330,7 +413,7 @@ const AttendanceRegistry = () => {
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+        <div className="attendance-utility-btns" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
           <button className="btn-secondary" onClick={markAllEnrolledPresent} style={{ flex: 1, padding: '0.5rem', fontSize: '0.75rem', height: '38px' }}><FiUserCheck /> Mark All Present</button>
           <button 
             className="btn-secondary" 
@@ -355,7 +438,7 @@ const AttendanceRegistry = () => {
       
       {/* Holiday Warning Banner */}
       {currentHoliday && (
-        <div style={{ 
+        <div className="holiday-banner-compact" style={{ 
           margin: '0 0 1rem 0', padding: '1rem', borderRadius: '12px', 
           backgroundColor: currentHoliday.type === 'Holiday' ? '#FEE2E2' : '#FEF3C7',
           border: `1px solid ${currentHoliday.type === 'Holiday' ? '#FCA5A5' : '#FCD34D'}`,
