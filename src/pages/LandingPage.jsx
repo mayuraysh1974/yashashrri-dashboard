@@ -47,6 +47,7 @@ const LandingPage = ({ isAuthenticated }) => {
         </div>
         <div className="landing-nav-links desktop-only">
           <a href="#features">Features</a>
+          <a href="#results">Results</a>
           <a href="#gallery">Gallery</a>
           <a href="#contact">Contact</a>
           <Link to="/admission" style={{ fontWeight: 'bold', color: '#B8860B' }}>Online Admission</Link>
@@ -164,6 +165,60 @@ const LandingPage = ({ isAuthenticated }) => {
         <div className="stat-item">
           <span className="stat-number">100%</span>
           <span className="stat-label">Commitment</span>
+        </div>
+      </section>
+
+      {/* HSC Results Section */}
+      <section id="results" className="results-section">
+        <div className="section-header">
+          <h2>HSC Science <span className="text-highlight">Toppers 2025</span></h2>
+          <p>Excellence in 12th Science – Proudly presenting our academic stars who have excelled through dedication and expert guidance.</p>
+        </div>
+        <div className="results-container">
+          <div className="topper-card gold">
+            <div className="topper-badge">95.83%</div>
+            <div className="topper-img-wrap">
+              <img src="/topper1.png" alt="Siddharth More" />
+            </div>
+            <div className="topper-info">
+              <h3>Siddharth More</h3>
+              <p className="subject-marks">Maths: 100/100<br />Physics: 98/100</p>
+              <span className="achievement-tag">Institute Rank 1</span>
+            </div>
+          </div>
+          <div className="topper-card silver">
+            <div className="topper-badge">94.50%</div>
+            <div className="topper-img-wrap">
+              <img src="/topper2.png" alt="Ananya Deshmukh" />
+            </div>
+            <div className="topper-info">
+              <h3>Ananya Deshmukh</h3>
+              <p className="subject-marks">Biology: 97/100<br />Chemistry: 95/100</p>
+              <span className="achievement-tag">Distinction</span>
+            </div>
+          </div>
+          <div className="topper-card bronze">
+            <div className="topper-badge">92.17%</div>
+            <div className="topper-img-wrap">
+              <img src="/topper3.png" alt="Varun Patil" />
+            </div>
+            <div className="topper-info">
+              <h3>Varun Patil</h3>
+              <p className="subject-marks">Maths: 99/100<br />CS: 96/100</p>
+              <span className="achievement-tag">Distinction</span>
+            </div>
+          </div>
+          <div className="topper-card bronze">
+            <div className="topper-badge">91.50%</div>
+            <div className="topper-img-wrap">
+              <img src="/topper4.png" alt="Ishita Kulkarni" />
+            </div>
+            <div className="topper-info">
+              <h3>Ishita Kulkarni</h3>
+              <p className="subject-marks">Physics: 96/100<br />Chemistry: 94/100</p>
+              <span className="achievement-tag">Distinction</span>
+            </div>
+          </div>
         </div>
       </section>
 
