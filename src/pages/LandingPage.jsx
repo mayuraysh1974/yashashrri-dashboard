@@ -5,11 +5,13 @@ import './LandingPage.css';
 
 const LandingPage = ({ isAuthenticated }) => {
   const [galleryItems, setGalleryItems] = useState([]);
+  const [hscResults, setHscResults] = useState([]);
   const [enquiryForm, setEnquiryForm] = useState({ student_name: '', standard: '', phone: '' });
   const [enquiryStatus, setEnquiryStatus] = useState({ loading: false, success: false, error: null });
 
   useEffect(() => {
     fetchGallery();
+    fetchHscResults();
   }, []);
 
   const fetchGallery = async () => {
@@ -22,6 +24,18 @@ const LandingPage = ({ isAuthenticated }) => {
       if (data) setGalleryItems(data);
     } catch (err) {
       console.error("Error fetching gallery:", err);
+    }
+  };
+
+  const fetchHscResults = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('hsc_results')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (data) setHscResults(data);
+    } catch (err) {
+      console.error("Error fetching HSC results:", err);
     }
   };
 
@@ -175,50 +189,23 @@ const LandingPage = ({ isAuthenticated }) => {
           <p>Excellence in 12th Science – Proudly presenting our academic stars who have excelled through dedication and expert guidance.</p>
         </div>
         <div className="results-container">
-          <div className="topper-card gold">
-            <div className="topper-badge">95.83%</div>
-            <div className="topper-img-wrap">
-              <img src="/topper1.png" alt="Siddharth More" />
+          {hscResults.length > 0 ? hscResults.map((result, index) => (
+            <div key={result.id} className={`topper-card ${index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}`}>
+              <div className="topper-badge">{result.percentage}</div>
+              <div className="topper-img-wrap">
+                <img src={result.photo_url} alt={result.student_name} onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(result.student_name) + '&background=random'; }} />
+              </div>
+              <div className="topper-info">
+                <h3>{result.student_name}</h3>
+                <p className="subject-marks">{result.subject_scores?.split(',').map((s, i) => <React.Fragment key={i}>{s.trim()}<br /></React.Fragment>)}</p>
+                {result.rank_tag && <span className="achievement-tag">{result.rank_tag}</span>}
+              </div>
             </div>
-            <div className="topper-info">
-              <h3>Siddharth More</h3>
-              <p className="subject-marks">Maths: 100/100<br />Physics: 98/100</p>
-              <span className="achievement-tag">Institute Rank 1</span>
+          )) : (
+            <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
+              <p>Achievers list is being updated. Check back soon!</p>
             </div>
-          </div>
-          <div className="topper-card silver">
-            <div className="topper-badge">94.50%</div>
-            <div className="topper-img-wrap">
-              <img src="/topper2.png" alt="Ananya Deshmukh" />
-            </div>
-            <div className="topper-info">
-              <h3>Ananya Deshmukh</h3>
-              <p className="subject-marks">Biology: 97/100<br />Chemistry: 95/100</p>
-              <span className="achievement-tag">Distinction</span>
-            </div>
-          </div>
-          <div className="topper-card bronze">
-            <div className="topper-badge">92.17%</div>
-            <div className="topper-img-wrap">
-              <img src="/topper3.png" alt="Varun Patil" />
-            </div>
-            <div className="topper-info">
-              <h3>Varun Patil</h3>
-              <p className="subject-marks">Maths: 99/100<br />CS: 96/100</p>
-              <span className="achievement-tag">Distinction</span>
-            </div>
-          </div>
-          <div className="topper-card bronze">
-            <div className="topper-badge">91.50%</div>
-            <div className="topper-img-wrap">
-              <img src="/topper4.png" alt="Ishita Kulkarni" />
-            </div>
-            <div className="topper-info">
-              <h3>Ishita Kulkarni</h3>
-              <p className="subject-marks">Physics: 96/100<br />Chemistry: 94/100</p>
-              <span className="achievement-tag">Distinction</span>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
