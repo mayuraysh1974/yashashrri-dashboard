@@ -262,10 +262,10 @@ const AttendanceRegistry = () => {
 
       <div className="card-base" style={{ flex: 1, overflow: 'auto', padding: 0, borderRadius: '8px' }}>
         <div className="desktop-only">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table style={{ width: 'auto', borderCollapse: 'collapse', minWidth: '600px' }}>
             <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-surface)', zIndex: 1 }}>
               <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', width: '250px' }}>Student Profile</th>
+                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Student Profile</th>
                 <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Status</th>
               </tr>
             </thead>
