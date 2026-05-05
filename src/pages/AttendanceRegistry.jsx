@@ -399,7 +399,7 @@ const AttendanceRegistry = () => {
              padding: 0 12px !important;
           }
         }
-      `}></style>
+      `}</style>
 
       <div className="card-base animate-in filter-card-compact">
         <div className="mobile-filter-grid">
