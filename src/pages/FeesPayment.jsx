@@ -85,7 +85,6 @@ const FeesPayment = () => {
     }
   };
 
-  // eslint-disable-next-line
   useEffect(() => {
     fetchStudents();
     fetchHistory();

@@ -7,7 +7,7 @@ const FeeReports = () => {
   const [arrears, setArrears] = useState([]);
   const [collection, setCollection] = useState({ collections: [], summary: { totalCollection: 0, transactions: 0 } });
   const [facultySummary, setFacultySummary] = useState([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState({ 
     start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0], 
@@ -140,21 +140,15 @@ const FeeReports = () => {
     setLoading(false);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const fetchStandards = async () => {
     const { data } = await supabase.from('standards').select('*').order('standard');
     setStandards(data || []);
   };
 
-  // eslint-disable-next-line
   useEffect(() => {
     fetchStandards();
   }, []);
 
-  // eslint-disable-next-line
   useEffect(() => {
     if (activeTab === 'arrears') fetchArrears();
     else if (activeTab === 'collection') fetchCollection();

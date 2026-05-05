@@ -558,7 +558,7 @@ const AttendanceRegistry = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary-blue)' }}>{student.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{student.id} • {student.standard}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{student.id} | {student.standard}</div>
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
