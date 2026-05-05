@@ -272,10 +272,10 @@ const AttendanceRegistry = () => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} className="attendance-page-container">
-      <div className="page-header animate-in attendance-compact-header">
+      <div className="page-header animate-in attendance-compact-header" style={{ padding: '1rem 0', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
         <div>
-          <h1 className="page-title">{mode === 'Daily' ? 'Daily Attendance' : 'Subject-wise Attendance'}</h1>
-          <p className="page-subtitle">Academic registry and lecture-level tracking</p>
+          <h1 className="page-title" style={{ fontSize: '1.5rem', marginBottom: '2px' }}>{mode === 'Daily' ? 'Daily Attendance' : 'Subject-wise Attendance'}</h1>
+          <p className="page-subtitle" style={{ fontSize: '0.85rem' }}>Academic registry and lecture-level tracking</p>
         </div>
         <div className="attendance-action-group">
           <div className="mode-toggle-compact" style={{ display: 'flex', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid var(--border-color)', height: '36px' }}>
@@ -294,7 +294,7 @@ const AttendanceRegistry = () => {
             </button>
             <button className="btn-secondary" onClick={notifyAbsentees} style={{ color: 'var(--danger-red)' }}><FiSend /> Notify</button>
           </div>
-          <button className="btn-primary attendance-save-btn" onClick={handleSave}><FiSave /> Save Attendance</button>
+          <button className="btn-primary attendance-save-btn" onClick={handleSave} style={{ backgroundColor: 'var(--accent-gold)', borderColor: 'var(--accent-gold)' }}><FiSave /> Save Attendance</button>
         </div>
       </div>
 
@@ -341,14 +341,14 @@ const AttendanceRegistry = () => {
              padding: 0.75rem !important;
              margin-bottom: 0.75rem !important;
           }
-          .filter-grid-compact {
+          .mobile-filter-grid {
              grid-template-columns: 1fr 1fr !important;
              gap: 8px !important;
           }
-          .filter-grid-compact .input-group label {
+          .mobile-filter-grid .input-group label {
              font-size: 0.6rem !important;
           }
-          .filter-grid-compact input, .filter-grid-compact select {
+          .mobile-filter-grid input, .mobile-filter-grid select {
              height: 34px !important;
              font-size: 0.8rem !important;
              padding: 0 8px !important;
@@ -377,7 +377,29 @@ const AttendanceRegistry = () => {
              font-size: 0.65rem !important;
           }
         }
-      `}</style>
+        
+        /* Desktop layout improvements */
+        @media (min-width: 769px) {
+          .mobile-filter-grid {
+             display: grid;
+             grid-template-columns: 1fr 1fr 1fr 1fr;
+             gap: 1rem;
+             align-items: flex-end;
+          }
+          .filter-card-compact {
+             padding: 1rem !important;
+             margin-bottom: 1rem !important;
+          }
+          .input-group label {
+             font-size: 0.75rem !important;
+             margin-bottom: 4px !important;
+          }
+          .input-group select, .input-group input {
+             height: 38px !important;
+             padding: 0 12px !important;
+          }
+        }
+      `}></style>
 
       <div className="card-base animate-in filter-card-compact">
         <div className="mobile-filter-grid">
@@ -393,7 +415,7 @@ const AttendanceRegistry = () => {
             </select>
           </div>
           {mode === 'Subject' && (
-            <div className="input-group search-full-width">
+            <div className="input-group">
               <label><FiBook /> Subject</label>
               <select value={selectedSubject} onChange={e => setSelectedSubject(e.target.value)}>
                 <option value="">Choose Subject...</option>
@@ -401,7 +423,7 @@ const AttendanceRegistry = () => {
               </select>
             </div>
           )}
-          <div className="input-group search-full-width">
+          <div className="input-group">
             <label><FiUserCheck /> Search</label>
             <input 
               type="text" 
