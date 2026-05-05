@@ -282,9 +282,9 @@ const AttendanceRegistry = () => {
                     </td>
                     <td style={{ padding: '0.4rem 0.75rem', textAlign: 'right' }}>
                        <div style={{ display: 'inline-flex', gap: '0.3rem' }}>
-                          <button onClick={() => handleStatusChange(student.id, 'Present')} className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}>P</button>
-                          <button onClick={() => handleStatusChange(student.id, 'Absent')} className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}>A</button>
-                          <button onClick={() => handleStatusChange(student.id, 'No Class')} className={`btn-attendance ${status === 'No Class' ? 'no-class' : ''}`}>N</button>
+                          <button onClick={() => handleStatusChange(student.id, 'Present')} className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}>Present</button>
+                          <button onClick={() => handleStatusChange(student.id, 'Absent')} className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}>Absent</button>
+                          <button onClick={() => handleStatusChange(student.id, 'No Class')} className={`btn-attendance ${status === 'No Class' ? 'no-class' : ''}`}>No Class</button>
                        </div>
                     </td>
                   </tr>
