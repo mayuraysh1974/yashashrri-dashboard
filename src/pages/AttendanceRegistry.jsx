@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { FiCheckCircle, FiXCircle, FiCalendar, FiFilter, FiSave, FiSend, FiBook, FiUserCheck, FiTrendingUp, FiRefreshCw } from 'react-icons/fi';
+import { FiXCircle, FiCalendar, FiFilter, FiSave, FiSend, FiBook, FiUserCheck, FiRefreshCw } from 'react-icons/fi';
 
 const AttendanceRegistry = () => {
   const [students, setStudents] = useState([]);
