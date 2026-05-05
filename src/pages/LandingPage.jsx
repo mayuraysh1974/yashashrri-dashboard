@@ -197,7 +197,7 @@ const LandingPage = ({ isAuthenticated }) => {
               </div>
               <div className="topper-info">
                 <h3>{result.student_name}</h3>
-                <p className="subject-marks">{result.subject_scores?.split(',').map((s, i) => <React.Fragment key={i}>{s.trim()}<br /></React.Fragment>)}</p>
+                <p className="subject-marks">{(result.subject_scores?.split(',') || []).map((s, i) => <React.Fragment key={i}>{s.trim()}<br /></React.Fragment>)}</p>
                 {result.rank_tag && <span className="achievement-tag">{result.rank_tag}</span>}
               </div>
             </div>

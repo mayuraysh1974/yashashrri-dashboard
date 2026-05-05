@@ -15,6 +15,7 @@ const AttendanceRegistry = () => {
   const [loading, setLoading] = useState(true);
   const [holidays, setHolidays] = useState([]);
   const [currentHoliday, setCurrentHoliday] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchInitialData();
@@ -120,7 +121,6 @@ const AttendanceRegistry = () => {
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Get subjects filtered by standard
   const filteredSubjects = subjects.filter(s => {
@@ -136,7 +136,7 @@ const AttendanceRegistry = () => {
     // 2. Strict word-boundary match for the full standard name (e.g., "X" won't match "IX" or "XII")
     const fullStdRegex = new RegExp(`\\b${std.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
     if (fullStdRegex.test(subName)) return true;
-    
+
     // 3. Fallback: Word boundary match for the first word (helps with specific branch names)
     const stdFirstWord = std.split(' ')[0];
     const firstWordRegex = new RegExp(`\\b${stdFirstWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
