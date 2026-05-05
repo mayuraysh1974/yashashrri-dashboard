@@ -265,8 +265,8 @@ const AttendanceRegistry = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-surface)', zIndex: 1 }}>
               <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Student Profile</th>
-                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem', width: '250px' }}>Student Profile</th>
+                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -280,7 +280,7 @@ const AttendanceRegistry = () => {
                        <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{student.name}</div>
                        <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
                     </td>
-                    <td style={{ padding: '0.4rem 0.75rem', textAlign: 'right' }}>
+                    <td style={{ padding: '0.4rem 0.75rem', textAlign: 'left' }}>
                        <div style={{ display: 'inline-flex', gap: '0.3rem' }}>
                           <button onClick={() => handleStatusChange(student.id, 'Present')} className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}>Present</button>
                           <button onClick={() => handleStatusChange(student.id, 'Absent')} className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}>Absent</button>
