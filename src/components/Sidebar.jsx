@@ -13,7 +13,8 @@ import {
   FiLayers,
   FiCheckCircle,
   FiBell,
-  FiTrendingUp
+  FiTrendingUp,
+  FiAward
 } from 'react-icons/fi';
 
 const Sidebar = () => {
@@ -37,6 +38,7 @@ const Sidebar = () => {
     { path: '/settings', name: 'Settings', icon: <FiSettings /> },
     { path: '/enquiries', name: 'Web Enquiries', icon: <FiBarChart2 /> },
     { path: '/gallery-management', name: 'Gallery Management', icon: <FiLayers /> },
+    { path: '/hall-of-fame', name: 'Hall of Fame', icon: <FiAward /> },
   ];
 
   return (

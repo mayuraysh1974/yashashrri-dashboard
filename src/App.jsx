@@ -29,6 +29,7 @@ import PublicFeesPayment from './pages/PublicFeesPayment';
 import Enquiries from './pages/Enquiries';
 import GalleryManagement from './pages/GalleryManagement';
 import StudentPortal from './pages/StudentPortal';
+import HallOfFame from './pages/HallOfFame';
 
 import { supabase } from './supabaseClient';
 
@@ -94,6 +95,7 @@ function App() {
                     <Route path="/menu" element={<MobileMenu />} />
                     <Route path="/enquiries" element={<Enquiries />} />
                     <Route path="/gallery-management" element={<GalleryManagement />} />
+                    <Route path="/hall-of-fame" element={<HallOfFame />} />
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                   </Routes>
                 </div>
