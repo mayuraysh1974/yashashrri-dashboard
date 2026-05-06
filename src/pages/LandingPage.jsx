@@ -202,6 +202,11 @@ const LandingPage = ({ isAuthenticated }) => {
               </div>
               <div className="topper-info">
                 <h3>{result.student_name}</h3>
+                {result.special_note && (
+                  <p style={{ color: '#B8860B', fontSize: '0.8rem', fontWeight: 'bold', margin: '0.2rem 0', textTransform: 'uppercase' }}>
+                    ★ {result.special_note}
+                  </p>
+                )}
                 <p className="subject-marks">{result.marks ? `Marks: ${result.marks}` : ''}{result.marks ? <br/> : ''}{result.stream} ({result.year})</p>
                 {result.rank && <span className="achievement-tag">{result.rank}</span>}
               </div>

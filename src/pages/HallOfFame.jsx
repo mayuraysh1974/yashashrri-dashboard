@@ -14,6 +14,7 @@ const HallOfFame = () => {
   const [stream, setStream] = useState('Science');
   const [rank, setRank] = useState('1st Rank');
   const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [specialNote, setSpecialNote] = useState('');
   const [file, setFile] = useState(null);
 
   useEffect(() => {
@@ -82,6 +83,7 @@ const HallOfFame = () => {
           stream,
           rank,
           year,
+          special_note: specialNote,
           photo_url: publicUrl 
         }]);
 
@@ -94,6 +96,7 @@ const HallOfFame = () => {
       setMarks('');
       setStream('Science');
       setRank('1st Rank');
+      setSpecialNote('');
       // keep year as is
       fetchItems();
     } catch (error) {
@@ -168,6 +171,17 @@ const HallOfFame = () => {
                 onChange={(e) => setStudentName(e.target.value)} 
                 placeholder="e.g. Meet Mhatre"
                 required
+                className="form-control"
+                style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }}
+              />
+            </div>
+            <div className="input-group" style={{ flex: '1 1 200px' }}>
+              <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Special Note (Optional)</label>
+              <input 
+                type="text" 
+                value={specialNote} 
+                onChange={(e) => setSpecialNote(e.target.value)} 
+                placeholder="e.g. JAIN JUNIOR COLLEGE TOPPER"
                 className="form-control"
                 style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #CBD5E1' }}
               />
@@ -312,7 +326,14 @@ const HallOfFame = () => {
                         )}
                       </div>
                     </td>
-                    <td style={{ padding: '1rem 1.5rem', fontWeight: '600', color: '#1E293B' }}>{item.student_name}</td>
+                    <td style={{ padding: '1rem 1.5rem', fontWeight: '600', color: '#1E293B' }}>
+                      {item.student_name}
+                      {item.special_note && (
+                        <div style={{ fontSize: '0.7rem', color: '#B8860B', marginTop: '0.2rem', fontWeight: '700' }}>
+                          ★ {item.special_note}
+                        </div>
+                      )}
+                    </td>
                     <td style={{ padding: '1rem 1.5rem' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontWeight: 'bold', color: '#0F172A' }}>{item.percentage}</span>
