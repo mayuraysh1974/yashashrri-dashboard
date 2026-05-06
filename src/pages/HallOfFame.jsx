@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { FiTrash2, FiUpload, FiAward, FiImage } from 'react-icons/fi';
+import { FiTrash2, FiUpload, FiAward, FiImage, FiEdit, FiX } from 'react-icons/fi';
 
 const HallOfFame = () => {
   const [items, setItems] = useState([]);
@@ -16,6 +16,10 @@ const HallOfFame = () => {
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [specialNote, setSpecialNote] = useState('');
   const [file, setFile] = useState(null);
+
+  // Edit State
+  const [editingId, setEditingId] = useState(null);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState('');
 
   useEffect(() => {
     fetchItems();
@@ -48,63 +52,104 @@ const HallOfFame = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) {
+    if (!editingId && !file) {
       alert("Please select a photograph.");
       return;
     }
 
     setUploading(true);
     try {
-      // 1. Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${fileName}`;
+      let finalPhotoUrl = existingPhotoUrl;
 
-      const { error: uploadError } = await supabase.storage
-        .from('gallery') // Reusing the gallery bucket to avoid needing to create a new one, but can create a 'hall_of_fame' bucket if preferred
-        .upload(filePath, file);
+      // 1. Upload file to Supabase Storage if new file selected
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-      if (uploadError) throw uploadError;
+        const { error: uploadError } = await supabase.storage
+          .from('gallery')
+          .upload(filePath, file);
 
-      // 2. Get Public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('gallery')
-        .getPublicUrl(filePath);
+        if (uploadError) throw uploadError;
 
-      const publicUrl = publicUrlData.publicUrl;
+        const { data: publicUrlData } = supabase.storage
+          .from('gallery')
+          .getPublicUrl(filePath);
 
-      // 3. Save to database
-      const { error: dbError } = await supabase
-        .from('hall_of_fame')
-        .insert([{ 
-          student_name: studentName, 
-          percentage, 
-          marks,
-          stream,
-          rank,
-          year,
-          special_note: specialNote,
-          photo_url: publicUrl 
-        }]);
+        finalPhotoUrl = publicUrlData.publicUrl;
+      }
 
-      if (dbError) throw dbError;
+      // 2. Save to database
+      if (editingId) {
+        const { error: dbError } = await supabase
+          .from('hall_of_fame')
+          .update({ 
+            student_name: studentName, 
+            percentage, 
+            marks,
+            stream,
+            rank,
+            year,
+            special_note: specialNote,
+            photo_url: finalPhotoUrl 
+          })
+          .eq('id', editingId);
+
+        if (dbError) throw dbError;
+      } else {
+        const { error: dbError } = await supabase
+          .from('hall_of_fame')
+          .insert([{ 
+            student_name: studentName, 
+            percentage, 
+            marks,
+            stream,
+            rank,
+            year,
+            special_note: specialNote,
+            photo_url: finalPhotoUrl 
+          }]);
+
+        if (dbError) throw dbError;
+      }
 
       // Reset & Refresh
-      setFile(null);
-      setStudentName('');
-      setPercentage('');
-      setMarks('');
-      setStream('Science');
-      setRank('1st Rank');
-      setSpecialNote('');
-      // keep year as is
+      cancelEditing();
       fetchItems();
     } catch (error) {
-      alert('Error uploading: ' + error.message + '\n\nMake sure the "hall_of_fame" table exists in your database.');
+      alert('Error saving record: ' + error.message);
       console.error(error);
     } finally {
       setUploading(false);
     }
+  };
+
+  const startEditing = (item) => {
+    setEditingId(item.id);
+    setStudentName(item.student_name);
+    setPercentage(item.percentage || '');
+    setMarks(item.marks || '');
+    setStream(item.stream || 'Science');
+    setRank(item.rank || '1st Rank');
+    setYear(item.year || new Date().getFullYear().toString());
+    setSpecialNote(item.special_note || '');
+    setExistingPhotoUrl(item.photo_url || '');
+    setFile(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setStudentName('');
+    setPercentage('');
+    setMarks('');
+    setStream('Science');
+    setRank('1st Rank');
+    setYear(new Date().getFullYear().toString());
+    setSpecialNote('');
+    setExistingPhotoUrl('');
+    setFile(null);
   };
 
   const deleteItem = async (id, url) => {
@@ -147,7 +192,7 @@ const HallOfFame = () => {
       </div>
       
       <div className="card" style={{ marginBottom: '2rem', background: '#F8FAFC', padding: '1.5rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-        <h3 style={{ color: '#1E293B', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Add New Topper</h3>
+        <h3 style={{ color: '#1E293B', marginBottom: '1.5rem', fontSize: '1.1rem' }}>{editingId ? 'Edit Topper' : 'Add New Topper'}</h3>
         <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
@@ -243,38 +288,64 @@ const HallOfFame = () => {
           </div>
 
           <div className="input-group">
-            <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Photograph</label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#64748B', textTransform: 'uppercase' }}>Photograph {editingId && <span style={{ textTransform: 'none', fontWeight: 'normal' }}>(Leave empty to keep existing)</span>}</label>
             <input 
               type="file" 
               accept="image/*" 
               onChange={(e) => setFile(e.target.files[0])}
-              required
+              required={!editingId}
               className="form-control"
               style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', backgroundColor: '#fff' }}
             />
           </div>
 
-          <button 
-            type="submit" 
-            disabled={uploading || !file} 
-            className="btn btn-primary" 
-            style={{ 
-              padding: '0.8rem 1.5rem', 
-              fontSize: '1rem', 
-              fontWeight: '600', 
-              backgroundColor: '#4338CA', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px', 
-              cursor: uploading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <FiUpload /> {uploading ? 'Uploading...' : 'Upload & Add to Hall of Fame'}
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button 
+              type="submit" 
+              disabled={uploading || (!editingId && !file)} 
+              className="btn btn-primary" 
+              style={{ 
+                flex: 1,
+                padding: '0.8rem 1.5rem', 
+                fontSize: '1rem', 
+                fontWeight: '600', 
+                backgroundColor: '#4338CA', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '8px', 
+                cursor: uploading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <FiUpload /> {uploading ? 'Saving...' : (editingId ? 'Update Record' : 'Upload & Add to Hall of Fame')}
+            </button>
+            {editingId && (
+              <button 
+                type="button" 
+                onClick={cancelEditing}
+                className="btn btn-secondary" 
+                style={{ 
+                  padding: '0.8rem 1.5rem', 
+                  fontSize: '1rem', 
+                  fontWeight: '600', 
+                  backgroundColor: '#E2E8F0', 
+                  color: '#475569', 
+                  border: 'none', 
+                  borderRadius: '8px', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <FiX /> Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -342,13 +413,22 @@ const HallOfFame = () => {
                     </td>
                     <td style={{ padding: '1rem 1.5rem', color: '#475569' }}>{item.stream}</td>
                     <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                      <button 
-                        onClick={() => deleteItem(item.id, item.photo_url)} 
-                        style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', padding: '0.5rem', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-                        title="Delete Record"
-                      >
-                        <FiTrash2 size={16} /> 
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        <button 
+                          onClick={() => startEditing(item)} 
+                          style={{ background: '#E0E7FF', color: '#4338CA', border: 'none', padding: '0.5rem', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                          title="Edit Record"
+                        >
+                          <FiEdit size={16} /> 
+                        </button>
+                        <button 
+                          onClick={() => deleteItem(item.id, item.photo_url)} 
+                          style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', padding: '0.5rem', borderRadius: '6px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                          title="Delete Record"
+                        >
+                          <FiTrash2 size={16} /> 
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
