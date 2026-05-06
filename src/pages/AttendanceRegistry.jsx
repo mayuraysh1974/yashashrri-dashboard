@@ -261,37 +261,27 @@ const AttendanceRegistry = () => {
       )}
 
       <div className="card-base" style={{ flex: 1, overflow: 'auto', padding: 0, borderRadius: '8px' }}>
-        <div className="desktop-only">
-          <table style={{ width: 'auto', borderCollapse: 'collapse', minWidth: '600px' }}>
-            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'var(--bg-surface)', zIndex: 1 }}>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Student Profile</th>
-                <th style={{ padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedStudents.length === 0 ? (
-                <tr><td colSpan="2" style={{ padding: '2rem', textAlign: 'center', fontSize: '0.8rem' }}>No students found.</td></tr>
-              ) : displayedStudents.map(student => {
-                const status = getEffectiveStatus(student.id);
-                return (
-                  <tr key={student.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '0.4rem 0.75rem' }}>
-                       <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{student.name}</div>
-                       <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
-                    </td>
-                    <td style={{ padding: '0.4rem 0.75rem', textAlign: 'left' }}>
-                       <div style={{ display: 'inline-flex', gap: '0.3rem' }}>
-                          <button onClick={() => handleStatusChange(student.id, 'Present')} className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}>Present</button>
-                          <button onClick={() => handleStatusChange(student.id, 'Absent')} className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}>Absent</button>
-                          <button onClick={() => handleStatusChange(student.id, 'No Class')} className={`btn-attendance ${status === 'No Class' ? 'no-class' : ''}`}>No Class</button>
-                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="desktop-only" style={{ padding: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '0.75rem', alignItems: 'start' }}>
+            {displayedStudents.length === 0 ? (
+              <div style={{ padding: '2rem', textAlign: 'center', fontSize: '0.8rem', gridColumn: '1 / -1' }}>No students found.</div>
+            ) : displayedStudents.map(student => {
+              const status = getEffectiveStatus(student.id);
+              return (
+                <div key={student.id} style={{ display: 'flex', alignItems: 'center', padding: '0.5rem 0.75rem', border: '1px solid var(--border-color, #e2e8f0)', borderRadius: '6px', backgroundColor: 'var(--bg-surface, white)', gap: '1rem' }}>
+                  <div style={{ width: '180px', flexShrink: 0 }}>
+                     <div style={{ fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{student.name}</div>
+                     <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)' }}>ID: {student.id} | {student.standard}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'nowrap' }}>
+                        <button onClick={() => handleStatusChange(student.id, 'Present')} className={`btn-attendance ${status === 'Present' ? 'present' : ''}`}>Present</button>
+                        <button onClick={() => handleStatusChange(student.id, 'Absent')} className={`btn-attendance ${status === 'Absent' ? 'absent' : ''}`}>Absent</button>
+                        <button onClick={() => handleStatusChange(student.id, 'No Class')} className={`btn-attendance ${status === 'No Class' ? 'no-class' : ''}`}>No Class</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
         <div className="mobile-only" style={{ padding: '0.4rem' }}>
           {displayedStudents.map(student => {

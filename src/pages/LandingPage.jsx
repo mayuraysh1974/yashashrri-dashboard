@@ -185,7 +185,7 @@ const LandingPage = ({ isAuthenticated }) => {
       {/* HSC Results Section */}
       <section id="results" className="results-section">
         <div className="section-header">
-          <h2>HSC Science <span className="text-highlight">Toppers 2025</span></h2>
+          <h2>HSC Science <span className="text-highlight">Toppers 2025-26</span></h2>
           <p>Excellence in 12th Science – Proudly presenting our academic stars who have excelled through dedication and expert guidance.</p>
         </div>
         <div className="results-container">
