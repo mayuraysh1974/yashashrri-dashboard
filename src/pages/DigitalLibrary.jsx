@@ -56,11 +56,11 @@ const DigitalLibrary = () => {
     try {
       if (uploadFiles.length > 0) {
         for (const file of uploadFiles) {
-          const filePath = `library/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+          const filePath = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
           
           const { error: storageError } = await supabase.storage
             .from('library-files')
-            .upload(filePath, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+            .upload(filePath, file);
           
           if (storageError) throw storageError;
 
@@ -97,7 +97,8 @@ const DigitalLibrary = () => {
       setFormData({ name: '', standard: '', videoLink: '', category: 'General' });
       fetchResources();
     } catch (err) {
-      alert('Error during upload: ' + err.message);
+      console.error('Upload Error:', err);
+      alert('Error during upload: ' + err.message + '\n\nPlease ensure you have created a PUBLIC storage bucket named "library-files" in your Supabase dashboard.');
     }
     setUploading(false);
   };
