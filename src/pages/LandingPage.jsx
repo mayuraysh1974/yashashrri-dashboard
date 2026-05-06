@@ -5,13 +5,13 @@ import './LandingPage.css';
 
 const LandingPage = ({ isAuthenticated }) => {
   const [galleryItems, setGalleryItems] = useState([]);
-  const [hscResults, setHscResults] = useState([]);
+  const [hallOfFame, setHallOfFame] = useState([]);
   const [enquiryForm, setEnquiryForm] = useState({ student_name: '', standard: '', phone: '' });
   const [enquiryStatus, setEnquiryStatus] = useState({ loading: false, success: false, error: null });
 
   useEffect(() => {
     fetchGallery();
-    fetchHscResults();
+    fetchHallOfFame();
   }, []);
 
   const fetchGallery = async () => {
@@ -27,15 +27,16 @@ const LandingPage = ({ isAuthenticated }) => {
     }
   };
 
-  const fetchHscResults = async () => {
+  const fetchHallOfFame = async () => {
     try {
       const { data, error } = await supabase
-        .from('hsc_results')
+        .from('hall_of_fame')
         .select('*')
-        .order('display_order', { ascending: true });
-      if (data) setHscResults(data);
+        .order('year', { ascending: false })
+        .order('rank', { ascending: true });
+      if (data) setHallOfFame(data);
     } catch (err) {
-      console.error("Error fetching HSC results:", err);
+      console.error("Error fetching Hall of Fame:", err);
     }
   };
 
@@ -182,26 +183,30 @@ const LandingPage = ({ isAuthenticated }) => {
         </div>
       </section>
 
-      {/* HSC Results Section */}
+      {/* Hall of Fame Section */}
       <section id="results" className="results-section">
         <div className="section-header">
-          <h2>HSC Science <span className="text-highlight">Toppers 2025-26</span></h2>
-          <p>Excellence in 12th Science – Proudly presenting our academic stars who have excelled through dedication and expert guidance.</p>
+          <h2>Hall of <span className="text-highlight">Fame</span></h2>
+          <p>Proudly presenting our academic stars who have excelled through dedication and expert guidance across the years.</p>
         </div>
         <div className="results-container">
-          {hscResults.length > 0 ? hscResults.map((result, index) => (
-            <div key={result.id} className={`topper-card ${index === 0 ? 'gold' : index === 1 ? 'silver' : 'bronze'}`}>
+          {hallOfFame.length > 0 ? hallOfFame.map((result, index) => {
+            const isFirst = result.rank === '1st Rank';
+            const isSecond = result.rank === '2nd Rank';
+            const cardClass = isFirst ? 'gold' : isSecond ? 'silver' : 'bronze';
+            return (
+            <div key={result.id} className={`topper-card ${cardClass}`}>
               <div className="topper-badge">{result.percentage}</div>
               <div className="topper-img-wrap">
                 <img src={result.photo_url} alt={result.student_name} onError={(e) => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(result.student_name) + '&background=random'; }} />
               </div>
               <div className="topper-info">
                 <h3>{result.student_name}</h3>
-                <p className="subject-marks">{(result.subject_scores?.split(',') || []).map((s, i) => <React.Fragment key={i}>{s.trim()}<br /></React.Fragment>)}</p>
-                {result.rank_tag && <span className="achievement-tag">{result.rank_tag}</span>}
+                <p className="subject-marks">{result.marks ? `Marks: ${result.marks}` : ''}{result.marks ? <br/> : ''}{result.stream} ({result.year})</p>
+                {result.rank && <span className="achievement-tag">{result.rank}</span>}
               </div>
             </div>
-          )) : (
+          )}) : (
             <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
               <p>Achievers list is being updated. Check back soon!</p>
             </div>
