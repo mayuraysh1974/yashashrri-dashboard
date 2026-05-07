@@ -140,6 +140,10 @@ const FeeReports = () => {
     setLoading(false);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const fetchStandards = async () => {
     const { data } = await supabase.from('standards').select('*').order('standard');
     setStandards(data || []);
