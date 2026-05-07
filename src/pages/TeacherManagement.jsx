@@ -141,6 +141,22 @@ const TeacherManagement = () => {
     }, 1000);
   };
 
+  const handleDeleteShare = async (shareId) => {
+    if (!window.confirm('Delete this share entitlement?')) return;
+    const { error } = await supabase.from('teacher_shares').delete().eq('id', shareId);
+    if (error) return alert(error.message);
+    fetchFinanceDetails(selectedTeacher.id);
+    fetchTeachers();
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!window.confirm('Delete this payment record?')) return;
+    const { error } = await supabase.from('teacher_payments').delete().eq('id', paymentId);
+    if (error) return alert(error.message);
+    fetchFinanceDetails(selectedTeacher.id);
+    fetchTeachers();
+  };
+
   const handleAddShare = async () => {
     if (!shareForm.amount || !shareForm.description) return alert('Amount and description required');
     const { error } = await supabase.from('teacher_shares').insert({
@@ -383,12 +399,13 @@ const TeacherManagement = () => {
                         <span>Amount</span>
                     </div>
                     {financeData.shares.map(s => (
-                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '1rem' }}>
+                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '0.5rem' }}>
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{s.description}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{s.date}</div>
                             </div>
                             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1A237E', whiteSpace: 'nowrap' }}>₹{s.amount.toLocaleString()}</div>
+                            <button onClick={() => handleDeleteShare(s.id)} className="no-print" title="Delete entry" style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', borderRadius: '6px', padding: '0.3rem 0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}><FiTrash2 size={13} /></button>
                         </div>
                     ))}
                 </div>
@@ -434,12 +451,13 @@ const TeacherManagement = () => {
                         <span>Amount</span>
                     </div>
                     {financeData.payments.map(p => (
-                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '1rem' }}>
+                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.8rem', borderBottom: '1px solid #f1f5f9', gap: '0.5rem' }}>
                             <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{p.paymentMode} - {p.remarks || 'No remarks'}</div>
+                                <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1E293B', wordBreak: 'break-word' }}>{p.payment_mode} - {p.remarks || 'No remarks'}</div>
                                 <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{p.date}</div>
                             </div>
                             <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--success-green)', whiteSpace: 'nowrap' }}>₹{p.amount.toLocaleString()}</div>
+                            <button onClick={() => handleDeletePayment(p.id)} className="no-print" title="Delete payment" style={{ background: '#FEE2E2', color: '#EF4444', border: 'none', borderRadius: '6px', padding: '0.3rem 0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', flexShrink: 0 }}><FiTrash2 size={13} /></button>
                         </div>
                     ))}
                 </div>
