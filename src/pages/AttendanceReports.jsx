@@ -311,39 +311,86 @@ const AttendanceReports = () => {
           </div>
           
           <div style={{ flex: 1 }}>
-            {activeTab === 'student-monthly' && (
-              <div className="card-base" style={{ padding: '1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-                  <div>
-                    <h3 style={{ fontSize: '1rem', color: '#1A237E', margin: 0 }}>{reportData.student?.name}</h3>
-                    <p style={{ color: '#64748B', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Standard: {reportData.student?.standard}</p>
+            {activeTab === 'student-monthly' && (() => {
+              // Build a full calendar for the selected month
+              const attMap = {};
+              (reportData.attendance || []).forEach(a => { attMap[a.date] = a.status; });
+              const year = parseInt(selectedMonth.split('-')[0]);
+              const month = parseInt(selectedMonth.split('-')[1]) - 1;
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const firstDayOfWeek = new Date(year, month, 1).getDay(); // 0=Sun
+              const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+              const presentCount = (reportData.attendance || []).filter(a => a.status === 'Present').length;
+              const absentCount = (reportData.attendance || []).filter(a => a.status === 'Absent').length;
+              const totalClasses = presentCount + absentCount;
+              const pct = totalClasses > 0 ? ((presentCount / totalClasses) * 100).toFixed(1) : 'N/A';
+
+              // Build calendar cells: empty slots + day cells
+              const cells = [];
+              for (let i = 0; i < firstDayOfWeek; i++) cells.push(null);
+              for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+              return (
+                <div className="card-base" style={{ padding: '1.25rem' }}>
+                  {/* Student Info + Summary */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', color: '#1A237E', margin: 0 }}>{reportData.student?.name}</h3>
+                      <p style={{ color: '#64748B', fontSize: '0.8rem', margin: '4px 0 0 0' }}>Standard: {reportData.student?.standard}</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <div style={{ textAlign: 'center', background: '#DCFCE7', borderRadius: '8px', padding: '0.4rem 0.8rem' }}>
+                        <div style={{ fontWeight: 800, color: '#059669', fontSize: '1.1rem' }}>{presentCount}</div>
+                        <div style={{ fontSize: '0.65rem', color: '#059669' }}>Present</div>
+                      </div>
+                      <div style={{ textAlign: 'center', background: '#FEE2E2', borderRadius: '8px', padding: '0.4rem 0.8rem' }}>
+                        <div style={{ fontWeight: 800, color: '#DC2626', fontSize: '1.1rem' }}>{absentCount}</div>
+                        <div style={{ fontSize: '0.65rem', color: '#DC2626' }}>Absent</div>
+                      </div>
+                      <div style={{ textAlign: 'center', background: '#EFF6FF', borderRadius: '8px', padding: '0.4rem 0.8rem' }}>
+                        <div style={{ fontWeight: 800, color: '#1D4ED8', fontSize: '1.1rem' }}>{pct}{pct !== 'N/A' ? '%' : ''}</div>
+                        <div style={{ fontSize: '0.65rem', color: '#1D4ED8' }}>Attendance</div>
+                      </div>
+                    </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <p style={{ fontWeight: 700, fontSize: '0.85rem', margin: 0 }}>{new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</p>
+
+                  {/* Calendar Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
+                    {/* Day headers */}
+                    {dayNames.map(d => (
+                      <div key={d} style={{ textAlign: 'center', fontWeight: 700, fontSize: '0.7rem', color: '#64748B', padding: '0.3rem 0', textTransform: 'uppercase' }}>{d}</div>
+                    ))}
+
+                    {/* Calendar cells */}
+                    {cells.map((day, i) => {
+                      if (!day) return <div key={`empty-${i}`} />;
+                      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                      const status = attMap[dateStr];
+                      const bg = status === 'Present' ? '#10B981' : status === 'Absent' ? '#EF4444' : status === 'No Class' ? '#E2E8F0' : 'transparent';
+                      const color = status === 'No Class' ? '#64748B' : status ? 'white' : '#94A3B8';
+                      const label = status === 'Present' ? 'P' : status === 'Absent' ? 'A' : status === 'No Class' ? 'N' : '';
+                      return (
+                        <div key={dateStr} style={{ textAlign: 'center', borderRadius: '8px', padding: '0.4rem 0.2rem', background: bg, border: !status ? '1px dashed #E2E8F0' : 'none', minHeight: '44px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.8rem', color }}>{day}</div>
+                          {label && <div style={{ fontSize: '0.6rem', color, fontWeight: 600 }}>{label}</div>}
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-                {reportData.attendance.length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No attendance records found.</p>
-                ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(40px, 1fr))', gap: '4px' }}>
-                    {reportData.attendance.map(a => (
-                      <div key={a.date} style={{ 
-                        padding: '0.4rem 0', 
-                        textAlign: 'center', 
-                        borderRadius: '6px', 
-                        background: a.status === 'Present' ? '#10B981' : a.status === 'No Class' ? '#F1F5F9' : '#EF4444', 
-                        color: a.status === 'No Class' ? '#64748B' : 'white', 
-                        fontSize: '0.7rem',
-                        border: a.status === 'No Class' ? '1px solid var(--border-color)' : 'none'
-                      }}>
-                        <div style={{ fontWeight: 800 }}>{a.date.split('-')[2]}</div>
-                        <div style={{ fontSize: '0.6rem' }}>{a.status === 'Present' ? 'P' : a.status === 'No Class' ? 'N' : 'A'}</div>
+
+                  {/* Legend */}
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
+                    {[['#10B981', 'Present'], ['#EF4444', 'Absent'], ['#E2E8F0', 'No Class'], ['transparent', 'No Record']].map(([bg, label]) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: '#64748B' }}>
+                        <div style={{ width: '14px', height: '14px', borderRadius: '4px', background: bg, border: bg === 'transparent' ? '1px dashed #CBD5E1' : 'none' }} />
+                        {label}
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {activeTab === 'class-daily' && (
               <div className="card-base" style={{ padding: 0, overflow: 'hidden' }}>
