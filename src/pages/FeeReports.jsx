@@ -191,86 +191,50 @@ const FeeReports = () => {
         </button>
       </div>
 
-      <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem', backgroundColor: 'var(--bg-main)', flexWrap: 'wrap', borderRadius: '12px' }}>
-        <div style={{ display: 'inline-flex', gap: '0.25rem' }}>
-          <button 
-            onClick={() => setActiveTab('arrears')}
-            style={{ 
-              backgroundColor: activeTab === 'arrears' ? 'var(--bg-surface)' : 'transparent',
-              color: activeTab === 'arrears' ? 'var(--primary-blue)' : 'var(--text-secondary)',
-              boxShadow: activeTab === 'arrears' ? 'var(--shadow-sm)' : 'none',
-              padding: '0.6rem 1.2rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem'
-            }}
-          >
-            Student Arrears
-          </button>
-          <button 
-            onClick={() => setActiveTab('collection')}
-            style={{ 
-              backgroundColor: activeTab === 'collection' ? 'var(--bg-surface)' : 'transparent',
-              color: activeTab === 'collection' ? 'var(--primary-blue)' : 'var(--text-secondary)',
-              boxShadow: activeTab === 'collection' ? 'var(--shadow-sm)' : 'none',
-              padding: '0.6rem 1.2rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem'
-            }}
-          >
-            Income History
-          </button>
-          <button 
-            onClick={() => setActiveTab('faculty')}
-            style={{ 
-              backgroundColor: activeTab === 'faculty' ? 'var(--bg-surface)' : 'transparent',
-              color: activeTab === 'faculty' ? 'var(--primary-blue)' : 'var(--text-secondary)',
-              boxShadow: activeTab === 'faculty' ? 'var(--shadow-sm)' : 'none',
-              padding: '0.6rem 1.2rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem'
-            }}
-          >
-            Faculty Ledger
-          </button>
+      <div className="card-base no-print" style={{ marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: 'var(--bg-main)', borderRadius: '12px' }}>
+        {/* Tab Switcher */}
+        <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+          {['arrears', 'collection', 'faculty'].map(tab => (
+            <button key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{ 
+                flex: '1 1 auto',
+                backgroundColor: activeTab === tab ? 'var(--bg-surface)' : 'transparent',
+                color: activeTab === tab ? 'var(--primary-blue)' : 'var(--text-secondary)',
+                boxShadow: activeTab === tab ? 'var(--shadow-sm)' : 'none',
+                padding: '0.6rem 0.75rem', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem'
+              }}
+            >
+              {tab === 'arrears' ? 'Student Arrears' : tab === 'collection' ? 'Income History' : 'Faculty Ledger'}
+            </button>
+          ))}
         </div>
 
-        {activeTab !== 'arrears' && (
-           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: '1rem' }}>
-              <select 
-                value={stdFilter} 
-                onChange={e => setStdFilter(e.target.value)} 
-                style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'white' }}
-              >
-                <option value="">All Classes</option>
-                {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
-              </select>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>From:</span>
-                 <input type="date" value={dateFilter.start} onChange={e => setDateFilter({...dateFilter, start: e.target.value})} style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                 <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>To:</span>
-                 <input type="date" value={dateFilter.end} onChange={e => setDateFilter({...dateFilter, end: e.target.value})} style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
-              </div>
-           </div>
-        )}
+        {/* Filters Row */}
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <select 
+            value={stdFilter} 
+            onChange={e => setStdFilter(e.target.value)} 
+            style={{ flex: '1 1 100px', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'white' }}
+          >
+            <option value="">All Classes</option>
+            {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
+          </select>
 
-        {activeTab === 'arrears' && (
-           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: '1rem' }}>
-              <select 
-                value={stdFilter} 
-                onChange={e => setStdFilter(e.target.value)} 
-                style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem', backgroundColor: 'white' }}
-              >
-                <option value="">All Classes</option>
-                {standards.map(s => <option key={s.id} value={s.standard}>{s.standard}</option>)}
-              </select>
-           </div>
-        )}
-        
-        <div className="search-bar" style={{ backgroundColor: 'var(--bg-surface)', flex: 1, minWidth: '200px', maxWidth: '300px', marginLeft: 'auto' }}>
-          <FiSearch style={{ color: 'var(--text-secondary)' }} />
-          <input 
-            type="text" 
-            className="search-input" 
-            placeholder={`Filter records...`} 
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)} 
-          />
+          {activeTab !== 'arrears' && (
+            <>
+              <input type="date" value={dateFilter.start} onChange={e => setDateFilter({...dateFilter, start: e.target.value})} 
+                style={{ flex: '1 1 130px', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
+              <input type="date" value={dateFilter.end} onChange={e => setDateFilter({...dateFilter, end: e.target.value})} 
+                style={{ flex: '1 1 130px', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)', fontSize: '0.85rem' }} />
+            </>
+          )}
+
+          <div className="search-bar" style={{ backgroundColor: 'var(--bg-surface)', flex: '2 1 150px' }}>
+            <FiSearch style={{ color: 'var(--text-secondary)' }} />
+            <input type="text" className="search-input" placeholder="Filter records..."
+              value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          </div>
         </div>
       </div>
 
