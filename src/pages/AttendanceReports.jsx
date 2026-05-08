@@ -151,7 +151,7 @@ const AttendanceReports = () => {
     setLoading(false);
   };
 
-  const PrintHeader = ({ title }) => (
+  const PrintHeader = ({ title, subTitle }) => (
     <div className="print-header" style={{ display: 'none', textAlign: 'center', marginBottom: '30px' }}>
       <div style={{ marginBottom: '10px' }}>
         <img src="/logo.png" alt="Yashashrri Logo" style={{ maxWidth: '450px', height: 'auto' }} onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; e.target.parentNode.nextElementSibling.style.display = 'block'; }} />
@@ -167,6 +167,7 @@ const AttendanceReports = () => {
       </div>
       <hr style={{ border: 'none', borderTop: '2px solid #1A237E', margin: '20px 0' }} />
       <h2 style={{ fontSize: '16px', color: '#1A237E', margin: '10px 0', textTransform: 'uppercase' }}>{title}</h2>
+      {subTitle && <p style={{ fontSize: '13px', color: '#64748B', fontWeight: 600, margin: '4px 0 0 0' }}>{subTitle}</p>}
     </div>
   );
 
@@ -281,7 +282,33 @@ const AttendanceReports = () => {
 
       {reportData && (
         <div className="card-base" style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', background: 'transparent', border: 'none', boxShadow: 'none' }}>
-          <PrintHeader title={activeTab.split('-').join(' ').toUpperCase() + " REPORT"} />
+          <PrintHeader 
+            title={activeTab.split('-').join(' ').toUpperCase() + ' REPORT'}
+            subTitle={
+              activeTab === 'class-daily'
+                ? `Date: ${new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} | Class: ${selectedStandard}`
+                : activeTab === 'class-monthly'
+                ? `Month: ${new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} | Class: ${selectedStandard}`
+                : activeTab === 'subject-monthly'
+                ? `Month: ${new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} | Subject: ${subjects.find(s => s.id === selectedSubject)?.name || ''}`
+                : `Month: ${new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} | Student: ${reportData?.student?.name || ''}`
+            }
+          />
+
+          {/* Visible on-screen report context banner */}
+          <div style={{ background: '#1A237E', color: 'white', borderRadius: '10px', padding: '0.75rem 1.25rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {activeTab === 'class-daily' ? 'Class Daily Report' : activeTab === 'class-monthly' ? 'Class Monthly Report' : activeTab === 'subject-monthly' ? 'Subject Monthly Report' : 'Student Monthly Report'}
+            </div>
+            <div style={{ fontSize: '0.85rem', fontWeight: 600, opacity: 0.9, textAlign: 'right' }}>
+              {activeTab === 'class-daily' && (
+                <><span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '6px', padding: '0.2rem 0.6rem', marginRight: '0.5rem' }}>{new Date(selectedDate).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span><span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: '6px', padding: '0.2rem 0.6rem' }}>Class: {selectedStandard}</span></>
+              )}
+              {(activeTab === 'class-monthly' || activeTab === 'subject-monthly' || activeTab === 'student-monthly') && (
+                <span style={{ background: 'rgba(255,255,255,0.2)', borderRadius: '6px', padding: '0.2rem 0.6rem' }}>{new Date(selectedMonth + '-02').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
+              )}
+            </div>
+          </div>
           
           <div style={{ flex: 1 }}>
             {activeTab === 'student-monthly' && (
