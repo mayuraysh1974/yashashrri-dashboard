@@ -195,6 +195,71 @@ const StudentPortal = () => {
     }
   };
 
+  const downloadReceipt = (payment) => {
+    const date = payment.payment_date
+      ? new Date(payment.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'N/A';
+    const amount = (payment.amount_paid || 0).toLocaleString();
+    const receiptNo = `YC-${payment.id?.toString().slice(-6).toUpperCase() || 'XXXXXX'}`;
+    const html = `
+      <!DOCTYPE html><html><head><title>Fee Receipt - ${student.name}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 40px; color: #1E293B; }
+        .header { text-align: center; border-bottom: 3px solid #1A237E; padding-bottom: 20px; margin-bottom: 24px; }
+        .logo { font-size: 22px; font-weight: 900; color: #1A237E; letter-spacing: 2px; }
+        .subtitle { font-size: 11px; color: #64748B; margin-top: 4px; }
+        .receipt-title { font-size: 16px; font-weight: 700; color: #1A237E; text-transform: uppercase; margin-top: 10px; }
+        .receipt-no { font-size: 12px; color: #64748B; margin-top: 4px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .info-item label { font-size: 10px; color: #64748B; text-transform: uppercase; font-weight: 700; display: block; }
+        .info-item span { font-size: 14px; font-weight: 600; color: #1E293B; }
+        .amount-box { background: #F0F4FF; border: 2px solid #1A237E; border-radius: 12px; padding: 20px; text-align: center; margin: 20px 0; }
+        .amount-label { font-size: 11px; color: #64748B; text-transform: uppercase; font-weight: 700; }
+        .amount-value { font-size: 32px; font-weight: 900; color: #1A237E; margin-top: 4px; }
+        .status-badge { display: inline-block; background: #ECFDF5; color: #059669; font-weight: 800; font-size: 12px; padding: 4px 14px; border-radius: 20px; border: 1px solid #A7F3D0; margin-top: 8px; }
+        .footer { margin-top: 40px; border-top: 1px solid #E2E8F0; padding-top: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .sign-line { width: 160px; border-bottom: 1px solid #1E293B; margin-bottom: 6px; }
+        .note { font-size: 10px; color: #94A3B8; margin-top: 20px; text-align: center; }
+        @media print { body { padding: 20px; } }
+      </style></head><body>
+      <div class="header">
+        <div class="logo">YASHASHRRI CLASSES</div>
+        <div class="subtitle">Main Br: Vaidya Colony, Nr. Axis Bank ATM, Talegaon Dabhade, PUNE - 410506 | +91 73874 20737</div>
+        <div class="receipt-title">Fee Payment Receipt</div>
+        <div class="receipt-no">Receipt No: ${receiptNo}</div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><label>Student Name</label><span>${student.name}</span></div>
+        <div class="info-item"><label>Student ID</label><span>${student.id}</span></div>
+        <div class="info-item"><label>Standard</label><span>${student.standard}</span></div>
+        <div class="info-item"><label>Payment Date</label><span>${date}</span></div>
+        <div class="info-item"><label>Payment Mode</label><span>${payment.payment_mode || 'Cash'}</span></div>
+        <div class="info-item"><label>Remarks</label><span>${payment.remarks || '—'}</span></div>
+      </div>
+      <div class="amount-box">
+        <div class="amount-label">Amount Paid</div>
+        <div class="amount-value">₹${amount}</div>
+        <div class="status-badge">✓ PAID</div>
+      </div>
+      <div class="footer">
+        <div>
+          <div class="sign-line"></div>
+          <div style="font-size:11px;color:#64748B">Student / Parent Signature</div>
+        </div>
+        <div style="text-align:right">
+          <div class="sign-line"></div>
+          <div style="font-size:11px;color:#64748B">Authorized Signatory</div>
+          <div style="font-size:10px;color:#64748B">Yashashrri Classes</div>
+        </div>
+      </div>
+      <div class="note">This is a computer-generated receipt. No physical signature required.</div>
+      <script>window.onload = () => { window.print(); }<\/script>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+  };
+
 
   if (!student) {
     return (
@@ -478,7 +543,7 @@ const StudentPortal = () => {
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Date</th>
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Mode / Remarks</th>
                               <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B' }}>Amount</th>
-                              <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B', textAlign: 'right' }}>Status</th>
+                              <th style={{ padding: '1rem', fontSize: '0.75rem', color: '#64748B', textAlign: 'right' }}>Receipt</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -487,7 +552,11 @@ const StudentPortal = () => {
                                 <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</td>
                                 <td style={{ padding: '1rem', fontSize: '0.8rem', color: '#64748B' }}>{p.payment_mode || '-'} {p.remarks ? `(${p.remarks})` : ''}</td>
                                 <td style={{ padding: '1rem', fontWeight: 700, color: (p.amount_paid || 0) < 0 ? '#EF4444' : '#1A237E' }}>{(p.amount_paid || 0) < 0 ? `- ₹${Math.abs(p.amount_paid || 0).toLocaleString()}` : `₹${(p.amount_paid || 0).toLocaleString()}`}</td>
-                                <td style={{ padding: '1rem', textAlign: 'right' }}><span style={{ backgroundColor: '#ECFDF5', color: '#059669', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 800 }}>Paid</span></td>
+                                <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                  <button onClick={() => downloadReceipt(p)} style={{ background: '#1A237E', color: 'white', border: 'none', borderRadius: '6px', padding: '0.3rem 0.7rem', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <FiDownload size={11} /> Receipt
+                                  </button>
+                                </td>
                               </tr>
                           ))}
                         </tbody>
@@ -502,15 +571,9 @@ const StudentPortal = () => {
                               <div style={{ fontWeight: 700, fontSize: '0.85rem', color: (p.amount_paid || 0) < 0 ? '#EF4444' : '#1E293B' }}>{(p.amount_paid || 0) < 0 ? `- ₹${Math.abs(p.amount_paid || 0).toLocaleString()}` : `₹${(p.amount_paid || 0).toLocaleString()}`}</div>
                               <div style={{ fontSize: '0.65rem', color: '#64748B', marginTop: '2px' }}>{p.payment_date ? new Date(p.payment_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'} • {p.payment_mode || '-'}</div>
                            </div>
-                           <span style={{ 
-                             backgroundColor: '#ECFDF5', 
-                             color: '#059669', 
-                             padding: '0.2rem 0.5rem', 
-                             borderRadius: '4px', 
-                             fontSize: '0.65rem', 
-                             fontWeight: 800,
-                             textTransform: 'uppercase'
-                           }}>PAID</span>
+                           <button onClick={() => downloadReceipt(p)} style={{ background: '#1A237E', color: 'white', border: 'none', borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', flexShrink: 0 }}>
+                              <FiDownload size={12} /> Receipt
+                           </button>
                         </div>
                       ))}
                    </div>
